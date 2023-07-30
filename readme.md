@@ -1,4 +1,4 @@
-## About Mhamcloud
+## About POS
 
 POS Applications which allow you to create virtusal Store.
 
