@@ -1,6 +1,6 @@
 ## About Mhamcloud
 
-Mhamcloud is a POS Applications which allow you to create virtusal Store.
+POS Applications which allow you to create virtusal Store.
 
 ## How to install
 
@@ -19,11 +19,11 @@ Mhamcloud is a POS Applications which allow you to create virtusal Store.
 
 Step 1:
 
-`` git clone git@github.com:zillurcse/mhamcloud-v6.git ``
+`` git clone git@github.com:mohammednur1997/pos.git ``
 
 Step 2:
 
-`` cd  mhamcloud-v6``
+`` cd  pos``
 
 Step 3:
 
