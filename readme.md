@@ -1,10 +1,10 @@
 ## About POS
 
-POS Applications which allow you to create virtusal Store.
+POS Applications which allow you to create virtual Store.
 
 ## How to install
 
-### Requirements 
+### Requirements
 `` php version = 8.0 or more ``
 
 `` composer ``
