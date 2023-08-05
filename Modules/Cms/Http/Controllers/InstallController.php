@@ -76,16 +76,16 @@ class InstallController extends Controller
             $pid = config('cms.pid');
 
             //Validate
-            $response = pos_boot(url('/'), __DIR__, $license_code, $email, $login_username, $type = 1, $pid);
-
-            if (! empty($response)) {
-                return $response;
-            }
+//            $response = pos_boot(url('/'), __DIR__, $license_code, $email, $login_username, $type = 1, $pid);
+//
+//            if (! empty($response)) {
+//                return $response;
+//            }
 
             $is_installed = System::getProperty($this->module_name.'_version');
-            if (! empty($is_installed)) {
-                abort(404);
-            }
+//            if (! empty($is_installed)) {
+//                abort(404);
+//            }
 
             DB::statement('SET default_storage_engine=INNODB;');
             Artisan::call('module:migrate', ['module' => 'Cms', '--force' => true]);
