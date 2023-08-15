@@ -28,43 +28,43 @@ class AppServiceProvider extends ServiceProvider
         ini_set('memory_limit', '-1');
         set_time_limit(0);
 
-        if (config('app.debug')) {
-            error_reporting(E_ALL & ~E_USER_DEPRECATED);
-        } else {
-            error_reporting(0);
-        }
+        // if (config('app.debug')) {
+        //     error_reporting(E_ALL & ~E_USER_DEPRECATED);
+        // } else {
+        //     error_reporting(0);
+        // }
 
-        //force https
-        $url = parse_url(config('app.url'));
+        // //force https
+        // $url = parse_url(config('app.url'));
 
-        if ($url['scheme'] == 'https') {
-            \URL::forceScheme('https');
-        }
+        // if ($url['scheme'] == 'https') {
+        //     \URL::forceScheme('https');
+        // }
 
-        if (request()->has('lang')) {
-            \App::setLocale(request()->get('lang'));
-        }
+        // if (request()->has('lang')) {
+        //     \App::setLocale(request()->get('lang'));
+        // }
 
-        //In Laravel 5.6, Blade will double encode special characters by default. If you would like to maintain the previous behavior of preventing double encoding, you may add Blade::withoutDoubleEncoding() to your AppServiceProvider boot method.
-        Blade::withoutDoubleEncoding();
+        // //In Laravel 5.6, Blade will double encode special characters by default. If you would like to maintain the previous behavior of preventing double encoding, you may add Blade::withoutDoubleEncoding() to your AppServiceProvider boot method.
+        // Blade::withoutDoubleEncoding();
 
-        //Laravel 5.6 uses Bootstrap 4 by default. Shift did not update your front-end resources or dependencies as this could impact your UI. If you are using Bootstrap and wish to continue using Bootstrap 3, you should add Paginator::useBootstrapThree() to your AppServiceProvider boot method.
-        Paginator::useBootstrapThree();
+        // //Laravel 5.6 uses Bootstrap 4 by default. Shift did not update your front-end resources or dependencies as this could impact your UI. If you are using Bootstrap and wish to continue using Bootstrap 3, you should add Paginator::useBootstrapThree() to your AppServiceProvider boot method.
+        // Paginator::useBootstrapThree();
 
-        \Illuminate\Pagination\Paginator::useBootstrap();
+        // \Illuminate\Pagination\Paginator::useBootstrap();
 
-        // Dropbox service provider
-        Storage::extend('dropbox', function ($app, $config) {
-            $adapter = new DropboxAdapter(new DropboxClient(
-                $config['authorization_token']
-            ));
+        // // Dropbox service provider
+        // Storage::extend('dropbox', function ($app, $config) {
+        //     $adapter = new DropboxAdapter(new DropboxClient(
+        //         $config['authorization_token']
+        //     ));
  
-            return new FilesystemAdapter(
-                new Filesystem($adapter, $config),
-                $adapter,
-                $config
-            );
-        });
+        //     return new FilesystemAdapter(
+        //         new Filesystem($adapter, $config),
+        //         $adapter,
+        //         $config
+        //     );
+        // });
 
 
         $asset_v = config('constants.asset_version', 1);

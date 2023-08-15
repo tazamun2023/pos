@@ -60,12 +60,12 @@
                                 <div>
                                     <span style="display: block;font-size: 20px;color: #A0A0A0;">{{ $v['label'] }}</span>
                                     {{-- Suffix CR/DR as per value --}}
-                                    <span style="display: block;font-size: 20px;color: #2E2D4D;font-weight: 600">
+                                    <span style="display: block;font-size: 20px;color: #01a781;font-weight: 600">
                                         @if ($bal < 0)
                                             {{ in_array($v['label'], ['Asset', 'Expenses']) ? ' (CR)' : ' (DR)' }}
                                         @endif
                                     </span>
-                                    <span style="display: block;font-size: 24px;color: #2E2D4D;">@format_currency(abs($bal))</span>
+                                    <span style="display: block;font-size: 24px;color: #01a781;">@format_currency(abs($bal))</span>
                                 </div>
                             </div>
                         @endforeach

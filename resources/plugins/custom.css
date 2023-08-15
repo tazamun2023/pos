@@ -6,7 +6,7 @@ body {
   font-size: 14px;
   font-weight: 400;
   line-height: 1.5 !important;*/
-  color: #525f7f; }
+  color: #01a781; }
 
 h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
   /*font-family: 'Open Sans', sans-serif;*/
@@ -135,7 +135,7 @@ h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
       font-weight: 600; }
 
 .navbar-nav > .notifications-menu > .dropdown-menu > li .menu > li > a {
-  color: #525f7f;
+  color: #01a781;
   font-size: 13px;
   border-bottom: 0px; }
   .navbar-nav > .notifications-menu > .dropdown-menu > li .menu > li > a:hover {

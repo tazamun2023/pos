@@ -11,7 +11,7 @@
 
 <!-- Main content -->
 <section class="content" style="background: #fff;border-radius: 10px">
-    <section class="content-header " style="border-bottom: .5px solid #2E2D4D;padding-bottom: 20px;margin: 0 20px;display: flex; justify-content: space-between">
+    <section class="content-header " style="border-bottom: .5px solid #01a781;padding-bottom: 20px;margin: 0 20px;display: flex; justify-content: space-between">
     <h1>@lang('lang_v1.purchase_return')
     </h1>
     @can('purchase.update')

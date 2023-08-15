@@ -4,7 +4,7 @@
     @endphp
     <div class="col-xs-4">
         <fieldset>
-            <label style="color: #525f7f;">{{$list}}</label>
+            <label style="color: #01a781;">{{$list}}</label>
             <div class="switch-toggle switch-candy">
 
                 <input id="{{$key}}_yes" name="repair_checklist[{{$list}}]" type="radio" value="yes"
