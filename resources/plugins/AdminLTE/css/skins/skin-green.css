@@ -29,7 +29,7 @@
   color: #fff;
 }
 .skin-green .main-header .navbar .sidebar-toggle:hover {
-  background-color: #000080;
+  background-color: #ed143d;
 }
 @media (max-width: 767px) {
   .skin-green .main-header .navbar .dropdown-menu li.divider {
@@ -39,11 +39,11 @@
     color: #fff;
   }
   .skin-green .main-header .navbar .dropdown-menu li a:hover {
-    background: #000080;
+    background: #ed143d;
   }
 }
 .skin-green .main-header .logo {
-  background-color: #000080;
+  background-color: #ed143d;
   color: #ffffff;
   border-bottom: 0 solid transparent;
 }

@@ -2,7 +2,7 @@
 <!-- Main Header -->
 <header class="main-header no-print">
     <div>
-        <a href="{{ route('home') }}" class="logo" style="background: #000080!important">
+        <a href="{{ route('home') }}" class="logo" style="background: #ed143d!important">
 
             <span class="logo-lg">{{ Session::get('business.name') }} <i class="fa fa-circle text-success"
                     id="online_indicator"></i></span>

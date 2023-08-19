@@ -12,7 +12,7 @@
 <section class="content" style="background: #fff;border-radius: 10px">
   <!-- Content Header (Page header) -->
 
-    <section class="content-header " style="border-bottom: 0.5px solid #000080;padding-bottom: 20px;margin: 0 20px; ">
+    <section class="content-header " style="border-bottom: 0.5px solid #ed143d;padding-bottom: 20px;margin: 0 20px; ">
     <h1>@lang( 'role.add_role' )</h1>
   </section>
     @php

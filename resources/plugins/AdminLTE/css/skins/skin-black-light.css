@@ -86,7 +86,7 @@
 }
 .skin-black-light .user-panel > .info,
 .skin-black-light .user-panel > .info > a {
-  color: #000080444;
+  color: #ed143d444;
 }
 .skin-black-light .sidebar-menu > li {
   -webkit-transition: border-left-color 0.3s ease;
@@ -116,7 +116,7 @@
   background: #f4f4f5;
 }
 .skin-black-light .sidebar a {
-  color: #000080444;
+  color: #ed143d444;
 }
 .skin-black-light .sidebar a:hover {
   text-decoration: none;

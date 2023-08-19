@@ -52,7 +52,7 @@ class DataController extends Controller
                             ['icon' => 'fa fas fa-book', 'active' => request()->segment(1) == 'docs']
                         );
                     },
-                    ['icon' => 'fas fa-plug', 'style' => 'background-color: #000080 !important;']
+                    ['icon' => 'fas fa-plug', 'style' => 'background-color: #ed143d !important;']
                 )->order(89);
             });
         }
