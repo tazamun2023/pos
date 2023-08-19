@@ -1227,7 +1227,7 @@
                     var xValues = ["Total Sell Return", "Total Purchase Return", "Total purchase"];
                         var yValues = [data.total_sell_return, data.total_purchase_return, data.total_purchase];
                     var barColors = [
-                        "#01a781",
+                        "#000080",
                     ];
 
                     new Chart("total_sell_chart", {

@@ -32,7 +32,7 @@
 
                             </div>
                             <div class="box-body "
-                                style="display: flex;flex-direction: column;gap:10px ;font-weight: 500;font-size: 16px;line-height: 20px;color: #01a781;">
+                                style="display: flex;flex-direction: column;gap:10px ;font-weight: 500;font-size: 16px;line-height: 20px;color: #000080;">
 
                                 <span>@lang('superadmin::lang.start_date') : {{ @format_date($active->start_date) }}</span>
                                 <span>@lang('superadmin::lang.end_date') : {{ @format_date($active->end_date) }}</span>

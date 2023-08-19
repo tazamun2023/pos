@@ -462,7 +462,7 @@ fieldset[disabled] .btn-foursquare.focus {
 }
 .btn-github {
   color: #fff;
-  background-color: #444444;
+  background-color: #000080444;
   border-color: rgba(0, 0, 0, 0.2);
 }
 .btn-github:focus,
@@ -510,11 +510,11 @@ fieldset[disabled] .btn-github:focus,
 .btn-github.disabled.focus,
 .btn-github[disabled].focus,
 fieldset[disabled] .btn-github.focus {
-  background-color: #444444;
+  background-color: #000080444;
   border-color: rgba(0, 0, 0, 0.2);
 }
 .btn-github .badge {
-  color: #444444;
+  color: #000080444;
   background-color: #fff;
 }
 .btn-google {

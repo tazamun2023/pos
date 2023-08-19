@@ -80,7 +80,7 @@
   margin: 4px;
 }
 .skin-black .main-header, .skin-black-light .main-header {
-  color: #01a781 !important;
+  color: #000080 !important;
 }
 .skin-black .main-header .navbar .nav .open>a {
   color: #999 !important;

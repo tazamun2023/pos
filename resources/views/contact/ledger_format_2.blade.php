@@ -101,7 +101,7 @@
 	<table class="table" style="margin-top: 0;">
 		<tr>
 			<th style="font-size: 12px;">@lang('lang_v1.current')</th>
-			<th style="color: #2dce89 !important;font-size: 12px;">{{strtoupper(__('lang_v1.1_30_days_past_due'))}}</th>
+			<th style="color: #000080 !important;font-size: 12px;">{{strtoupper(__('lang_v1.1_30_days_past_due'))}}</th>
 			<th style="color: #ffd026 !important;font-size: 12px;">{{strtoupper(__('lang_v1.30_60_days_past_due'))}}</th>
 			<th style="color: #ffa100 !important;font-size: 12px;">{{strtoupper(__('lang_v1.60_90_days_past_due'))}}</th>
 			<th style="color: #f5365c !important;font-size: 12px;">{{strtoupper(__('lang_v1.over_90_days_past_due'))}}</th>
@@ -111,7 +111,7 @@
 			<td style="text-align: center;">
 				@format_currency($current_due)
 			</td>
-			<td style="color: #2dce89 !important; text-align: center;">
+			<td style="color: #000080 !important; text-align: center;">
 				@format_currency($due_1_30_days)
 			</td>
 			<td style="color: #ffd026 !important; text-align: center;">

@@ -11,7 +11,7 @@
 
 <!-- Main content -->
 <section class="content" style="background: #fff;border-radius: 10px">
-    <section class="content-header " style="border-bottom: .5px solid #01a781;padding-bottom: 20px;margin: 0 20px;">
+    <section class="content-header " style="border-bottom: .5px solid #000080;padding-bottom: 20px;margin: 0 20px;">
         <h1>@lang( 'account.balance_sheet')
         </h1>
     </section>

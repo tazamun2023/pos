@@ -28,7 +28,7 @@
                         <thead>
                             <tr>
                                 <th>@lang( 'lang_v1.supplier_name')</th>
-                                <th style="color: #2dce89 !important;">@lang( 'lang_v1.current')</th>
+                                <th style="color: #000080 !important;">@lang( 'lang_v1.current')</th>
                                 <th style="color: #ffd026 !important;">
                                     @lang( 'accounting::lang.1_30_days' )
                                 </th>
