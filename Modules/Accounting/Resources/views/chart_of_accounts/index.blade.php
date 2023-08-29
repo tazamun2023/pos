@@ -9,19 +9,11 @@
 
 @include('accounting::layouts.nav')
 
-
-<section class="content" style="padding: 15px 0;">
-    <!-- Content Header (Page header) -->
-<section class="content-header f_content-header f_product_content-header">
+<!-- Content Header (Page header) -->
+<section class="content-header">
     <h1>@lang( 'accounting::lang.chart_of_accounts' )</h1>
-    <div class="box-tools">
-        <a class="btn f_add-btn pull-right m-5 btn-modal" 
-        href="{{action('\Modules\Accounting\Http\Controllers\CoaController@create')}}" 
-        data-href="{{action('\Modules\Accounting\Http\Controllers\CoaController@create')}}" 
-        data-container="#create_account_modal">
-        <i class="fas fa-plus"></i> @lang( 'messages.add' )</a>
-    </div>
 </section>
+<section class="content">
     <div class="row mb-12">
         <div class="col-md-12">
             <div class="btn-group btn-group-toggle" data-toggle="buttons">
@@ -40,7 +32,15 @@
     <div class="row">
         <div class="col-md-12">
             @component('components.widget', ['class' => 'box-solid'])
-           
+            @slot('tool')
+                <div class="box-tools">
+                    <a class="btn btn-primary pull-right m-5 btn-modal" 
+                    href="{{action([\Modules\Accounting\Http\Controllers\CoaController::class, 'create'])}}" 
+                    data-href="{{action([\Modules\Accounting\Http\Controllers\CoaController::class, 'create'])}}" 
+                    data-container="#create_account_modal">
+                    <i class="fas fa-plus"></i> @lang( 'messages.add' )</a>
+                </div>
+            @endslot
                 <div id="accounts_tree"></div>
                 <div id="tabular_view" class="hide">
                     <div class="row">

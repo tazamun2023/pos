@@ -1,5 +1,5 @@
 <div class="modal-dialog no-print" role="document">
-{!! Form::open(['url' => action('\Modules\Accounting\Http\Controllers\TransactionController@saveMap'), 'method' => 'POST', 'id' => 'save_accounting_map' ]) !!}
+{!! Form::open(['url' => action([\Modules\Accounting\Http\Controllers\TransactionController::class, 'saveMap']), 'method' => 'POST', 'id' => 'save_accounting_map' ]) !!}
     
     <input type="hidden" name="type" value="{{$type}}" id="transaction_type">
     @if(in_array($type, ['sell', 'purchase']))

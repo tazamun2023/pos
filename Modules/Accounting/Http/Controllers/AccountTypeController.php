@@ -2,17 +2,17 @@
 
 namespace Modules\Accounting\Http\Controllers;
 
-use App\AccountType;
+use App\Utils\ModuleUtil;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Modules\Accounting\Entities\AccountingAccountType;
 use Yajra\DataTables\Facades\DataTables;
-use App\Utils\ModuleUtil;
 
 class AccountTypeController extends Controller
 {
     protected $accountingUtil;
+
     /**
      * Constructor
      *
@@ -25,20 +25,21 @@ class AccountTypeController extends Controller
 
     /**
      * Display a listing of the resource.
+     *
      * @return Response
      */
     public function index()
     {
         $business_id = request()->session()->get('user.business_id');
 
-        if (!(auth()->user()->can('superadmin') || 
+        if (! (auth()->user()->can('superadmin') ||
             $this->moduleUtil->hasThePermissionInSubscription($business_id, 'accounting_module'))) {
             abort(403, 'Unauthorized action.');
         }
 
         if (request()->ajax()) {
             $query = AccountingAccountType::where('account_type', request()->input('account_type'))
-                        ->where(function($q) use($business_id){
+                        ->where(function ($q) use ($business_id) {
                             $q->whereNull('business_id')
                               ->orWhere('business_id', $business_id);
                         })
@@ -46,31 +47,32 @@ class AccountTypeController extends Controller
                         ->select(['name', 'description', 'id', 'business_id', 'parent_id', 'account_primary_type']);
 
             return Datatables::of($query)
-                ->editColumn('name', function($row) {
+                ->editColumn('name', function ($row) {
                     $html = '';
 
-                    if(empty($row->business_id)) {
-                        $html = __('accounting::lang.' . $row->name);
+                    if (empty($row->business_id)) {
+                        $html = __('accounting::lang.'.$row->name);
                     } else {
                         $html = $row->name;
                     }
+
                     return $html;
                 })
-                ->editColumn('account_primary_type', function($row) {
-                    return __('accounting::lang.' . $row->account_primary_type);
+                ->editColumn('account_primary_type', function ($row) {
+                    return __('accounting::lang.'.$row->account_primary_type);
                 })
-                ->addColumn('parent_type', function($row) {
-                    if(!empty($row->parent_id)) {
-                        if(empty($row->business_id) && !empty($row->description)) {
-                            return __('accounting::lang.' . $row->parent->name);
+                ->addColumn('parent_type', function ($row) {
+                    if (! empty($row->parent_id)) {
+                        if (empty($row->business_id) && ! empty($row->description)) {
+                            return __('accounting::lang.'.$row->parent->name);
                         } else {
                             return $row->parent->name;
                         }
                     }
                 })
-                ->editColumn('description', function($row) {
-                    if(empty($row->business_id) && !empty($row->description)) {
-                        return __('accounting::lang.' . $row->description);
+                ->editColumn('description', function ($row) {
+                    if (empty($row->business_id) && ! empty($row->description)) {
+                        return __('accounting::lang.'.$row->description);
                     } else {
                         return $row->description;
                     }
@@ -90,6 +92,7 @@ class AccountTypeController extends Controller
 
     /**
      * Show the form for creating a new resource.
+     *
      * @return Response
      */
     public function create()
@@ -99,14 +102,15 @@ class AccountTypeController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     * @param Request $request
+     *
+     * @param  Request  $request
      * @return Response
      */
     public function store(Request $request)
     {
         $business_id = request()->session()->get('user.business_id');
 
-        if (!(auth()->user()->can('superadmin') || 
+        if (! (auth()->user()->can('superadmin') ||
             $this->moduleUtil->hasThePermissionInSubscription($business_id, 'accounting_module'))) {
             abort(403, 'Unauthorized action.');
         }
@@ -123,15 +127,15 @@ class AccountTypeController extends Controller
 
             $account_type = AccountingAccountType::create($input);
             $output = ['success' => true,
-                            'data' => $account_type,
-                            'msg' => __("lang_v1.added_success")
-                        ];
+                'data' => $account_type,
+                'msg' => __('lang_v1.added_success'),
+            ];
         } catch (\Exception $e) {
-            \Log::emergency("File:" . $e->getFile(). "Line:" . $e->getLine(). "Message:" . $e->getMessage());
-            
+            \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
+
             $output = ['success' => false,
-                            'msg' => __("messages.something_went_wrong")
-                        ];
+                'msg' => __('messages.something_went_wrong'),
+            ];
         }
 
         return $output;
@@ -139,7 +143,8 @@ class AccountTypeController extends Controller
 
     /**
      * Show the specified resource.
-     * @param int $id
+     *
+     * @param  int  $id
      * @return Response
      */
     public function show($id)
@@ -149,22 +154,23 @@ class AccountTypeController extends Controller
 
     /**
      * Show the form for editing the specified resource.
-     * @param int $id
+     *
+     * @param  int  $id
      * @return Response
      */
     public function edit($id)
     {
         $business_id = request()->session()->get('user.business_id');
 
-        if (!(auth()->user()->can('superadmin') || 
+        if (! (auth()->user()->can('superadmin') ||
             $this->moduleUtil->hasThePermissionInSubscription($business_id, 'accounting_module'))) {
             abort(403, 'Unauthorized action.');
         }
 
         $account_type = AccountingAccountType::find($id);
         $account_sub_types = AccountingAccountType::where('account_type', 'sub_type')
-                                              ->where(function($q) use($business_id){
-                                                 $q->whereNull('business_id')
+                                              ->where(function ($q) use ($business_id) {
+                                                  $q->whereNull('business_id')
                                                   ->orWhere('business_id', $business_id);
                                               })
                                                ->get();
@@ -174,15 +180,16 @@ class AccountTypeController extends Controller
 
     /**
      * Update the specified resource in storage.
-     * @param Request $request
-     * @param int $id
+     *
+     * @param  Request  $request
+     * @param  int  $id
      * @return Response
      */
     public function update(Request $request, $id)
     {
         $business_id = request()->session()->get('user.business_id');
 
-        if (!(auth()->user()->can('superadmin') || 
+        if (! (auth()->user()->can('superadmin') ||
             $this->moduleUtil->hasThePermissionInSubscription($business_id, 'accounting_module'))) {
             abort(403, 'Unauthorized action.');
         }
@@ -197,15 +204,15 @@ class AccountTypeController extends Controller
 
             $account_type->update($input);
             $output = ['success' => true,
-                            'data' => $account_type,
-                            'msg' => __("lang_v1.updated_success")
-                        ];
+                'data' => $account_type,
+                'msg' => __('lang_v1.updated_success'),
+            ];
         } catch (\Exception $e) {
-            \Log::emergency("File:" . $e->getFile(). "Line:" . $e->getLine(). "Message:" . $e->getMessage());
-            
+            \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
+
             $output = ['success' => false,
-                            'msg' => __("messages.something_went_wrong")
-                        ];
+                'msg' => __('messages.something_went_wrong'),
+            ];
         }
 
         return $output;
@@ -213,14 +220,15 @@ class AccountTypeController extends Controller
 
     /**
      * Remove the specified resource from storage.
-     * @param int $id
+     *
+     * @param  int  $id
      * @return Response
      */
     public function destroy($id)
     {
         $business_id = request()->session()->get('user.business_id');
 
-        if (!(auth()->user()->can('superadmin') || 
+        if (! (auth()->user()->can('superadmin') ||
             $this->moduleUtil->hasThePermissionInSubscription($business_id, 'accounting_module'))) {
             abort(403, 'Unauthorized action.');
         }
@@ -228,18 +236,18 @@ class AccountTypeController extends Controller
         if (request()->ajax()) {
             try {
                 AccountingAccountType::where('business_id', $business_id)
-                                      ->where('id',$id)
+                                      ->where('id', $id)
                                       ->delete();
 
                 $output = ['success' => true,
-                            'msg' => __("lang_v1.deleted_success")
-                        ];
+                    'msg' => __('lang_v1.deleted_success'),
+                ];
             } catch (\Exception $e) {
-                \Log::emergency("File:" . $e->getFile(). "Line:" . $e->getLine(). "Message:" . $e->getMessage());
-            
+                \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
+
                 $output = ['success' => false,
-                            'msg' => '__("messages.something_went_wrong")'
-                        ];
+                    'msg' => '__("messages.something_went_wrong")',
+                ];
             }
 
             return $output;

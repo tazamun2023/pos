@@ -1,7 +1,7 @@
 <div class="modal-dialog modal-lg" role="document">
   <div class="modal-content">
 
-    {!! Form::open(['url' => action('\Modules\Accounting\Http\Controllers\AccountTypeController@update', 
+    {!! Form::open(['url' => action([\Modules\Accounting\Http\Controllers\AccountTypeController::class, 'update'], 
         $account_type->id), 'method' => 'put', 'id' => 'edit_account_type_form' ]) !!}
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
