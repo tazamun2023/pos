@@ -6,21 +6,20 @@
 
 @include('accounting::layouts.nav')
 
-
-<section class="content" style="padding: 15px 0;">
-    <!-- Content Header (Page header) -->
-    <section class="content-header f_content-header f_product_content-header" style="margin-bottom: 25px">
+<!-- Content Header (Page header) -->
+<section class="content-header">
     <h1>@lang( 'accounting::lang.journal_entry' )</h1>
 </section>
+<section class="content">
 
-{!! Form::open(['url' => action('\Modules\Accounting\Http\Controllers\JournalEntryController@store'), 
+{!! Form::open(['url' => action([\Modules\Accounting\Http\Controllers\JournalEntryController::class, 'store']), 
     'method' => 'post', 'id' => 'journal_add_form']) !!}
 
 	@component('components.widget', ['class' => 'box-primary'])
 
         <div class="row">
             <div class="col-sm-3">
-                <div class="form-group addProduct_form">
+                <div class="form-group">
                     {!! Form::label('ref_no', __('purchase.ref_no').':') !!}
                     @show_tooltip(__('lang_v1.leave_empty_to_autogenerate'))
                     {!! Form::text('ref_no', null, ['class' => 'form-control']); !!}
@@ -28,7 +27,7 @@
             </div>
 
             <div class="col-sm-3">
-				<div class="form-group addProduct_form">
+				<div class="form-group">
 					{!! Form::label('journal_date', __('accounting::lang.journal_date') . ':*') !!}
 					<div class="input-group">
 						<span class="input-group-addon">
@@ -43,7 +42,7 @@
 
         <div class="row">
             <div class="col-md-12">
-                <div class="form-group addProduct_form">
+                <div class="form-group">
                     {!! Form::label('note', __('lang_v1.additional_notes')) !!}
                     {!! Form::textarea('note', null, ['class' => 'form-control', 'rows' => 3]); !!}
                 </div>
@@ -55,7 +54,7 @@
 
             <table class="table table-bordered table-striped hide-footer" id="journal_table">
                 <thead>
-                    <tr class="f_tr-th">
+                    <tr>
                         <th class="col-md-1">#</th>
                         <th class="col-md-5">@lang( 'accounting::lang.account' )</th>
                         <th class="col-md-3">@lang( 'accounting::lang.debit' )</th>
@@ -98,7 +97,7 @@
 
         <div class="row">
             <div class="col-sm-12">
-                <button type="button" class="btn f_btn-primary pull-right btn-flat journal_add_btn">@lang('messages.save')</button>
+                <button type="button" class="btn btn-primary pull-right btn-flat journal_add_btn">@lang('messages.save')</button>
             </div>
         </div>
         

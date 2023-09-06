@@ -2,30 +2,28 @@
 
 namespace Modules\Accounting\Http\Controllers;
 
+use App\Utils\ModuleUtil;
+use App\Utils\Util;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
-use Modules\Accounting\Entities\AccountingAccount;
+use Illuminate\Support\Facades\DB;
 use Modules\Accounting\Entities\AccountingAccountsTransaction;
 use Modules\Accounting\Entities\AccountingAccTransMapping;
-use App\Utils\Util;
-use Illuminate\Support\Facades\DB;
-use Yajra\DataTables\Facades\DataTables;
-use App\Utils\ModuleUtil;
 use Modules\Accounting\Utils\AccountingUtil;
+use Yajra\DataTables\Facades\DataTables;
 
 class JournalEntryController extends Controller
 {
     /**
      * All Utils instance.
-     *
      */
     protected $util;
 
     /**
      * Constructor
      *
-     * @param ProductUtils $product
+     * @param  ProductUtils  $product
      * @return void
      */
     public function __construct(Util $util, ModuleUtil $moduleUtil, AccountingUtil $accountingUtil)
@@ -37,15 +35,16 @@ class JournalEntryController extends Controller
 
     /**
      * Display a listing of the resource.
+     *
      * @return Response
      */
     public function index()
     {
         $business_id = request()->session()->get('user.business_id');
 
-        if (!(auth()->user()->can('superadmin') || 
-            $this->moduleUtil->hasThePermissionInSubscription($business_id, 'accounting_module')) || 
-            !(auth()->user()->can('accounting.view_journal')) ) {
+        if (! (auth()->user()->can('superadmin') ||
+            $this->moduleUtil->hasThePermissionInSubscription($business_id, 'accounting_module')) ||
+            ! (auth()->user()->can('accounting.view_journal'))) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -57,9 +56,9 @@ class JournalEntryController extends Controller
                             DB::raw("CONCAT(COALESCE(u.surname, ''),' ',COALESCE(u.first_name, ''),' ',COALESCE(u.last_name,'')) as added_by"),
                         ]);
 
-            if (!empty(request()->start_date) && !empty(request()->end_date)) {
+            if (! empty(request()->start_date) && ! empty(request()->end_date)) {
                 $start = request()->start_date;
-                $end =  request()->end_date;
+                $end = request()->end_date;
                 $journal->whereDate('accounting_acc_trans_mappings.operation_date', '>=', $start)
                             ->whereDate('accounting_acc_trans_mappings.operation_date', '<=', $end);
             }
@@ -69,38 +68,38 @@ class JournalEntryController extends Controller
                     'action', function ($row) {
                         $html = '<div class="btn-group">
                                 <button type="button" class="btn btn-info dropdown-toggle btn-xs" 
-                                    data-toggle="dropdown" aria-expanded="false">' .
-                                    __("messages.actions") .
+                                    data-toggle="dropdown" aria-expanded="false">'.
+                                    __('messages.actions').
                                     '<span class="caret"></span><span class="sr-only">Toggle Dropdown
                                     </span>
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-right" role="menu">';
-                        if(auth()->user()->can('accounting.view_journal')) {
+                        if (auth()->user()->can('accounting.view_journal')) {
                             // $html .= '<li>
-                            //         <a href="#" data-href="'.action('\Modules\Accounting\Http\Controllers\JournalEntryController@show', [$row->id]).'">
+                            //         <a href="#" data-href="'.action([\Modules\Accounting\Http\Controllers\JournalEntryController::class, 'show'], [$row->id]).'">
                             //             <i class="fas fa-eye" aria-hidden="true"></i>'.__("messages.view").'
                             //         </a>
                             //         </li>';
                         }
 
-                        if(auth()->user()->can('accounting.edit_journal')) {
+                        if (auth()->user()->can('accounting.edit_journal')) {
                             $html .= '<li>
-                                    <a href="'.action('\Modules\Accounting\Http\Controllers\JournalEntryController@edit', [$row->id]).'">
-                                        <i class="fas fa-edit"></i>'.  __("messages.edit").'
+                                    <a href="'.action([\Modules\Accounting\Http\Controllers\JournalEntryController::class, 'edit'], [$row->id]).'">
+                                        <i class="fas fa-edit"></i>'.__('messages.edit').'
                                     </a>
                                 </li>';
                         }
 
-                        if(auth()->user()->can('accounting.delete_journal')) {
+                        if (auth()->user()->can('accounting.delete_journal')) {
                             $html .= '<li>
-                                    <a href="#" data-href="'.action('\Modules\Accounting\Http\Controllers\JournalEntryController@destroy', [$row->id]).'" class="delete_journal_button">
-                                        <i class="fas fa-trash" aria-hidden="true"></i>'.__("messages.delete").'
+                                    <a href="#" data-href="'.action([\Modules\Accounting\Http\Controllers\JournalEntryController::class, 'destroy'], [$row->id]).'" class="delete_journal_button">
+                                        <i class="fas fa-trash" aria-hidden="true"></i>'.__('messages.delete').'
                                     </a>
-                                    </li>' ;
+                                    </li>';
                         }
-                                
+
                         $html .= '</ul></div>';
-                        
+
                         return $html;
                     })
                 ->rawColumns(['action'])
@@ -112,36 +111,37 @@ class JournalEntryController extends Controller
 
     /**
      * Show the form for creating a new resource.
+     *
      * @return Response
      */
     public function create()
     {
         $business_id = request()->session()->get('user.business_id');
 
-        if (!(auth()->user()->can('superadmin') || 
-            $this->moduleUtil->hasThePermissionInSubscription($business_id, 'accounting_module')) || 
-            !(auth()->user()->can('accounting.add_journal')) ) {
+        if (! (auth()->user()->can('superadmin') ||
+            $this->moduleUtil->hasThePermissionInSubscription($business_id, 'accounting_module')) ||
+            ! (auth()->user()->can('accounting.add_journal'))) {
             abort(403, 'Unauthorized action.');
         }
-   
+
         return view('accounting::journal_entry.create');
     }
 
     /**
      * Store a newly created resource in storage.
-     * @param Request $request
+     *
+     * @param  Request  $request
      * @return Response
      */
     public function store(Request $request)
     {
         $business_id = request()->session()->get('user.business_id');
 
-        if (!(auth()->user()->can('superadmin') || 
-            $this->moduleUtil->hasThePermissionInSubscription($business_id, 'accounting_module')) || 
-            !(auth()->user()->can('accounting.add_journal')) ) {
+        if (! (auth()->user()->can('superadmin') ||
+            $this->moduleUtil->hasThePermissionInSubscription($business_id, 'accounting_module')) ||
+            ! (auth()->user()->can('accounting.add_journal'))) {
             abort(403, 'Unauthorized action.');
         }
-
 
         try {
             DB::beginTransaction();
@@ -157,8 +157,8 @@ class JournalEntryController extends Controller
 
             $ref_no = $request->get('ref_no');
             $ref_count = $this->util->setAndGetReferenceCount('journal_entry');
-            if(empty($ref_no)){
-                $prefix = !empty($accounting_settings['journal_entry_prefix'])? 
+            if (empty($ref_no)) {
+                $prefix = ! empty($accounting_settings['journal_entry_prefix']) ?
                 $accounting_settings['journal_entry_prefix'] : '';
 
                 //Generate reference number
@@ -175,18 +175,17 @@ class JournalEntryController extends Controller
             $acc_trans_mapping->save();
 
             //save details in account trnsactions table
-            foreach($account_ids as $index => $account_id){
-                if(!empty($account_id)){
-                    
+            foreach ($account_ids as $index => $account_id) {
+                if (! empty($account_id)) {
                     $transaction_row = [];
                     $transaction_row['accounting_account_id'] = $account_id;
 
-                    if(!empty($credits[$index])){
+                    if (! empty($credits[$index])) {
                         $transaction_row['amount'] = $credits[$index];
                         $transaction_row['type'] = 'credit';
                     }
 
-                    if(!empty($debits[$index])){
+                    if (! empty($debits[$index])) {
                         $transaction_row['amount'] = $debits[$index];
                         $transaction_row['type'] = 'debit';
                     }
@@ -203,18 +202,17 @@ class JournalEntryController extends Controller
             }
 
             DB::commit();
-            
-            $output = ['success' => 1,
-                        'msg' => __('lang_v1.added_success')
-                        ];
 
+            $output = ['success' => 1,
+                'msg' => __('lang_v1.added_success'),
+            ];
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::emergency("File:" . $e->getFile(). "Line:" . $e->getLine(). "Message:" . $e->getMessage());
-            
+            \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
+
             $output = ['success' => 0,
-                            'msg' => __('messages.something_went_wrong')
-                        ];
+                'msg' => __('messages.something_went_wrong'),
+            ];
         }
 
         return redirect()->route('journal-entry.index')->with('status', $output);
@@ -222,35 +220,36 @@ class JournalEntryController extends Controller
 
     /**
      * Show the specified resource.
-     * @param int $id
+     *
+     * @param  int  $id
      * @return Response
      */
     public function show($id)
     {
         $business_id = request()->session()->get('user.business_id');
 
-        if (!(auth()->user()->can('superadmin') || 
-            $this->moduleUtil->hasThePermissionInSubscription($business_id, 'accounting_module')) || 
-            !(auth()->user()->can('accounting.view_journal')) ) {
+        if (! (auth()->user()->can('superadmin') ||
+            $this->moduleUtil->hasThePermissionInSubscription($business_id, 'accounting_module')) ||
+            ! (auth()->user()->can('accounting.view_journal'))) {
             abort(403, 'Unauthorized action.');
         }
 
-        
         return view('accounting::journal_entry.show');
     }
 
     /**
      * Show the form for editing the specified resource.
-     * @param int $id
+     *
+     * @param  int  $id
      * @return Response
      */
     public function edit($id)
     {
         $business_id = request()->session()->get('user.business_id');
 
-        if (!(auth()->user()->can('superadmin') || 
-            $this->moduleUtil->hasThePermissionInSubscription($business_id, 'accounting_module')) || 
-            !(auth()->user()->can('accounting.edit_journal')) ) {
+        if (! (auth()->user()->can('superadmin') ||
+            $this->moduleUtil->hasThePermissionInSubscription($business_id, 'accounting_module')) ||
+            ! (auth()->user()->can('accounting.edit_journal'))) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -261,24 +260,25 @@ class JournalEntryController extends Controller
         $accounts_transactions = AccountingAccountsTransaction::with('account')
                                     ->where('acc_trans_mapping_id', $id)
                                     ->get()->toArray();
-        
+
         return view('accounting::journal_entry.edit')
             ->with(compact('journal', 'accounts_transactions'));
     }
 
     /**
      * Update the specified resource in storage.
-     * @param Request $request
-     * @param int $id
+     *
+     * @param  Request  $request
+     * @param  int  $id
      * @return Response
      */
     public function update(Request $request, $id)
     {
         $business_id = request()->session()->get('user.business_id');
 
-        if (!(auth()->user()->can('superadmin') || 
-            $this->moduleUtil->hasThePermissionInSubscription($business_id, 'accounting_module')) || 
-            !(auth()->user()->can('accounting.edit_journal')) ) {
+        if (! (auth()->user()->can('superadmin') ||
+            $this->moduleUtil->hasThePermissionInSubscription($business_id, 'accounting_module')) ||
+            ! (auth()->user()->can('accounting.edit_journal'))) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -288,7 +288,7 @@ class JournalEntryController extends Controller
             $user_id = request()->session()->get('user.id');
 
             $account_ids = $request->get('account_id');
-            $accounts_transactions_id  = $request->get('accounts_transactions_id');
+            $accounts_transactions_id = $request->get('accounts_transactions_id');
             $credits = $request->get('credit');
             $debits = $request->get('debit');
             $journal_date = $request->get('journal_date');
@@ -302,18 +302,17 @@ class JournalEntryController extends Controller
             $acc_trans_mapping->update();
 
             //save details in account trnsactions table
-            foreach($account_ids as $index => $account_id){
-                if(!empty($account_id)){
-                    
+            foreach ($account_ids as $index => $account_id) {
+                if (! empty($account_id)) {
                     $transaction_row = [];
                     $transaction_row['accounting_account_id'] = $account_id;
 
-                    if(!empty($credits[$index])){
+                    if (! empty($credits[$index])) {
                         $transaction_row['amount'] = $credits[$index];
                         $transaction_row['type'] = 'credit';
                     }
 
-                    if(!empty($debits[$index])){
+                    if (! empty($debits[$index])) {
                         $transaction_row['amount'] = $debits[$index];
                         $transaction_row['type'] = 'debit';
                     }
@@ -323,7 +322,7 @@ class JournalEntryController extends Controller
                     $transaction_row['sub_type'] = 'journal_entry';
                     $transaction_row['acc_trans_mapping_id'] = $acc_trans_mapping->id;
 
-                    if(!empty($accounts_transactions_id[$index])){
+                    if (! empty($accounts_transactions_id[$index])) {
                         $accounts_transactions = AccountingAccountsTransaction::find($accounts_transactions_id[$index]);
                         $accounts_transactions->fill($transaction_row);
                         $accounts_transactions->update();
@@ -332,24 +331,25 @@ class JournalEntryController extends Controller
                         $accounts_transactions->fill($transaction_row);
                         $accounts_transactions->save();
                     }
-                }elseif(!empty($accounts_transactions_id[$index])){
+                } elseif (! empty($accounts_transactions_id[$index])) {
                     AccountingAccountsTransaction::delete($accounts_transactions_id[$index]);
                 }
             }
 
             $output = ['success' => 1,
-                        'msg' => __('lang_v1.updated_success')
-                        ];
+                'msg' => __('lang_v1.updated_success'),
+            ];
 
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            print_r($e->getMessage());exit;
-            \Log::emergency("File:" . $e->getFile(). "Line:" . $e->getLine(). "Message:" . $e->getMessage());
-            
+            print_r($e->getMessage());
+            exit;
+            \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
+
             $output = ['success' => 0,
-                            'msg' => __('messages.something_went_wrong')
-                        ];
+                'msg' => __('messages.something_went_wrong'),
+            ];
         }
 
         return redirect()->route('journal-entry.index')->with('status', $output);
@@ -357,15 +357,16 @@ class JournalEntryController extends Controller
 
     /**
      * Remove the specified resource from storage.
-     * @param int $id
+     *
+     * @param  int  $id
      * @return Response
      */
     public function destroy($id)
     {
         $business_id = request()->session()->get('user.business_id');
-        if (!(auth()->user()->can('superadmin') || 
-            $this->moduleUtil->hasThePermissionInSubscription($business_id, 'accounting_module')) || 
-            !(auth()->user()->can('accounting.delete_journal')) ) {
+        if (! (auth()->user()->can('superadmin') ||
+            $this->moduleUtil->hasThePermissionInSubscription($business_id, 'accounting_module')) ||
+            ! (auth()->user()->can('accounting.delete_journal'))) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -373,14 +374,14 @@ class JournalEntryController extends Controller
 
         $acc_trans_mapping = AccountingAccTransMapping::where('id', $id)
                         ->where('business_id', $business_id)->firstOrFail();
-        
-        if(!empty($acc_trans_mapping)){
+
+        if (! empty($acc_trans_mapping)) {
             $acc_trans_mapping->delete();
             AccountingAccountsTransaction::where('acc_trans_mapping_id', $id)->delete();
         }
 
         return ['success' => 1,
-                    'msg' => __('lang_v1.deleted_success')
-                ];
+            'msg' => __('lang_v1.deleted_success'),
+        ];
     }
 }

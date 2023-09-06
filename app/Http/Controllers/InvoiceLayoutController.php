@@ -247,14 +247,26 @@ class InvoiceLayoutController extends Controller
         return redirect('invoice-schemes')->with('status', $output);
     }
 
-    private function getDesigns()
-    {
-        return ['classic' => __('lang_v1.classic').' ('.__('lang_v1.for_normal_printer').')',
-            'elegant' => __('lang_v1.elegant').' ('.__('lang_v1.for_normal_printer').')',
-            'detailed' => __('lang_v1.detailed').' ('.__('lang_v1.for_normal_printer').')',
-            'columnize-taxes' => __('lang_v1.columnize_taxes').' ('.__('lang_v1.for_normal_printer').')',
-            'slim' => __('lang_v1.slim').' ('.__('lang_v1.recomended_for_80mm').')',
-            'slim2' => __('lang_v1.slim').' 2 ('.__('lang_v1.recomended_for_58mm').')',
+//    private function getDesigns()
+//    {
+//        return ['classic' => __('lang_v1.classic').' ('.__('lang_v1.for_normal_printer').')',
+//            'elegant' => __('lang_v1.elegant').' ('.__('lang_v1.for_normal_printer').')',
+//            'detailed' => __('lang_v1.detailed').' ('.__('lang_v1.for_normal_printer').')',
+//            'columnize-taxes' => __('lang_v1.columnize_taxes').' ('.__('lang_v1.for_normal_printer').')',
+//            'slim' => __('lang_v1.slim').' ('.__('lang_v1.recomended_for_80mm').')',
+//            'slim2' => __('lang_v1.slim').' 2 ('.__('lang_v1.recomended_for_58mm').')',
+//        ];
+//    }
+    private function getDesigns() {
+        return [
+            'e-invoice' => __('lang_v1.e-invoice') ,
+            'e-invoice2' => __('lang_v1.e-invoice2') ,
+            'classic' => __('lang_v1.classic') .  ' (' . __('lang_v1.for_normal_printer') . ')',
+            'elegant' => __('lang_v1.elegant') . ' (' . __('lang_v1.for_normal_printer') . ')',
+            'detailed' => __('lang_v1.detailed') . ' (' . __('lang_v1.for_normal_printer') . ')',
+            'columnize-taxes' => __('lang_v1.columnize_taxes') . ' (' . __('lang_v1.for_normal_printer') . ')',
+            'slim' => __('lang_v1.slim') . ' (' . __('lang_v1.recomended_for_80mm') . ')',
+            'slim2' => __('lang_v1.slim') . ' 2 (' . __('lang_v1.recomended_for_58mm') . ')'
         ];
     }
 }

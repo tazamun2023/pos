@@ -2,7 +2,7 @@
 <div class="modal-dialog modal-lg" role="document">
   <div class="modal-content">
 
-    {!! Form::open(['url' => action('\Modules\Accounting\Http\Controllers\AccountTypeController@store'), 
+    {!! Form::open(['url' => action([\Modules\Accounting\Http\Controllers\AccountTypeController::class, 'store']), 
         'method' => 'post', 'id' => 'create_account_type_form' ]) !!}
     {!! Form::hidden('account_type', null, ['id' => 'account_type']); !!}
     <div class="modal-header">
