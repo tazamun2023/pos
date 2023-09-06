@@ -32,9 +32,9 @@
 			@endif
 			@if(!empty($receipt_details->contact))
 				<br/>{!! $receipt_details->contact !!}
-			@endif	
+			@endif
 			@if(!empty($receipt_details->contact) && !empty($receipt_details->website))
-				, 
+				,
 			@endif
 			@if(!empty($receipt_details->website))
 				{{ $receipt_details->website }}
@@ -55,7 +55,7 @@
 			@endif
 			@if(!empty($receipt_details->sub_heading_line4))
 				<br>{{ $receipt_details->sub_heading_line4 }}
-			@endif		
+			@endif
 			@if(!empty($receipt_details->sub_heading_line5))
 				<br>{{ $receipt_details->sub_heading_line5 }}
 			@endif
@@ -193,7 +193,7 @@
 					@endif
 					{{$receipt_details->repair_status}}<br>
 		        @endif
-		        
+
 		        @if(!empty($receipt_details->repair_warranty_label) || !empty($receipt_details->repair_warranty))
 					@if(!empty($receipt_details->repair_warranty_label))
 						<b>{!! $receipt_details->repair_warranty_label !!}</b>
@@ -201,7 +201,7 @@
 					{{$receipt_details->repair_warranty}}
 					<br>
 		        @endif
-		        
+
 				<!-- Waiter info -->
 				@if(!empty($receipt_details->service_staff_label) || !empty($receipt_details->service_staff))
 		        	<br/>
@@ -286,21 +286,21 @@
 							@if(!empty($line['image']))
 								<img src="{{$line['image']}}" alt="Image" width="50" style="float: left; margin-right: 8px;">
 							@endif
-                            {{$line['name']}} {{$line['product_variation']}} {{$line['variation']}} 
+                            {{$line['name']}} {{$line['product_variation']}} {{$line['variation']}}
                             @if(!empty($line['sub_sku'])), {{$line['sub_sku']}} @endif @if(!empty($line['brand'])), {{$line['brand']}} @endif @if(!empty($line['cat_code'])), {{$line['cat_code']}}@endif
                             @if(!empty($line['product_custom_fields'])), {{$line['product_custom_fields']}} @endif
                             @if(!empty($line['product_description']))
                             	<small>
                             		{!!$line['product_description']!!}
                             	</small>
-                            @endif 
+                            @endif
                             @if(!empty($line['sell_line_note']))
                             <br>
                             <small>
                             	{!!$line['sell_line_note']!!}
                             </small>
-                            @endif 
-                            @if(!empty($line['lot_number']))<br> {{$line['lot_number_label']}}:  {{$line['lot_number']}} @endif 
+                            @endif
+                            @if(!empty($line['lot_number']))<br> {{$line['lot_number_label']}}:  {{$line['lot_number']}} @endif
                             @if(!empty($line['product_expiry'])), {{$line['product_expiry_label']}}:  {{$line['product_expiry']}} @endif
 
                             @if(!empty($line['warranty_name'])) <br><small>{{$line['warranty_name']}} </small>@endif @if(!empty($line['warranty_exp_date'])) <small>- {{@format_date($line['warranty_exp_date'])}} </small>@endif
@@ -314,7 +314,7 @@
                             @endif
                         </td>
 						<td class="text-right">
-							{{$line['quantity']}} {{$line['units']}} 
+							{{$line['quantity']}} {{$line['units']}}
 
 							@if($receipt_details->show_base_unit_details && $line['quantity'] && $line['base_unit_multiplier'] !== 1)
                             <br><small>
@@ -325,7 +325,7 @@
 						<td class="text-right">{{$line['unit_price_before_discount']}}</td>
 						@if(!empty($receipt_details->discounted_unit_price_label))
 							<td class="text-right">
-								{{$line['unit_price_inc_tax']}} 
+								{{$line['unit_price_inc_tax']}}
 							</td>
 						@endif
 						@if(!empty($receipt_details->item_discount_label))
@@ -343,9 +343,9 @@
 						@foreach($line['modifiers'] as $modifier)
 							<tr>
 								<td>
-		                            {{$modifier['name']}} {{$modifier['variation']}} 
+		                            {{$modifier['name']}} {{$modifier['variation']}}
 		                            @if(!empty($modifier['sub_sku'])), {{$modifier['sub_sku']}} @endif @if(!empty($modifier['cat_code'])), {{$modifier['cat_code']}}@endif
-		                            @if(!empty($modifier['sell_line_note']))({!!$modifier['sell_line_note']!!}) @endif 
+		                            @if(!empty($modifier['sell_line_note']))({!!$modifier['sell_line_note']!!}) @endif
 		                        </td>
 								<td class="text-right">{{$modifier['quantity']}} {{$modifier['units']}} </td>
 								<td class="text-right">{{$modifier['unit_price_inc_tax']}}</td>
@@ -610,7 +610,7 @@
 	    	<p>{!! nl2br($receipt_details->additional_notes) !!}</p>
 	    </div>
     @endif
-    
+
 </div>
 <div class="row" style="color: #000000 !important;">
 	@if(!empty($receipt_details->footer_text))
@@ -624,7 +624,7 @@
 				{{-- Barcode --}}
 				<img class="center-block" src="data:image/png;base64,{{DNS1D::getBarcodePNG($receipt_details->invoice_no, 'C128', 2,30,array(39, 48, 54), true)}}">
 			@endif
-			
+
 			@if($receipt_details->show_qr_code && !empty($receipt_details->qr_code_text))
 				<img class="center-block mt-5" src="data:image/png;base64,{{DNS2D::getBarcodePNG($receipt_details->qr_code_text, 'QRCODE', 3, 3, [39, 48, 54])}}">
 			@endif
