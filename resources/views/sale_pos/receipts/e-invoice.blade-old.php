@@ -2,130 +2,295 @@
     $totals = ['taxable_value' => 0];
 @endphp
 
-
-<table style="width:100%;"> 
-   <thead>
+<table style="width:100%;">
+    <thead>
     <tr>
-        <th width="50%" style="text-align: left !importent" rowspan="2">@if($receipt_details->show_barcode)
-            <br/>
-            <img src="data:image/png;base64,{{DNS1D::getBarcodePNG($receipt_details->invoice_no, 'C128', 2,30,array(39, 48, 54), true)}}">
-        @endif
+        <td class="pull-right">
+            <small class="text-muted-imp">
+                @if(!empty($receipt_details->invoice_no_prefix))
+                    {!! $receipt_details->invoice_no_prefix !!}
+                @endif
 
-        @if($receipt_details->show_qr_code && !empty($receipt_details->qr_code_text))
-            <img class="mt-5" src="data:image/png;base64,{{DNS2D::getBarcodePNG($receipt_details->qr_code_text, 'QRCODE')}}">
-        @endif</th>
-        <th style="text-align: right" colspan="2">
-            <h3>@if(!empty($receipt_details->invoice_heading))
-                <p class="" style="font-weight: bold; font-size: 20px !important;">{!! $receipt_details->invoice_heading !!}</p>
-            @endif</h3>
-        </th>
-
-    </tr>
-    <tr>
-        <th style="text-align: right"> @if(!empty($receipt_details->invoice_no_prefix))
-            {!! $receipt_details->invoice_no_prefix !!}
-        @endif : {{$receipt_details->invoice_no}} </th>
-        <th style="text-align: right">
-        @if(!empty($receipt_details->date_label))
-                {{$receipt_details->invoice_date}}
-                {!! $receipt_details->date_label !!}
-        @endif
-        <br>
-        @if(!empty($receipt_details->due_date_label))
-                <span>{{$receipt_details->due_date_label}}</span>
-                {{$receipt_details->due_date ?? ''}}
-        @endif
-    </th>
+                {{$receipt_details->invoice_no}}
+            </small>
+        </td>
     </tr>
     </thead>
-   </table>
-   <br>
-   <br>
-   <table width="100%" style="padding-top:20px;">
-    <tbody style="margin-top:100px;">
-        @if(!empty($receipt_details->display_name))
-    <tr>
-        <td colspan="4" style="text-align: right"><strong>  {{$receipt_details->display_name}}</strong></td>
-    </tr>
-    <tr>
-        <td>Seller Id : <br>
-            --
-            
-        <td>Tax No <br>
-            @if(!empty($receipt_details->tax_info1)){{$receipt_details->tax_info1}}@else -- @endif <br></td>
-        <td>
-            Contact <br>
-            @if(!empty($receipt_details->contact))
-                {!! $receipt_details->contact !!}
-            @else
-            --
-            @endif</td>
-        <td style="text-align: right">Address <br> @if(!empty($receipt_details->address))
-            {!! $receipt_details->address !!}
-        @endif</td>
-    </tr>
-    @endif
-    <br>
-    <br>
-    <tr style="margin-top: 30px;">
-        <td colspan="5">&nbsp; &nbsp; &nbsp; <br></td>
-    </tr>
-    <tr>
-        <td colspan="4" style="text-align: right;"> 
-           <strong style="padding-top:30px;">
-            @if(!empty($receipt_details->customer_name))
-            {{$receipt_details->customer_name}}
-            @endif
-           </strong>
-        </td>
-    </tr>
-    <tr>
-        <td> 
-            @if(!empty($receipt_details->client_id_label))
-            {{ $receipt_details->client_id_label }}
-            @else
-            Client id: 
-            @endif
-            <br>
-            @if(!empty($receipt_details->client_id_label))
-            
-            {{ $receipt_details->client_id }}
-            @else
-            --
-           @endif</td>
-        <td> @if(!empty($receipt_details->customer_tax_label))
-           {{ $receipt_details->customer_tax_label }}
-            @else
-            Tax No:
-           @endif
-           <br>
-           @if(!empty($receipt_details->customer_tax_label))
-             {{ $receipt_details->customer_tax_number }}
-             @else
-             --
-        @endif</td>
-        <td> 
-            Contact: <br>
-            --
-            
-        </td>
-        <td  style="text-align: right"> @if(!empty($receipt_details->customer_custom_fields))
-            <br/>{!! $receipt_details->customer_custom_fields !!}
-            @else
-            Address <br>
-            ---
-        @endif</td>
-    </tr>
-   </tbody>
-</table>
 
-
-
-<table style="width:100%;">
     <tbody>
     <tr>
-        <td>
+        <td class="text-center">
+            <div>
+                <!-- Logo -->
+                @if(!empty($receipt_details->logo))
+                    <img src="{{$receipt_details->logo}}" class="img" style="height: 130px; width: 150px; float: left; object-fit: cover">
+                @endif
 
+                @if(!empty($receipt_details->invoice_heading))
+                    <p class="" style="font-weight: bold; font-size: 20px !important;">{!! $receipt_details->invoice_heading !!}</p>
+                @endif
+            </div>
+        </td>
+    </tr>
+
+    <tr>
+        <td>
+            <div style="display: flex; gap: 5px; @if(!empty($receipt_details->logo)) margin-top: -20px @endif">
+                <div style="width: 33%">
+                    @if(!config('constants.langs_rtl')))
+                    <!-- Shop & Location Name  -->
+                    @if(!empty($receipt_details->display_name))
+                        <p style="text-align: right">
+                            {{$receipt_details->display_name}}
+                            @if(!empty($receipt_details->address))
+                                <br/>{!! $receipt_details->address !!}
+                            @endif
+
+                            @if(!empty($receipt_details->contact))
+                                <br/>{!! $receipt_details->contact !!}
+                            @endif
+
+                            {{--				@if(!empty($receipt_details->website))--}}
+                            {{--					<br/>{{ $receipt_details->website }}--}}
+                            {{--				@endif--}}
+
+                            {{--				@if(!empty($receipt_details->tax_info1))--}}
+                            {{--					<br/>{{ $receipt_details->tax_label1 }} {{ $receipt_details->tax_info1 }}--}}
+                            {{--				@endif--}}
+
+                            {{--				@if(!empty($receipt_details->tax_info2))--}}
+                            {{--					<br/>{{ $receipt_details->tax_label2 }} {{ $receipt_details->tax_info2 }}--}}
+                            {{--				@endif--}}
+
+                            {{--				@if(!empty($receipt_details->location_custom_fields))--}}
+                            {{--					<br/>{{ $receipt_details->location_custom_fields }}--}}
+                            {{--				@endif--}}
+                            <br>
+                            @if(!empty($receipt_details->location_custom_field_1_value))
+                                {{ $receipt_details->location_custom_field_1_value }}  : سجل تجاري رقم
+                            @endif
+                            <br>
+                            @if(!empty($receipt_details->location_custom_field_2_value))
+                                {{ $receipt_details->location_custom_field_2_value }}  : الرقم الضريبي
+                            @endif
+                            @if(!empty($receipt_details->sales_person_label))
+                                <br/>
+                                <strong>{{ $receipt_details->sales_person_label }}</strong> {{ $receipt_details->sales_person }}
+                            @endif
+                        </p>
+                    @endif
+                    @else
+                        <div class="word-wrap">
+                            @if(!empty($receipt_details->customer_label))
+                                <b>{{ $receipt_details->customer_label }}</b><br/>
+                            @endif
+
+                            <!-- customer info -->
+                            {{--                        @if(!empty($receipt_details->customer_name))--}}
+                            {{--                            {{ $receipt_details->customer_name }}<br>--}}
+                            {{--                        @endif--}}
+                            @if(!empty($receipt_details->customer_info))
+                                {!! $receipt_details->customer_info !!}
+                            @endif
+                            @if(!empty($receipt_details->client_id_label))
+                                <br/>
+                                <strong>{{ $receipt_details->client_id_label }}</strong> {{ $receipt_details->client_id }}
+                            @endif
+                            @if(!empty($receipt_details->customer_tax_label))
+                                <br/>
+                                <strong>{{ $receipt_details->customer_tax_label }}</strong> {{ $receipt_details->customer_tax_number }}
+                            @endif
+                            @if(!empty($receipt_details->customer_custom_fields))
+                                <br/>{!! $receipt_details->customer_custom_fields !!}
+                            @endif
+                            @if(!empty($receipt_details->custom_field1))
+                                <br/>{!! $receipt_details->custom_field1 !!}
+                                سجل تجاري
+                            @endif
+                            @if(!empty($receipt_details->custom_field2))
+                                <br/>{!! $receipt_details->custom_field2 !!}
+                                الرقم الضريبي
+                            @endif
+
+
+                            @if(!empty($receipt_details->customer_rp_label))
+                                <br/>
+                                <strong>{{ $receipt_details->customer_rp_label }}</strong> {{ $receipt_details->customer_total_rp }}
+                            @endif
+
+                            <!-- Display type of service details -->
+                            @if(!empty($receipt_details->types_of_service))
+                                <span class="pull-left text-left">
+					<strong>{!! $receipt_details->types_of_service_label !!}:</strong>
+					{{$receipt_details->types_of_service}}
+                                    <!-- Waiter info -->
+                                    @if(!empty($receipt_details->types_of_service_custom_fields))
+                                        <br>
+                                        @foreach($receipt_details->types_of_service_custom_fields as $key => $value)
+                                            <strong>{{$key}}: </strong> {{$value}}@if(!$loop->last), @endif
+                                        @endforeach
+                                    @endif
+				</span>
+                            @endif
+
+                        </div>
+                    @endif
+                </div>
+                <div style="text-align: center; width: 33%">
+                    @if($receipt_details->show_barcode)
+                        <br>
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <img class="center-block" src="data:image/png;base64,{{DNS1D::getBarcodePNG($receipt_details->invoice_no, 'C128', 2,30,array(39, 48, 54), true)}}">
+                            </div>
+                        </div>
+                    @endif
+
+                    @if($receipt_details->show_qr_code && !empty($receipt_details->qr_code_details))
+                        @php
+                            $qr_code_text = implode(', ', $receipt_details->qr_code_details);
+                        @endphp
+                        {{--				<img class="center-block mt-5" src="data:image/png;base64,{{DNS2D::getBarcodePNG($qr_code_text, 'QRCODE', 4, 4, [39, 48, 54])}}">--}}
+                        @include('sale_pos.partials.qr_code')
+                    @endif
+                    <div style="margin: 0 auto; font-size: 18px; font-width: bold; text-align: center" class="invoice-info">
+                        @if(!empty($receipt_details->invoice_no_prefix))
+                            {!! $receipt_details->invoice_no_prefix !!}
+                        @endif
+
+                        {{$receipt_details->invoice_no}}
+                    </div>
+                    @if(!empty($receipt_details->all_due))
+                        <span>{!! $receipt_details->all_bal_label !!}</span>
+                        {{$receipt_details->all_due}}
+                    @endif
+                    @if(!empty($receipt_details->date_label))
+                        <div style="font-size: 16px">
+                            {{$receipt_details->invoice_date}}
+                            {!! $receipt_details->date_label !!}
+                        </div>
+                    @endif
+                    @if(!empty($receipt_details->due_date_label))
+                        <div style="font-size: 20px">
+                            <span>{{$receipt_details->due_date_label}}</span>
+                            {{$receipt_details->due_date ?? ''}}
+                        </div>
+                    @endif
+                </div>
+                <div style="width: 33%">
+                    @if(!config('constants.langs_rtl')))
+                    <div class="word-wrap">
+                        @if(!empty($receipt_details->customer_label))
+                            <b>{{ $receipt_details->customer_label }}</b><br/>
+                        @endif
+
+                        <!-- customer info -->
+                        {{--                        @if(!empty($receipt_details->customer_name))--}}
+                        {{--                            {{ $receipt_details->customer_name }}<br>--}}
+                        {{--                        @endif--}}
+                        @if(!empty($receipt_details->customer_info))
+                            {!! $receipt_details->customer_info !!}
+                        @endif
+                        @if(!empty($receipt_details->client_id_label))
+                            <br/>
+                            <strong>{{ $receipt_details->client_id_label }}</strong> {{ $receipt_details->client_id }}
+                        @endif
+                        @if(!empty($receipt_details->customer_tax_label))
+                            <br/>
+                            <strong>{{ $receipt_details->customer_tax_label }}</strong> {{ $receipt_details->customer_tax_number }}
+                        @endif
+                        @if(!empty($receipt_details->customer_custom_fields))
+                            <br/>{!! $receipt_details->customer_custom_fields !!}
+                        @endif
+                        @if(!empty($receipt_details->custom_field1))
+                            <br/>{!! $receipt_details->custom_field1 !!}
+                            سجل تجاري
+                        @endif
+                        @if(!empty($receipt_details->custom_field2))
+                            <br/>{!! $receipt_details->custom_field2 !!}
+                            الرقم الضريبي
+                        @endif
+
+
+                        @if(!empty($receipt_details->customer_rp_label))
+                            <br/>
+                            <strong>{{ $receipt_details->customer_rp_label }}</strong> {{ $receipt_details->customer_total_rp }}
+                        @endif
+
+                        <!-- Display type of service details -->
+                        @if(!empty($receipt_details->types_of_service))
+                            <span class="pull-left text-left">
+					<strong>{!! $receipt_details->types_of_service_label !!}:</strong>
+					{{$receipt_details->types_of_service}}
+                                <!-- Waiter info -->
+                                @if(!empty($receipt_details->types_of_service_custom_fields))
+                                    <br>
+                                    @foreach($receipt_details->types_of_service_custom_fields as $key => $value)
+                                        <strong>{{$key}}: </strong> {{$value}}@if(!$loop->last), @endif
+                                    @endforeach
+                                @endif
+				</span>
+                        @endif
+
+                    </div>
+                    @else
+                        @if(!empty($receipt_details->display_name))
+                            <p style="text-align: left; margin-top: 30px" >
+                                {{$receipt_details->display_name}}
+                                @if(!empty($receipt_details->address))
+                                    <br/>{!! $receipt_details->address !!}
+                                @endif
+
+                                @if(!empty($receipt_details->contact))
+                                    <br/>{!! $receipt_details->contact !!}
+                                @endif
+
+                                {{--				@if(!empty($receipt_details->website))--}}
+                                {{--					<br/>{{ $receipt_details->website }}--}}
+                                {{--				@endif--}}
+
+                                {{--				@if(!empty($receipt_details->tax_info1))--}}
+                                {{--					<br/>{{ $receipt_details->tax_label1 }} {{ $receipt_details->tax_info1 }}--}}
+                                {{--				@endif--}}
+
+                                {{--				@if(!empty($receipt_details->tax_info2))--}}
+                                {{--					<br/>{{ $receipt_details->tax_label2 }} {{ $receipt_details->tax_info2 }}--}}
+                                {{--				@endif--}}
+
+                                {{--				@if(!empty($receipt_details->location_custom_fields))--}}
+                                {{--					<br/>{{ $receipt_details->location_custom_fields }}--}}
+                                {{--				@endif--}}
+                                <br>
+                                @if(!empty($receipt_details->location_custom_field_1_value))
+                                    {{ $receipt_details->location_custom_field_1_value }}  : سجل تجاري رقم
+                                @endif
+                                <br>
+                                @if(!empty($receipt_details->location_custom_field_2_value))
+                                    {{ $receipt_details->location_custom_field_2_value }}  : الرقم الضريبي
+                                @endif
+                                @if(!empty($receipt_details->sales_person_label))
+                                    <br/>
+                                    <strong>{{ $receipt_details->sales_person_label }}</strong> {{ $receipt_details->sales_person }}
+                                @endif
+                            </p>
+                        @endif
+                    @endif
+                </div>
+            </div>
+            <div>
+                @if(!empty($receipt_details->header_text))
+                    {!! $receipt_details->header_text !!}
+                @endif
+
+                @php
+                    $sub_headings = implode('<br/>', array_filter([$receipt_details->sub_heading_line1, $receipt_details->sub_heading_line2, $receipt_details->sub_heading_line3, $receipt_details->sub_heading_line4, $receipt_details->sub_heading_line5]));
+                @endphp
+
+                @if(!empty($sub_headings))
+                    <span>{!! $sub_headings !!}</span>
+                @endif
+
+            </div>
             <!-- business information here -->
             <div class="row invoice-info">
 
