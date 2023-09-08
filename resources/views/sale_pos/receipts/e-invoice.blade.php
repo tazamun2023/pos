@@ -48,17 +48,15 @@
         <td colspan="4" style="text-align: right"><strong>  {{$receipt_details->display_name}}</strong></td>
     </tr>
     <tr>
-        <td>Seller Id : <br>
-            --
+        <td>{{ $receipt_details->saller_id_label }}: {{ $receipt_details->saller_id }}<br>
+
             
-        <td>Tax No <br>
-            @if(!empty($receipt_details->tax_info1)){{$receipt_details->tax_info1}}@else -- @endif <br></td>
+        <td>Tax No {{ $receipt_details->custom_field1, $receipt_details->custom_field2 }}<br>
+{{--            @if(!empty($receipt_details->custom_field1)){{$receipt_details->tax_info1}}@else -- @endif <br></td>--}}
         <td>
             Contact <br>
             @if(!empty($receipt_details->contact))
                 {!! $receipt_details->contact !!}
-            @else
-            --
             @endif</td>
         <td style="text-align: right">Address <br> @if(!empty($receipt_details->address))
             {!! $receipt_details->address !!}
@@ -84,36 +82,38 @@
             @if(!empty($receipt_details->client_id_label))
             {{ $receipt_details->client_id_label }}
             @else
-            Client id: 
+{{--            Client id: --}}
             @endif
             <br>
             @if(!empty($receipt_details->client_id_label))
             
             {{ $receipt_details->client_id }}
             @else
-            --
+{{--            ----}}
            @endif</td>
         <td> @if(!empty($receipt_details->customer_tax_label))
            {{ $receipt_details->customer_tax_label }}
             @else
-            Tax No:
+            Tax No: {{ $receipt_details->location_custom_fields }}
            @endif
            <br>
            @if(!empty($receipt_details->customer_tax_label))
              {{ $receipt_details->customer_tax_number }}
              @else
-             --
+{{--             ----}}
         @endif</td>
         <td> 
             Contact: <br>
-            --
+            @if(!empty($receipt_details->contact))
+                {!! $receipt_details->contact !!}
+            @endif
             
         </td>
         <td  style="text-align: right"> @if(!empty($receipt_details->customer_custom_fields))
             <br/>{!! $receipt_details->customer_custom_fields !!}
             @else
-            Address <br>
-            ---
+{{--            Address <br>--}}
+            {!! $receipt_details->customer_info_address !!}
         @endif</td>
     </tr>
    </tbody>
