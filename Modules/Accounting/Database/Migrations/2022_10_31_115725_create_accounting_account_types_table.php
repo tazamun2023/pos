@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 use Modules\Accounting\Entities\AccountingAccountType;
 
 class CreateAccountingAccountTypesTable extends Migration
@@ -33,7 +33,7 @@ class CreateAccountingAccountTypesTable extends Migration
                 'show_balance' => 0,
                 'account_type' => 'sub_type',
                 'account_primary_type' => 'asset',
-                'parent_id' => null
+                'parent_id' => null,
             ],
             [
                 'id' => 2,
@@ -41,7 +41,7 @@ class CreateAccountingAccountTypesTable extends Migration
                 'show_balance' => 1,
                 'account_type' => 'sub_type',
                 'account_primary_type' => 'asset',
-                'parent_id' => null
+                'parent_id' => null,
             ],
             [
                 'id' => 3,
@@ -49,7 +49,7 @@ class CreateAccountingAccountTypesTable extends Migration
                 'show_balance' => 1,
                 'account_type' => 'sub_type',
                 'account_primary_type' => 'asset',
-                'parent_id' => null
+                'parent_id' => null,
             ],
             [
                 'id' => 4,
@@ -65,7 +65,7 @@ class CreateAccountingAccountTypesTable extends Migration
                 'show_balance' => 1,
                 'account_type' => 'sub_type',
                 'account_primary_type' => 'asset',
-                'parent_id' => null
+                'parent_id' => null,
             ],
             [
                 'id' => 6,
@@ -73,7 +73,7 @@ class CreateAccountingAccountTypesTable extends Migration
                 'show_balance' => 0,
                 'account_type' => 'sub_type',
                 'account_primary_type' => 'liability',
-                'parent_id' => null
+                'parent_id' => null,
             ],
             [
                 'id' => 7,
@@ -81,7 +81,7 @@ class CreateAccountingAccountTypesTable extends Migration
                 'show_balance' => 1,
                 'account_type' => 'sub_type',
                 'account_primary_type' => 'liability',
-                'parent_id' => null
+                'parent_id' => null,
             ],
             [
                 'id' => 8,
@@ -89,7 +89,7 @@ class CreateAccountingAccountTypesTable extends Migration
                 'show_balance' => 1,
                 'account_type' => 'sub_type',
                 'account_primary_type' => 'liability',
-                'parent_id' => null
+                'parent_id' => null,
             ],
             [
                 'id' => 9,
@@ -97,7 +97,7 @@ class CreateAccountingAccountTypesTable extends Migration
                 'show_balance' => 1,
                 'account_type' => 'sub_type',
                 'account_primary_type' => 'liability',
-                'parent_id' => null
+                'parent_id' => null,
             ],
             [
                 'id' => 10,
@@ -105,7 +105,7 @@ class CreateAccountingAccountTypesTable extends Migration
                 'show_balance' => 1,
                 'account_type' => 'sub_type',
                 'account_primary_type' => 'equity',
-                'parent_id' => null
+                'parent_id' => null,
             ],
             [
                 'id' => 11,
@@ -113,7 +113,7 @@ class CreateAccountingAccountTypesTable extends Migration
                 'show_balance' => 0,
                 'account_type' => 'sub_type',
                 'account_primary_type' => 'income',
-                'parent_id' => null
+                'parent_id' => null,
             ],
             [
                 'id' => 12,
@@ -121,7 +121,7 @@ class CreateAccountingAccountTypesTable extends Migration
                 'show_balance' => 0,
                 'account_type' => 'sub_type',
                 'account_primary_type' => 'income',
-                'parent_id' => null
+                'parent_id' => null,
             ],
             [
                 'id' => 13,
@@ -129,7 +129,7 @@ class CreateAccountingAccountTypesTable extends Migration
                 'show_balance' => 0,
                 'account_type' => 'sub_type',
                 'account_primary_type' => 'expenses',
-                'parent_id' => null
+                'parent_id' => null,
             ],
             [
                 'id' => 14,
@@ -137,7 +137,7 @@ class CreateAccountingAccountTypesTable extends Migration
                 'show_balance' => 0,
                 'account_type' => 'sub_type',
                 'account_primary_type' => 'expenses',
-                'parent_id' => null
+                'parent_id' => null,
             ],
             [
                 'id' => 15,
@@ -145,7 +145,7 @@ class CreateAccountingAccountTypesTable extends Migration
                 'show_balance' => 0,
                 'account_type' => 'sub_type',
                 'account_primary_type' => 'expenses',
-                'parent_id' => null
+                'parent_id' => null,
             ],
         ];
         AccountingAccountType::insert($account_sub_types);

@@ -1,4 +1,4 @@
-<div class="pos-tab-content active" style="border-radius: 10px;padding: 20px !important;">
+<div class="pos-tab-content active">
     <div class="row">
         <div class="col-sm-4">
             
@@ -7,9 +7,9 @@
 
     <div class="row">
         <div class="col-md-12">
-            <table class="table table-bordered table-striped w-full" id="sell_table">
+            <table class="table table-bordered table-striped" id="sell_table">
                 <thead>
-                    <tr class="f_th-tr">   
+                    <tr>
                         <th>@lang('messages.action')</th>
                         <th>@lang('messages.date')</th>
                         <th>@lang('sale.invoice_no')</th>

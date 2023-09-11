@@ -54,35 +54,37 @@
                                 $grand_total = 0;
                             @endphp
                             @foreach($report_details as $report)
-                                @php
-                                    $total_current += $report['<1'];
-                                    $total_1_30 += $report['1_30'];
-                                    $total_31_60 += $report['31_60'];
-                                    $total_61_90 += $report['61_90'];
-                                    $total_greater_than_90 += $report['>90'];
-                                    $grand_total += $report['total_due'];
-                                @endphp
-                                <td>
-                                    {{$report['name']}}
-                                </td>
-                                <td>
-                                    @format_currency($report['<1'])
-                                </td>
-                                <td>
-                                    @format_currency($report['1_30'])
-                                </td>
-                                <td>
-                                    @format_currency($report['31_60'])
-                                </td>
-                                <td>
-                                    @format_currency($report['61_90'])
-                                </td>
-                                <td>
-                                    @format_currency($report['>90'])
-                                </td>
-                                <td>
-                                    @format_currency($report['total_due'])
-                                </td>
+                                <tr>
+                                    @php
+                                        $total_current += $report['<1'];
+                                        $total_1_30 += $report['1_30'];
+                                        $total_31_60 += $report['31_60'];
+                                        $total_61_90 += $report['61_90'];
+                                        $total_greater_than_90 += $report['>90'];
+                                        $grand_total += $report['total_due'];
+                                    @endphp
+                                    <td>
+                                        {{$report['name']}}
+                                    </td>
+                                    <td>
+                                        @format_currency($report['<1'])
+                                    </td>
+                                    <td>
+                                        @format_currency($report['1_30'])
+                                    </td>
+                                    <td>
+                                        @format_currency($report['31_60'])
+                                    </td>
+                                    <td>
+                                        @format_currency($report['61_90'])
+                                    </td>
+                                    <td>
+                                        @format_currency($report['>90'])
+                                    </td>
+                                    <td>
+                                        @format_currency($report['total_due'])
+                                    </td>
+                                </tr>
                             @endforeach
                         </tbody>
                         <tfoot>

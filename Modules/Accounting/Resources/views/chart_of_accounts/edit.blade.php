@@ -1,7 +1,7 @@
 <div class="modal-dialog modal-lg" role="document">
   <div class="modal-content">
 
-    {!! Form::open(['url' => action('\Modules\Accounting\Http\Controllers\CoaController@update', $account->id), 
+    {!! Form::open(['url' => action([\Modules\Accounting\Http\Controllers\CoaController::class, 'update'], $account->id), 
         'method' => 'put', 'id' => 'create_client_form' ]) !!}
 
     <div class="modal-header">

@@ -31,7 +31,7 @@
                 <ul>
                     @foreach($account_sub_types->where('account_primary_type', $key)->all() as $sub_type)
                         <li @if($loop->index==0) data-jstree='{ "opened" : true }' @endif>
-                            {{$sub_type->account_type_name}} -{{ $sub_type->name }}
+                            {{$sub_type->account_type_name}}
                             <ul>
                             @foreach($accounts->where('account_sub_type_id', $sub_type->id)->sortBy('name')->all() as $account)
                                 <li @if(count($account->child_accounts) == 0) data-jstree='{ "icon" : "fas fa-arrow-alt-circle-right" }' @endif>
@@ -46,17 +46,17 @@
                                     <span class="tree-actions">
                                         <a class="btn btn-xs btn-default text-success ledger-link" 
                                             title="@lang( 'accounting::lang.ledger' )"
-                                            href="{{action('\Modules\Accounting\Http\Controllers\CoaController@ledger', $account->id)}}">
+                                            href="{{action([\Modules\Accounting\Http\Controllers\CoaController::class, 'ledger'], $account->id)}}">
                                             <i class="fas fa-file-alt"></i></a>
                                         <a class="btn-modal btn-xs btn-default text-primary" title="@lang('messages.edit')"
-                                            href="{{action('\Modules\Accounting\Http\Controllers\CoaController@edit', $account->id)}}" 
-                                            data-href="{{action('\Modules\Accounting\Http\Controllers\CoaController@edit', $account->id)}}" 
+                                            href="{{action([\Modules\Accounting\Http\Controllers\CoaController::class, 'edit'], $account->id)}}" 
+                                            data-href="{{action([\Modules\Accounting\Http\Controllers\CoaController::class, 'edit'], $account->id)}}" 
                                             data-container="#create_account_modal">
                                         <i class="fas fa-edit"></i></a>
                                         <a class="activate-deactivate-btn text-warning  btn-xs btn-default" 
                                             title="@if($account->status=='active') @lang('messages.deactivate') @else 
                                             @lang('messages.activate') @endif"
-                                            href="{{action('\Modules\Accounting\Http\Controllers\CoaController@activateDeactivate', $account->id)}}">
+                                            href="{{action([\Modules\Accounting\Http\Controllers\CoaController::class, 'activateDeactivate'], $account->id)}}">
                                             <i class="fas fa-power-off"></i>
                                         </a>
                                     </span>
@@ -77,17 +77,17 @@
                                                  <span class="tree-actions">
                                                     <a class="btn btn-xs btn-default text-success ledger-link" 
                                                         title="@lang( 'accounting::lang.ledger' )"
-                                                        href="{{action('\Modules\Accounting\Http\Controllers\CoaController@ledger', $child_account->id)}}">
+                                                        href="{{action([\Modules\Accounting\Http\Controllers\CoaController::class, 'ledger'], $child_account->id)}}">
                                                         <i class="fas fa-file-alt"></i></a>
                                                     <a class="btn-modal btn-xs btn-default text-primary" title="@lang('messages.edit')"
-                                                        href="{{action('\Modules\Accounting\Http\Controllers\CoaController@edit', $child_account->id)}}" 
-                                                        data-href="{{action('\Modules\Accounting\Http\Controllers\CoaController@edit', $child_account->id)}}" 
+                                                        href="{{action([\Modules\Accounting\Http\Controllers\CoaController::class, 'edit'], $child_account->id)}}" 
+                                                        data-href="{{action([\Modules\Accounting\Http\Controllers\CoaController::class, 'edit'], $child_account->id)}}" 
                                                         data-container="#create_account_modal">
                                                     <i class="fas fa-edit"></i></a>
                                                     <a class="activate-deactivate-btn text-warning  btn-xs btn-default" 
                                                         title="@if($child_account->status=='active') @lang('messages.deactivate') @else 
                                                         @lang('messages.activate') @endif"
-                                                        href="{{action('\Modules\Accounting\Http\Controllers\CoaController@activateDeactivate', $child_account->id)}}">
+                                                        href="{{action([\Modules\Accounting\Http\Controllers\CoaController::class, 'activateDeactivate'], $child_account->id)}}">
                                                         <i class="fas fa-power-off"></i>
                                                         </a>
                                                 </span>

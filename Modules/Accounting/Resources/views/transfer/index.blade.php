@@ -7,23 +7,15 @@
 @include('accounting::layouts.nav')
 
 <!-- Content Header (Page header) -->
-<section class="content-header f_content-header f_product_content-header">
+<section class="content-header">
     <h1>@lang( 'accounting::lang.transfer' )</h1>
-    @can('accounting.add_transfer')
-        <div class="box-tools">
-            <button type="button" class="btn btn-block f_add-btn btn-modal" 
-                data-href="{{action('\Modules\Accounting\Http\Controllers\TransferController@create')}}" 
-                data-container="#create_transfer_modal" >
-                <i class="fas fa-plus"></i> @lang( 'messages.add' )</a>
-        </div>
-@endcan
 </section>
-<section class="content no-print" style="border-radius: 8px;background: #fff;">
+<section class="content no-print">
     <div class="row">
         <div class="col-md-12">
             @component('components.filters', ['title' => __('report.filters')])
                 <div class="col-md-4">
-                    <div class="form-group addProduct_form">
+                    <div class="form-group">
                         {!! Form::label('transfer_from_filter', __( 'lang_v1.transfer_from' ) . ':') !!}
                         {!! Form::select('transfer_from_filter', [], null,
                             ['class' => 'form-control accounts-dropdown', 'style' => 'width:100%', 
@@ -31,7 +23,7 @@
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="form-group addProduct_form">
+                    <div class="form-group">
                         {!! Form::label('transfer_to_filter', __( 'account.transfer_to' ) . ':') !!}
                         {!! Form::select('transfer_to_filter', [], null,
                             ['class' => 'form-control accounts-dropdown', 'style' => 'width:100%', 
@@ -39,7 +31,7 @@
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="form-group addProduct_form">
+                    <div class="form-group">
                         {!! Form::label('transfer_date_range_filter', __('report.date_range') . ':') !!}
                         {!! Form::text('transfer_date_range_filter', null, 
                             ['placeholder' => __('lang_v1.select_a_date_range'), 
@@ -52,10 +44,19 @@
     <div class="row">
         <div class="col-md-12">
             @component('components.widget', ['class' => 'box-solid'])
-              
+                @can('accounting.add_transfer')
+                    @slot('tool')
+                        <div class="box-tools">
+                            <button type="button" class="btn btn-block btn-primary btn-modal" 
+                                data-href="{{action([\Modules\Accounting\Http\Controllers\TransferController::class, 'create'])}}" 
+                                data-container="#create_transfer_modal" >
+                                <i class="fas fa-plus"></i> @lang( 'messages.add' )</a>
+                        </div>
+                    @endslot
+                @endcan
                 <table class="table table-bordered table-striped" id="transfer_table">
                     <thead>
-                        <tr class="f_th-tr">
+                        <tr>
                             <th>@lang('messages.action')</th>
                             <th>@lang( 'messages.date' )</th>
                             <th>@lang('purchase.ref_no')</th>
@@ -117,9 +118,8 @@
         transfer_table = $('#transfer_table').DataTable({
             processing: true,
             serverSide: true,
-            buttons:[],
             ajax: {
-                url: "{{action('\Modules\Accounting\Http\Controllers\TransferController@index')}}",
+                url: "{{action([\Modules\Accounting\Http\Controllers\TransferController::class, 'index'])}}",
                 data: function(d) {
                     var start = '';
                     var end = '';

@@ -24,23 +24,23 @@
 
 @include('accounting::layouts.nav')
 
-
-<section class="content" style="padding: 15px 0">
-    <!-- Content Header (Page header) -->
-<section class="content-header f_content-header f_product_content-header">
+<!-- Content Header (Page header) -->
+<section class="content-header">
     <h1>@lang( 'accounting::lang.budget' )</h1>
-    <div class="box-tools">
-        <button type="button" class="btn btn-block f_add-btn" data-toggle="modal"  
-            data-target="#add_budget_modal">
-            <i class="fas fa-plus"></i> @lang( 'messages.add' )</button>
-    </div>
 </section>
+<section class="content">
 	@component('components.widget', ['class' => 'box-solid'])
-       
+        @slot('tool')
+            <div class="box-tools">
+                <button type="button" class="btn btn-block btn-primary" data-toggle="modal"  
+                    data-target="#add_budget_modal">
+                    <i class="fas fa-plus"></i> @lang( 'messages.add' )</button>
+            </div>
+        @endslot
         <div class="card-body">
             <div class="row mb-10">
                 <div class="col-md-4">
-                    <div class="form-group addProduct_form">
+                    <div class="form-group">
                         <label for="fiscal_year_picker">@lang( 'accounting::lang.financial_year_for_the_budget' )</label>
                         <input type="text" class="form-control" id="fiscal_year_picker" value="{{$fy_year}}" readonly>
                     </div>
@@ -61,7 +61,7 @@
 <div class="modal fade" id="add_budget_modal" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
-        {!! Form::open(['url' => action('\Modules\Accounting\Http\Controllers\BudgetController@create'), 
+        {!! Form::open(['url' => action([\Modules\Accounting\Http\Controllers\BudgetController::class, 'create']), 
             'method' => 'get', 'id' => 'add_budget_form' ]) !!}
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" 
@@ -71,7 +71,7 @@
             <div class="modal-body">
                 <div class="row">
                     <div class="col-md-12">
-                        <div class="form-group addProduct_form">
+                        <div class="form-group">
                             {!! Form::number('financial_year', null, ['class' => 'form-control', 
                                 'required', 'placeholder' => 
                                 __( 'accounting::lang.financial_year_for_the_budget' ), 'id' => 'financial_year' ]); !!}
@@ -80,7 +80,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="submit" class="btn f_btn-primary">@lang( 'accounting::lang.continue' )</button>
+                <button type="submit" class="btn btn-primary">@lang( 'accounting::lang.continue' )</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">@lang( 'messages.close' )</button>
             </div>
             {!! Form::close() !!}
@@ -97,7 +97,7 @@
             minViewMode: "years"
         }).on('changeDate', function(e){
             window.location.href = 
-            "{{action('\Modules\Accounting\Http\Controllers\BudgetController@index')}}?financial_year=" + $('#fiscal_year_picker').val();
+            "{{action([\Modules\Accounting\Http\Controllers\BudgetController::class, 'index'])}}?financial_year=" + $('#fiscal_year_picker').val();
         });
 
         $('#financial_year').datepicker({

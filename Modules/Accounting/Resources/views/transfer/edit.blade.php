@@ -1,7 +1,7 @@
 <div class="modal-dialog" role="document">
   <div class="modal-content">
 
-    {!! Form::open(['url' => action('\Modules\Accounting\Http\Controllers\TransferController@update', 
+    {!! Form::open(['url' => action([\Modules\Accounting\Http\Controllers\TransferController::class, 'update'], 
         $mapping_transaction->id), 'method' => 'put', 'id' => 'transfer_form' ]) !!}
 
     <div class="modal-header">

@@ -12,7 +12,7 @@
 </section>
 <section class="content">
 
-{!! Form::open(['url' => action('\Modules\Accounting\Http\Controllers\JournalEntryController@update', $journal->id), 
+{!! Form::open(['url' => action([\Modules\Accounting\Http\Controllers\JournalEntryController::class, 'update'], $journal->id), 
     'method' => 'PUT', 'id' => 'journal_add_form']) !!}
 
 	@component('components.widget', ['class' => 'box-primary'])

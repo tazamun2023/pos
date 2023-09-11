@@ -2,8 +2,8 @@
 
 namespace Modules\Accounting\Providers;
 
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Factory;
+use Illuminate\Support\ServiceProvider;
 
 class AccountingServiceProvider extends ServiceProvider
 {
@@ -18,7 +18,22 @@ class AccountingServiceProvider extends ServiceProvider
         $this->registerConfig();
         $this->registerViews();
         $this->registerFactories();
-        $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
+        $this->loadMigrationsFrom(__DIR__.'/../Database/Migrations');
+
+        $this->app['events']->listen(\App\Events\SellCreatedOrModified::class, 
+        \Modules\Accounting\Listeners\MapSellTransaction::class);
+
+        $this->app['events']->listen(\App\Events\TransactionPaymentAdded::class, 
+        \Modules\Accounting\Listeners\MapPaymentTransaction::class);
+
+        $this->app['events']->listen(\App\Events\TransactionPaymentUpdated::class, 
+        \Modules\Accounting\Listeners\MapPaymentTransaction::class);
+
+        $this->app['events']->listen(\App\Events\TransactionPaymentDeleted::class, 
+        \Modules\Accounting\Listeners\MapPaymentTransaction::class);
+
+        $this->app['events']->listen(\App\Events\PurchaseCreatedOrModified::class, 
+        \Modules\Accounting\Listeners\MapPurchaseTransaction::class);
     }
 
     /**
@@ -58,12 +73,12 @@ class AccountingServiceProvider extends ServiceProvider
         $sourcePath = __DIR__.'/../Resources/views';
 
         $this->publishes([
-            $sourcePath => $viewPath
-        ],'views');
+            $sourcePath => $viewPath,
+        ], 'views');
 
         $this->loadViewsFrom(array_merge(array_map(function ($path) {
-            return $path . '/modules/accounting';
-        }, \Config::get('view.paths')), [$sourcePath]), 'accounting');
+            return $path.'/modules/accounting';
+        }, config('view.paths')), [$sourcePath]), 'accounting');
     }
 
     /**
@@ -78,7 +93,7 @@ class AccountingServiceProvider extends ServiceProvider
         if (is_dir($langPath)) {
             $this->loadTranslationsFrom($langPath, 'accounting');
         } else {
-            $this->loadTranslationsFrom(__DIR__ .'/../Resources/lang', 'accounting');
+            $this->loadTranslationsFrom(__DIR__.'/../Resources/lang', 'accounting');
         }
     }
 
@@ -90,7 +105,7 @@ class AccountingServiceProvider extends ServiceProvider
     public function registerFactories()
     {
         if (! app()->environment('production') && $this->app->runningInConsole()) {
-            app(Factory::class)->load(__DIR__ . '/../Database/factories');
+            app(Factory::class)->load(__DIR__.'/../Database/factories');
         }
     }
 

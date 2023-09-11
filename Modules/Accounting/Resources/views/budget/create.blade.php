@@ -7,18 +7,18 @@
 @include('accounting::layouts.nav')
 
 <!-- Content Header (Page header) -->
-<section class="content-header f_content-header f_product_content-header">
+<section class="content-header">
     <h1>@lang('accounting::lang.budget_for_fy', ['fy' => $fy_year])</h1>
 </section>
 <section class="content">
 	@component('components.widget', ['class' => 'box-solid'])
-    {!! Form::open(['url' => action('\Modules\Accounting\Http\Controllers\BudgetController@store'), 
+    {!! Form::open(['url' => action([\Modules\Accounting\Http\Controllers\BudgetController::class, 'store']), 
             'method' => 'post', 'id' => 'add_budget_form' ]) !!}
         <input type="hidden" name="financial_year" value="{{$fy_year}}">
         <div class="row">
             <div class="col-md-12">
                 <div class="nav-tabs-custom">
-                    <ul class="nav nav-tabs nav-justified year_budget_nav">
+                    <ul class="nav nav-tabs nav-justified">
                         <li class="active">
                             <a href="#monthly_tab" data-toggle="tab" 
                             aria-expanded="true">@lang('accounting::lang.monthly')</a>
@@ -36,7 +36,7 @@
                         <div class="tab-pane active" id="monthly_tab">
                             <div class="table-responsive" style="height: 500px;">
                                 <table class="table table-striped">
-                                    <tr class="f_th-tr">
+                                    <tr>
                                         <th>
                                             @lang('account.account')
                                         </th>
@@ -67,7 +67,7 @@
                         <div class="tab-pane" id="quarterly_tab">
                             <div class="table-responsive" style="height: 500px;">
                                 <table class="table table-striped">
-                                    <tr class="f_th-tr">
+                                    <tr>
                                         <th>
                                             @lang('account.account')
                                         </th>
@@ -125,8 +125,8 @@
                         <div class="tab-pane" id="yearly_tab">
                             <div class="table-responsive" style="height: 500px;">
                                 <table class="table table-striped">
-                                    <tr class="f_th-tr">
-                                        <th >
+                                    <tr>
+                                        <th>
                                             @lang('account.account')
                                         </th>
                                         <th class="text-center">
@@ -157,7 +157,7 @@
         </div>
         <div class="row">
             <div class="col-md-12 text-center">
-                <button type="submit" class="btn f_btn-primary btn-lg">@lang('messages.submit')</button>
+                <button type="submit" class="btn btn-primary btn-lg">@lang('messages.submit')</button>
             </div>
         </div>
     {!! Form::close() !!}

@@ -6,29 +6,19 @@
 
 @include('accounting::layouts.nav')
 
-<section class="content-header f_content-header f_product_content-header">
+<!-- Content Header (Page header) -->
+<section class="content-header">
     <h1>@lang( 'accounting::lang.journal_entry' )</h1>
-    @can('accounting.add_journal')
-            
-                <div class="box-tools">
-                    <a class="btn btn-block f_add-btn" 
-                        href="{{action('\Modules\Accounting\Http\Controllers\JournalEntryController@create')}}">
-                        <i class="fas fa-plus"></i> @lang( 'messages.add' )</a>
-                </div>
-         
-        @endcan
 </section>
-<section class="content no-print" style="border-radius: 8px;background: #fff;">
-    <!-- Content Header (Page header) -->
-
+<section class="content no-print">
 <div class="row">
         <div class="col-md-12">
             @component('components.filters', ['title' => __('report.filters')])
                 <div class="col-md-4">
-                    <div class="form-group addProduct_form">
+                    <div class="form-group">
                         {!! Form::label('journal_entry_date_range_filter', __('report.date_range') . ':') !!}
-                        {!! Form::text('journal_entry_date_range_filter', null,
-                            ['placeholder' => __('lang_v1.select_a_date_range'),
+                        {!! Form::text('journal_entry_date_range_filter', null, 
+                            ['placeholder' => __('lang_v1.select_a_date_range'), 
                             'class' => 'form-control', 'readonly']); !!}
                     </div>
                 </div>
@@ -36,11 +26,19 @@
         </div>
     </div>
 	@component('components.widget', ['class' => 'box-solid'])
-        
+        @can('accounting.add_journal')
+            @slot('tool')
+                <div class="box-tools">
+                    <a class="btn btn-block btn-primary" 
+                        href="{{action([\Modules\Accounting\Http\Controllers\JournalEntryController::class, 'create'])}}">
+                        <i class="fas fa-plus"></i> @lang( 'messages.add' )</a>
+                </div>
+            @endslot
+        @endcan
         
         <table class="table table-bordered table-striped" id="journal_table">
             <thead>
-                <tr class='f_th-tr'>
+                <tr>
                     <th>@lang('messages.action')</th>
                     <th>@lang('accounting::lang.journal_date')</th>
                     <th>@lang('purchase.ref_no')</th>
@@ -66,7 +64,6 @@
         journal_table = $('#journal_table').DataTable({
             processing: true,
             serverSide: true,
-            buttons:[],
             ajax: {
                 url: '/accounting/journal-entry',
                 data: function(d) {
