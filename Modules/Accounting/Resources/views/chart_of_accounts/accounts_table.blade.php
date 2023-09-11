@@ -21,20 +21,20 @@
                         <ul class="dropdown-menu dropdown-menu-left" role="menu">
                             <li>
                                 <a
-                                href="{{action('\Modules\Accounting\Http\Controllers\CoaController@ledger', $account->id)}}">
+                                href="{{action([\Modules\Accounting\Http\Controllers\CoaController::class, 'ledger'], $account->id)}}">
                                 <i class="fas fa-file-alt"></i> @lang( 'accounting::lang.ledger' )</a>
                             </li>
 
                             <li>
                                 <a class="btn-modal" 
-                                href="{{action('\Modules\Accounting\Http\Controllers\CoaController@edit', $account->id)}}" 
-                                data-href="{{action('\Modules\Accounting\Http\Controllers\CoaController@edit', $account->id)}}" 
+                                href="{{action([\Modules\Accounting\Http\Controllers\CoaController::class, 'edit'], $account->id)}}" 
+                                data-href="{{action([\Modules\Accounting\Http\Controllers\CoaController::class, 'edit'], $account->id)}}" 
                                 data-container="#create_account_modal">
                                 <i class="fas fa-edit"></i> @lang( 'messages.edit' )</a>
                             </li>
                             <li>
                                 <a class="activate-deactivate-btn" 
-                                href="{{action('\Modules\Accounting\Http\Controllers\CoaController@activateDeactivate', $account->id)}}">
+                                href="{{action([\Modules\Accounting\Http\Controllers\CoaController::class, 'activateDeactivate'], $account->id)}}">
                                     <i class="fas fa-power-off"></i>
                                     @if($account->status=='active') @lang('messages.deactivate') @else 
                                     @lang('messages.activate') @endif
@@ -47,8 +47,16 @@
                 <td>{{$account->gl_code}}</td>
                 <td></td>
                 <td>@if(!empty($account->account_primary_type)){{__('accounting::lang.' . $account->account_primary_type)}}@endif</td>
-                <td>@if(!empty($account->account_sub_type)){{__('accounting::lang.' . $account->account_sub_type->name)}}@endif</td>
-                <td>@if(!empty($account->detail_type)){{__('accounting::lang.' . $account->detail_type->name)}}@endif</td>
+                <td>
+                    @if(!empty($account->account_sub_type))
+                        {{Str::contains(__('accounting::lang.' . $account->account_sub_type->name), 'lang.') ? $account->account_sub_type->name : __('accounting::lang.' . $account->account_sub_type->name)}}
+                    @endif
+                </td>
+                <td>
+                    @if(!empty($account->detail_type))
+                        {{Str::contains(__('accounting::lang.' . $account->detail_type->name), 'lang.') ? $account->detail_type->name : __('accounting::lang.' . $account->detail_type->name)}}
+                    @endif
+                </td>
                 <td>@if(!empty($account->balance)) @format_currency($account->balance) @endif</td>
                 <!-- <td></td> -->
                 <td>@if($account->status == 'active') 
@@ -67,20 +75,20 @@
                             <ul class="dropdown-menu dropdown-menu-left" role="menu">
                                 <li>
                                     <a
-                                    href="{{action('\Modules\Accounting\Http\Controllers\CoaController@ledger', $child_account->id)}}">
+                                    href="{{action([\Modules\Accounting\Http\Controllers\CoaController::class, 'ledger'], $child_account->id)}}">
                                     <i class="fas fa-file-alt"></i> @lang( 'accounting::lang.ledger' )</a>
                                 </li>
 
                                 <li>
                                 <a class="btn-modal" 
-                                    href="{{action('\Modules\Accounting\Http\Controllers\CoaController@edit', $child_account->id)}}" 
-                                    data-href="{{action('\Modules\Accounting\Http\Controllers\CoaController@edit', $child_account->id)}}" 
+                                    href="{{action([\Modules\Accounting\Http\Controllers\CoaController::class, 'edit'], $child_account->id)}}" 
+                                    data-href="{{action([\Modules\Accounting\Http\Controllers\CoaController::class, 'edit'], $child_account->id)}}" 
                                     data-container="#create_account_modal">
                                     <i class="fas fa-edit"></i> @lang( 'messages.edit' )</a>
                                 </li>
                                 <li>
                                     <a class="activate-deactivate-btn" 
-                                    href="{{action('\Modules\Accounting\Http\Controllers\CoaController@activateDeactivate', $child_account->id)}}">
+                                    href="{{action([\Modules\Accounting\Http\Controllers\CoaController::class, 'activateDeactivate'], $child_account->id)}}">
                                         <i class="fas fa-power-off"></i>
                                         @if($child_account->status=='active') @lang('messages.deactivate') @else 
                                         @lang('messages.activate') @endif
@@ -93,8 +101,16 @@
                         <td>{{$child_account->gl_code}}</td>
                         <td>{{$account->name}}</td>
                         <td>@if(!empty($child_account->account_primary_type)){{__('accounting::lang.' . $child_account->account_primary_type)}}@endif</td>
-                        <td>@if(!empty($child_account->account_sub_type)){{__('accounting::lang.' . $child_account->account_sub_type->name)}}@endif</td>
-                        <td>@if(!empty($child_account->detail_type)){{__('accounting::lang.' . $child_account->detail_type->name)}}@endif</td>
+                        <td>
+                            @if(!empty($child_account->account_sub_type))
+                                {{Str::contains(__('accounting::lang.' . $child_account->account_sub_type->name), 'lang.') ? $child_account->account_sub_type->name : __('accounting::lang.' . $child_account->account_sub_type->name)}}
+                            @endif
+                        </td>
+                        <td>
+                            @if(!empty($child_account->detail_type))
+                                {{Str::contains(__('accounting::lang.' . $child_account->detail_type->name), 'lang.') ? $child_account->detail_type->name : __('accounting::lang.' . $child_account->detail_type->name)}}
+                            @endif
+                        </td>
                         <td>@if(!empty($child_account->balance)) @format_currency($child_account->balance) @endif</td>
                         <!-- <td></td> -->
                         <td>

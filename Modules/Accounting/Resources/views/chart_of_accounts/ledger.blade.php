@@ -164,7 +164,7 @@
                             processing: true,
                             serverSide: true,
                             ajax: {
-                                url: '{{action("\Modules\Accounting\Http\Controllers\CoaController@ledger",[$account->id])}}',
+                                url: '{{action([\Modules\Accounting\Http\Controllers\CoaController::class, 'ledger'],[$account->id])}}',
                                 data: function(d) {
                                     var start = '';
                                     var end = '';

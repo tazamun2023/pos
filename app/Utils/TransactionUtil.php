@@ -1191,6 +1191,11 @@ class TransactionUtil extends Util
             $output['client_id_label'] = ! empty($il->client_id_label) ? $il->client_id_label : '';
             $output['client_id'] = ! empty($customer->contact_id) ? $customer->contact_id : '';
         }
+//dd($location_details);
+        $output['saller_id'] = $location_details->location_id;
+        $output['saller_id_label'] = $location_details->name;
+        $output['custom_field1'] = $location_details->custom_field1;
+        $output['custom_field2'] = $location_details->custom_field2;
 
         //Sales person info
         $output['sales_person'] = '';
