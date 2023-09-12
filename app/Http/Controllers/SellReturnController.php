@@ -509,7 +509,10 @@ class SellReturnController extends Controller
                 $output['printer_config'] = $this->businessUtil->printerConfig($business_id, $location_details->printer_id);
                 $output['data'] = $receipt_details;
             } else {
-                $output['html_content'] = view('sell_return.receipt', compact('receipt_details'))->render();
+                $layout = ! empty($receipt_details->design) ? 'sale_pos.receipts.'.$receipt_details->design : 'sale_pos.receipts.classic';
+
+                $output['html_content'] = view($layout, compact('receipt_details'))->render();
+//                $output['html_content'] = view('sell_return.receipt', compact('receipt_details'))->render();
             }
         }
 

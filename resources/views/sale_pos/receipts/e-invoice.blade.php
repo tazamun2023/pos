@@ -3,7 +3,7 @@
 @endphp
 
 
-<table style="width:100%;"> 
+<table style="width:100%;">
    <thead>
     <tr>
         <th width="50%" style="text-align: left !importent" rowspan="2">@if($receipt_details->show_barcode)
@@ -13,7 +13,11 @@
 
         @if($receipt_details->show_qr_code && !empty($receipt_details->qr_code_text))
             <img class="mt-5" src="data:image/png;base64,{{DNS2D::getBarcodePNG($receipt_details->qr_code_text, 'QRCODE')}}">
-        @endif</th>
+        @endif
+            @if(!empty($receipt_details->logo))
+                <img src="{{$receipt_details->logo}}" class="img" style="height: 90px; width: 90px; margin-left: 170px; object-fit: cover">
+            @endif
+        </th>
         <th style="text-align: right" colspan="2">
             <h3>@if(!empty($receipt_details->invoice_heading))
                 <p class="" style="font-weight: bold; font-size: 20px !important;">{!! $receipt_details->invoice_heading !!}</p>
@@ -50,7 +54,7 @@
     <tr>
         <td>{{ $receipt_details->saller_id_label }}: {{ $receipt_details->saller_id }}<br>
 
-            
+
         <td>Tax No {{ $receipt_details->custom_field1, $receipt_details->custom_field2 }}<br>
 {{--            @if(!empty($receipt_details->custom_field1)){{$receipt_details->tax_info1}}@else -- @endif <br></td>--}}
         <td>
@@ -69,7 +73,7 @@
         <td colspan="5">&nbsp; &nbsp; &nbsp; <br></td>
     </tr>
     <tr>
-        <td colspan="4" style="text-align: right;"> 
+        <td colspan="4" style="text-align: right;">
            <strong style="padding-top:30px;">
             @if(!empty($receipt_details->customer_name))
             {{$receipt_details->customer_name}}
@@ -78,7 +82,7 @@
         </td>
     </tr>
     <tr>
-        <td> 
+        <td>
             @if(!empty($receipt_details->client_id_label))
             {{ $receipt_details->client_id_label }}
             @else
@@ -86,7 +90,7 @@
             @endif
             <br>
             @if(!empty($receipt_details->client_id_label))
-            
+
             {{ $receipt_details->client_id }}
             @else
 {{--            ----}}
@@ -102,12 +106,12 @@
              @else
 {{--             ----}}
         @endif</td>
-        <td> 
+        <td>
             Contact: <br>
             @if(!empty($receipt_details->contact))
                 {!! $receipt_details->contact !!}
             @endif
-            
+
         </td>
         <td  style="text-align: right"> @if(!empty($receipt_details->customer_custom_fields))
             <br/>{!! $receipt_details->customer_custom_fields !!}
@@ -220,9 +224,9 @@
             <div class="row color-555">
                 <div class="col-xs-12">
                     <br/>
-                    <table class="table table-bordered table-no-top-cell-border table-slim">
+                    <table class="table table-bordered table-no-top-cell-border table-slim" >
                         <thead>
-                        <tr style="background-color: #aaaaaa !important; color: #000 !important; border: 1px solid grey; font-size: 15px !important font-weight: bold;" class="table-no-side-cell-border table-no-top-cell-border text-center">
+                        <tr style="background-color: #aaaaaa !important; color: #000 !important; border: 2px solid grey; font-size: 15px !important font-weight: bold;" class="table-no-side-cell-border table-no-top-cell-border text-center">
                             <td style="background-color: #aaaaaa !important; color: #000 !important;" width="5%">#</td>
 
                             <td style="background-color: #aaaaaa !important; color: #000 !important;" class="text-left" width="55%">
@@ -263,10 +267,10 @@
                             </td>
                         </tr>
                         </thead>
-                        <tbody>
+                        <tbody style="background-color: #aaaaaa !important; color: #000 !important; border: 2px solid grey; font-size: 15px !important font-weight: bold;">
                         @foreach($receipt_details->lines as $line)
                             <tr>
-                                <td class="text-center">
+                                <td class="text-center" style="background-color: #aaaaaa !important; color: #000 !important; border: 2px solid grey; font-size: 15px !important font-weight: bold;">
                                     {{$loop->iteration}}
                                 </td>
                                 <td class="text-left" style="word-break: break-all;">
@@ -296,7 +300,7 @@
                                     </td>
                                 @endif
 
-                                <td class="text-right">
+                                <td class="text-right" >
                                     {{$line['quantity']}} {{$line['units']}}
                                 </td>
                                 <td class="text-right">
@@ -395,7 +399,7 @@
                                 @endif
                             </tr>
                         @endfor
-                        <tr style="border: 1px solid grey">
+                        <tr style="border: 2px solid grey">
 
                             @php
                                 $colspan = 1;
@@ -434,7 +438,7 @@
                         @if(!empty($receipt_details->payments))
                             <thead>
 {{--                            @foreach($receipt_details->payments as $payment)--}}
-                                <tr style="background-color: #d2d6de !important; color: #000 !important; font-size: 15px !important font-weight: bold; border: 1px solid grey" class="table-no-side-cell-border table-no-top-cell-border text-center">
+                                <tr style="background-color: #d2d6de !important; color: #000 !important; font-size: 15px !important font-weight: bold; border: 2px solid grey" class="table-no-side-cell-border table-no-top-cell-border text-center">
                                     <td style="background-color: #d2d6de !important; color: #000 !important;" width="5%">#</td>
                                     <td style="background-color: #d2d6de !important; color: #000 !important;" class="text-left" width="30%">@lang('lang_v1.payment_method')</td>
                                     <td style="background-color: #d2d6de !important; color: #000 !important;" class="text-left" width="30%">@lang('lang_v1.payment_amount')</td>
@@ -612,7 +616,7 @@
                     </table>
                 </div>
             </div>
-            <table class="table table-bordered table-no-top-cell-border table-slim" style="width: 100%; border: 1px solid grey">
+            <table class="table table-bordered table-no-top-cell-border table-slim" style="width: 100%; border: 2px solid grey">
                     <thead>
                     <tr style="background-color: grey !important; padding: 5px; font-size: 18px !important; font-weight: bold;" class="table-no-side-cell-border table-no-top-cell-border text-center">
                         @if(!empty($receipt_details->total_paid))
