@@ -44,10 +44,9 @@
     </tr>
     </thead>
    </table>
-   <br>
-   <br>
-   <table width="100%" style="padding-top:20px;">
-    <tbody style="margin-top:100px;">
+
+   <table width="100%">
+    <tbody>
         @if(!empty($receipt_details->display_name))
     <tr>
         <td colspan="4" style="text-align: right"><strong>  {{$receipt_details->display_name}}</strong></td>
