@@ -1220,6 +1220,7 @@ class TransactionUtil extends Util
 
         //Heading & invoice label, when quotation use the quotation heading.
         if ($transaction_type == 'sell_return') {
+
             $output['invoice_heading'] = $il->cn_heading;
             $output['invoice_no_prefix'] = $il->cn_no_label;
 
@@ -1353,6 +1354,7 @@ class TransactionUtil extends Util
             $output['subtotal_exc_tax'] = $this->num_f($subtotal_exc_tax, true, $business_details);
             $output['total_line_discount'] = ! empty($total_line_discount) ? $this->num_f($total_line_discount, true, $business_details) : 0;
         } elseif ($transaction_type == 'sell_return') {
+
             $parent_sell = Transaction::find($transaction->return_parent_id);
             $lines = $parent_sell->sell_lines;
 
@@ -1368,7 +1370,9 @@ class TransactionUtil extends Util
             $output['lines'] = $details['lines'];
 
             $output['taxes'] = [];
+            $total_line_taxes = 0;
             foreach ($details['lines'] as $line) {
+               $total_line_taxes += $line['tax'];
                 if (! empty($line['group_tax_details'])) {
                     foreach ($line['group_tax_details'] as $tax_group_detail) {
                         if (! isset($output['taxes'][$tax_group_detail['name']])) {
@@ -1378,6 +1382,7 @@ class TransactionUtil extends Util
                     }
                 }
             }
+
         }
 
         //show cat code
@@ -1579,12 +1584,11 @@ class TransactionUtil extends Util
         //Barcode related information.
         $output['show_barcode'] = ! empty($il->show_barcode) ? true : false;
 
-        if (in_array($transaction_type, ['sell', 'sales_order'])) {
+        if (in_array($transaction_type, ['sell', 'sales_order', 'sell_return'])) {
             //Qr code related information.
             $output['show_qr_code'] = ! empty($il->show_qr_code) ? true : false;
 
             $zatca_qr = ! empty($il->common_settings['zatca_qr']) ? true : false;
-
             if ($zatca_qr) {
                 $total_order_tax = $transaction->tax_amount + $total_line_taxes;
                 $qr_code_text = $this->_zatca_qr_text($business_details->name, $business_details->tax_number_1, $transaction->transaction_date, $transaction->final_total, $total_order_tax);

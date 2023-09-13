@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'payment_amount' => 'Payment Amount',
     'add_product' => 'Add Product',
     'login_heading_brand' => 'Login to POS',
     'login_heading' => 'The POS program is compatible with the electronic invoice',
