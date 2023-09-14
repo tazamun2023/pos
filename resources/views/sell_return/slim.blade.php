@@ -7,6 +7,27 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <!-- <link rel="stylesheet" href="style.css"> -->
     <title>Receipt-{{$receipt_details->invoice_no}}</title>
+    <style>
+        td{
+            font-size:10px !important;
+        }
+        th{
+            font-size:10px !important;
+        }
+        div{
+            padding: 0px !important;
+        }
+        .producttable td{
+            font-size:10px !important;  
+        }
+        .producttable th{
+            font-size:8px !important;  
+        }
+        
+        p{
+            font-size:10px !important;   
+        }
+    </style>
 </head>
 <body>
 <div class="ticket">
@@ -327,7 +348,7 @@
             </p>
         </div>
     @endif
-    <table style="margin-top: 25px !important" class="border-bottom width-100 table-f-12 mb-10">
+    <table style="margin-top: 25px !important" class="border-bottom producttable width-100 table-f-12 mb-10">
         <thead class="border-bottom-dotted">
         <tr>
             <th class="serial_number">#</th>
@@ -750,13 +771,13 @@
 
         td.quantity,
         th.quantity {
-            width: 15%;
-            max-width: 15%;
+            width: 17%;
+            max-width: 17%;
             word-break: break-all;
         }
         td.unit_price, th.unit_price{
-            width: 25%;
-            max-width: 25%;
+            width: 23%;
+            max-width: 23%;
             word-break: break-all;
         }
 
