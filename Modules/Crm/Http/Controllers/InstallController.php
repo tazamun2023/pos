@@ -89,7 +89,7 @@ class InstallController extends Controller
 
             DB::statement('SET default_storage_engine=INNODB;');
             Artisan::call('module:migrate', ['module' => "Crm", '--force' => true]);
-            Artisan::call('module:publish', ['module' => "Crm", '--force' => true]);
+            Artisan::call('module:publish', ['module' => "Crm"]);
             System::addProperty($this->module_name . '_version', $this->appVersion);
 
             DB::commit();

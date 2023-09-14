@@ -70,7 +70,7 @@ class InstallController extends Controller
         }
 
         DB::statement('SET default_storage_engine=INNODB;');
-        Artisan::call('module:migrate', ['module' => "Manufacturing"]);
+        Artisan::call('module:migrate', ['module' => "Manufacturing", '--force' => true]);
         System::addProperty($this->module_name . '_version', $this->appVersion);
 
         $output = ['success' => 1,
