@@ -23,6 +23,7 @@
         .producttable th{
             font-size:8px !important;  
         }
+        
         p{
             font-size:10px !important;   
         }
