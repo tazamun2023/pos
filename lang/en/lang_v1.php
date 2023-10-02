@@ -1524,4 +1524,6 @@ return [
          Letterhead will be added at the top of the invoices.',
     'letter_head_help2' => 'Upload only if you want to replace previous letterhead',
     'copy_quotation' => 'Copy Quotation',
+//    added by rakib
+    'click_to_send_invoice_to_zatka' => "Send invoice to ZATKA"
 ];

@@ -508,4 +508,8 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone'])
         ->name('packing.downloadPdf');
     Route::get('/sells/invoice-url/{id}', [SellPosController::class, 'showInvoiceUrl']);
     Route::get('/show-notification/{id}', [HomeController::class, 'showNotification']);
+    Route::get('/send-invoice-to-zatka/{trx_id}', [SellPosController::class, 'SendInvoiceToZatka'])->name('send.invoice.to.zatka');
 });
+
+
+//Route::get('test-zatka/{trx}', [SellPosController::class, 'SendInvoiceToZatka']);
