@@ -3215,3 +3215,18 @@ table tbody td {
         gap: 10px;
     }
 }
+
+@media screen and (max-width: 992px) {
+    .f_content-btn_group {
+        gap: 2px;
+    }
+    .f_content-btn-1, .f_content-btn-2, .f_content-btn-3, .f_content-btn-4, .f_clock_in_btn, #view_todays_profit{
+        width: 55px;
+    }
+.f_content-btn_group button{
+    width: 55px;
+}
+.main-sidebar{
+    z-index: 9999;
+}
+}
