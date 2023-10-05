@@ -330,8 +330,8 @@
             <table style="margin-top: 25px !important" class="border-bottom width-100 table-f-12 mb-10">
                 <thead class="border-bottom-dotted">
                     <tr>
-                        <th class="serial_number">#</th>
-                        <th class="description" width="30%">
+{{--                        <th class="serial_number">#</th>--}}
+                        <th class="description" width="25%">
                         	{{$receipt_details->table_product_label}}
                         </th>
                         <th class="quantity text-right">
@@ -356,12 +356,12 @@
                 <tbody>
                 	@forelse($receipt_details->lines as $line)
 	                    <tr>
-	                        <td class="serial_number" style="vertical-align: top;">
-	                        	{{$loop->iteration}}
-	                        </td>
+{{--	                        <td class="serial_number" style="vertical-align: top;">--}}
+{{--	                        	{{$loop->iteration}}--}}
+{{--	                        </td>--}}
 	                        <td class="description">
 	                        	{{$line['name']}} {{$line['product_variation']}} {{$line['variation']}} 
-	                        	@if(!empty($line['sub_sku'])), {{$line['sub_sku']}} @endif @if(!empty($line['brand'])), {{$line['brand']}} @endif @if(!empty($line['cat_code'])), {{$line['cat_code']}}@endif
+{{--	                        	@if(!empty($line['sub_sku'])), {{$line['sub_sku']}} @endif @if(!empty($line['brand'])), {{$line['brand']}} @endif @if(!empty($line['cat_code'])), {{$line['cat_code']}}@endif--}}
 	                        	@if(!empty($line['product_custom_fields'])), {{$line['product_custom_fields']}} @endif
 	                        	@if(!empty($line['product_description']))
 	                            	<div class="f-8">
@@ -746,15 +746,15 @@ th.quantity {
     word-break: break-all;
 }
 td.unit_price, th.unit_price{
-	width: 25%;
-    max-width: 25%;
+	width: 22%;
+    max-width: 22%;
     word-break: break-all;
 }
 
 td.price,
 th.price {
-    width: 20%;
-    max-width: 20%;
+    width: 25%;
+    max-width: 25%;
     word-break: break-all;
 }
 
