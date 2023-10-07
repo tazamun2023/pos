@@ -1955,7 +1955,18 @@ class SellPosController extends Controller
     function SendInvoiceToZatka($trx_id){
         $trx_id = Crypt::decrypt($trx_id);
         $transaction = Transaction::find($trx_id);
-        $invoice_xml =  view('invoice', compact('transaction'));
+//        dd($transaction);
+        $location_details = BusinessLocation::find($transaction->location_id);
+        $invoice_layout_id = ! empty($invoice_layout_id) ? $invoice_layout_id : $location_details->invoice_layout_id;
+        $invoice_layout = $this->businessUtil->invoiceLayout($transaction->business_id, $invoice_layout_id);
+        $business_details = $this->businessUtil->getDetails($transaction->business_id);
+
+        $printer_type = null;
+        $receipt_printer_type = is_null($printer_type) ? $location_details->receipt_printer_type : $printer_type;
+
+        $receipt_details = $this->transactionUtil->getReceiptDetails($transaction->id, $transaction->location_id, $invoice_layout, $business_details, $location_details, $receipt_printer_type);
+//        dd($receipt_details);
+        $invoice_xml =  view('invoice', compact('transaction', 'receipt_details'));
 
 
         $header = [
