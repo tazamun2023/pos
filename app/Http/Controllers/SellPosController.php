@@ -1966,7 +1966,7 @@ class SellPosController extends Controller
         $receipt_printer_type = is_null($printer_type) ? $location_details->receipt_printer_type : $printer_type;
 
         $receipt_details = $this->transactionUtil->getReceiptDetails($transaction->id, $transaction->location_id, $invoice_layout, $business_details, $location_details, $receipt_printer_type);
-//        dd($receipt_details);
+//        dd($receipt_details->invoice_date);
         $invoice_xml =  view('invoice', compact('transaction', 'receipt_details'));
 
 

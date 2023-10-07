@@ -69,9 +69,9 @@
 
     <cbc:ProfileID>reporting:1.0</cbc:ProfileID>
     <cbc:ID>SME00062</cbc:ID>
-    <cbc:UUID>16e78469-64af-406d-9cfd-895e724198f0</cbc:UUID>
-    <cbc:IssueDate>2022-03-13</cbc:IssueDate>
-    <cbc:IssueTime>14:40:40</cbc:IssueTime>
+    <cbc:UUID>{{ \Illuminate\Support\Str::uuid($receipt_details->invoice_no) }}</cbc:UUID>
+    <cbc:IssueDate>{{ Carbon\Carbon::parse($receipt_details->invoice_date)->format('Y-m-d') }}</cbc:IssueDate>
+    <cbc:IssueTime>{{ Carbon\Carbon::parse($receipt_details->invoice_date)->format('H:i:s') }}</cbc:IssueTime>
     <cbc:InvoiceTypeCode name="0111010">388</cbc:InvoiceTypeCode>
     <cbc:DocumentCurrencyCode>SAR</cbc:DocumentCurrencyCode>
     <cbc:TaxCurrencyCode>SAR</cbc:TaxCurrencyCode>
@@ -89,7 +89,7 @@
     <cac:AdditionalDocumentReference>
         <cbc:ID>QR</cbc:ID>
         <cac:Attachment>
-            <cbc:EmbeddedDocumentBinaryObject mimeCode="text/plain">ARdBaG1lZCBNb2hhbWVkIEFMIEFobWFkeQIPMzAwMDc1NTg4NzAwMDAzAxQyMDIyLTAzLTEzVDE0OjQwOjQwWgQHMTExMC45MAUFMTQ0LjkGLFBFeDhiTkZjRU1FcEh6VVZ2UW50UUk2b3Q4ZUZxVFQvbDU5YitIMUhxWDQ9B2BNRVVDSVFDOTBmRllPcVRpbUh2WVAxZjliYlQ1c3RBZlI4YkkyZkFBRkF6WUF2TUNQUUlnY0dwR2hNU29jeGZ3ZHZjU1cxQjE1MjNnNW5EOGJDZThTQ1dOZWN0NXJLTT0IWDBWMBAGByqGSM49AgEGBSuBBAAKA0IABGGDDKDmhWAITDv7LXqLX2cmr6+qddUkpcLCvWs5rC2O29W/hS4ajAK4Qdnahym6MaijX75Cg3j4aao7ouYXJ9E=</cbc:EmbeddedDocumentBinaryObject>
+            <cbc:EmbeddedDocumentBinaryObject mimeCode="text/plain">{{ $receipt_details->qr_code_text }}</cbc:EmbeddedDocumentBinaryObject>
         </cac:Attachment>
     </cac:AdditionalDocumentReference><cac:Signature>
         <cbc:ID>urn:oasis:names:specification:ubl:signature:Invoice</cbc:ID>
@@ -100,7 +100,7 @@
                 <cbc:ID schemeID="CRN">454634645645654</cbc:ID>
             </cac:PartyIdentification>
             <cac:PostalAddress>
-                <cbc:StreetName>test</cbc:StreetName>
+                <cbc:StreetName>{{ $receipt_details->customer_name }}</cbc:StreetName>
                 <cbc:BuildingNumber>3454</cbc:BuildingNumber>
                 <cbc:PlotIdentification>1234</cbc:PlotIdentification>
                 <cbc:CitySubdivisionName>test</cbc:CitySubdivisionName>
@@ -112,13 +112,13 @@
                 </cac:Country>
             </cac:PostalAddress>
             <cac:PartyTaxScheme>
-                <cbc:CompanyID>300075588700003</cbc:CompanyID>
+                <cbc:CompanyID>{{ $receipt_details->custom_field1 }}</cbc:CompanyID>
                 <cac:TaxScheme>
                     <cbc:ID>VAT</cbc:ID>
                 </cac:TaxScheme>
             </cac:PartyTaxScheme>
             <cac:PartyLegalEntity>
-                <cbc:RegistrationName>Ahmed Mohamed AL Ahmady</cbc:RegistrationName>
+                <cbc:RegistrationName>{{ $receipt_details->saller_id_label }}</cbc:RegistrationName>
             </cac:PartyLegalEntity>
         </cac:Party>
     </cac:AccountingSupplierParty>
@@ -151,8 +151,8 @@
         </cac:Party>
     </cac:AccountingCustomerParty>
     <cac:Delivery>
-        <cbc:ActualDeliveryDate>2022-03-13</cbc:ActualDeliveryDate>
-        <cbc:LatestDeliveryDate>2022-03-15</cbc:LatestDeliveryDate>
+        <cbc:ActualDeliveryDate>{{ Carbon\Carbon::parse($receipt_details->invoice_date)->format('Y-m-d') }}</cbc:ActualDeliveryDate>
+        <cbc:LatestDeliveryDate>{{ Carbon\Carbon::parse($receipt_details->invoice_date)->format('Y-m-d') }}</cbc:LatestDeliveryDate>
     </cac:Delivery>
     <cac:PaymentMeans>
         <cbc:PaymentMeansCode>10</cbc:PaymentMeansCode>
@@ -171,10 +171,10 @@
         </cac:TaxCategory>
     </cac:AllowanceCharge>
     <cac:TaxTotal>
-        <cbc:TaxAmount currencyID="SAR">144.9</cbc:TaxAmount>
+        <cbc:TaxAmount currencyID="SAR">{{ str_replace('SAR', '', $receipt_details->tax) }}</cbc:TaxAmount>
         <cac:TaxSubtotal>
-            <cbc:TaxableAmount currencyID="SAR">966.00</cbc:TaxableAmount>
-            <cbc:TaxAmount currencyID="SAR">144.90</cbc:TaxAmount>
+            <cbc:TaxableAmount currencyID="SAR">{{ str_replace('SAR ', '', $receipt_details->total) }}</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="SAR">{{ str_replace('SAR', '', $receipt_details->tax) }}</cbc:TaxAmount>
             <cac:TaxCategory>
                 <cbc:ID schemeAgencyID="6" schemeID="UN/ECE 5305">S</cbc:ID>
                 <cbc:Percent>15.00</cbc:Percent>
@@ -185,16 +185,16 @@
         </cac:TaxSubtotal>
     </cac:TaxTotal>
     <cac:TaxTotal>
-        <cbc:TaxAmount currencyID="SAR">144.9</cbc:TaxAmount>
+        <cbc:TaxAmount currencyID="SAR">{{ str_replace('SAR', '', $receipt_details->tax) }}</cbc:TaxAmount>
 
     </cac:TaxTotal>
     <cac:LegalMonetaryTotal>
-        <cbc:LineExtensionAmount currencyID="SAR">968.00</cbc:LineExtensionAmount>
-        <cbc:TaxExclusiveAmount currencyID="SAR">966.00</cbc:TaxExclusiveAmount>
-        <cbc:TaxInclusiveAmount currencyID="SAR">1110.90</cbc:TaxInclusiveAmount>
-        <cbc:AllowanceTotalAmount currencyID="SAR">2.00</cbc:AllowanceTotalAmount>
-        <cbc:PrepaidAmount currencyID="SAR">0.00</cbc:PrepaidAmount>
-        <cbc:PayableAmount currencyID="SAR">1110.90</cbc:PayableAmount>
+        <cbc:LineExtensionAmount currencyID="SAR">{{ str_replace('SAR', '', $receipt_details->total) }}</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="SAR">{{ number_format($receipt_details->total_unformatted, 2) }}</cbc:TaxExclusiveAmount>
+{{--        <cbc:TaxInclusiveAmount currencyID="SAR">1110.90</cbc:TaxInclusiveAmount>--}}
+{{--        <cbc:AllowanceTotalAmount currencyID="SAR">2.00</cbc:AllowanceTotalAmount>--}}
+{{--        <cbc:PrepaidAmount currencyID="SAR">0.00</cbc:PrepaidAmount>--}}
+{{--        <cbc:PayableAmount currencyID="SAR">1110.90</cbc:PayableAmount>--}}
     </cac:LegalMonetaryTotal>
     <cac:InvoiceLine>
         <cbc:ID>1</cbc:ID>
