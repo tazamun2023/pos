@@ -1966,7 +1966,7 @@ class SellPosController extends Controller
         $receipt_printer_type = is_null($printer_type) ? $location_details->receipt_printer_type : $printer_type;
 
         $receipt_details = $this->transactionUtil->getReceiptDetails($transaction->id, $transaction->location_id, $invoice_layout, $business_details, $location_details, $receipt_printer_type);
-//        dd($receipt_details->invoice_date);
+//        dd($receipt_details);
         $invoice_xml =  view('invoice', compact('transaction', 'receipt_details'));
 
 
@@ -1991,11 +1991,14 @@ class SellPosController extends Controller
         $url = "https://gw-fatoora.zatca.gov.sa/e-invoicing/developer-portal/invoices/reporting/single";
 
         $response = Http::withHeaders($header)->post($url, $body);
-        ZatkaInfo::create([
-           'trx_id' => $trx_id,
-            'info' => 'nothing to store',
-            'status_code' => $response->status()
-        ]);
+//        if ($response->status()==200){
+            ZatkaInfo::create([
+                'trx_id' => $trx_id,
+                'info' => 'nothing to store',
+                'status_code' => $response->status()
+            ]);
+//        }
+
         return response($response->json(), $response->status());
 
     }

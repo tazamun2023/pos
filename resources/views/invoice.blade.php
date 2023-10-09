@@ -171,10 +171,10 @@
         </cac:TaxCategory>
     </cac:AllowanceCharge>
     <cac:TaxTotal>
-        <cbc:TaxAmount currencyID="SAR">{{ str_replace('SAR', '', $receipt_details->tax) }}</cbc:TaxAmount>
+        <cbc:TaxAmount currencyID="SAR">{{ str_replace('SAR ', '', $receipt_details->tax) }}</cbc:TaxAmount>
         <cac:TaxSubtotal>
-            <cbc:TaxableAmount currencyID="SAR">{{ str_replace('SAR ', '', $receipt_details->total) }}</cbc:TaxableAmount>
-            <cbc:TaxAmount currencyID="SAR">{{ str_replace('SAR', '', $receipt_details->tax) }}</cbc:TaxAmount>
+            <cbc:TaxableAmount currencyID="SAR">{{ str_replace('SAR ', '', $receipt_details->taxed_subtotal) }}</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="SAR">{{ str_replace('SAR ', '', $receipt_details->tax) }}</cbc:TaxAmount>
             <cac:TaxCategory>
                 <cbc:ID schemeAgencyID="6" schemeID="UN/ECE 5305">S</cbc:ID>
                 <cbc:Percent>15.00</cbc:Percent>
@@ -185,24 +185,25 @@
         </cac:TaxSubtotal>
     </cac:TaxTotal>
     <cac:TaxTotal>
-        <cbc:TaxAmount currencyID="SAR">{{ str_replace('SAR', '', $receipt_details->tax) }}</cbc:TaxAmount>
+        <cbc:TaxAmount currencyID="SAR">{{ str_replace('SAR ', '', $receipt_details->tax) }}</cbc:TaxAmount>
 
     </cac:TaxTotal>
     <cac:LegalMonetaryTotal>
-        <cbc:LineExtensionAmount currencyID="SAR">{{ str_replace('SAR', '', $receipt_details->total) }}</cbc:LineExtensionAmount>
-        <cbc:TaxExclusiveAmount currencyID="SAR">{{ number_format($receipt_details->total_unformatted, 2) }}</cbc:TaxExclusiveAmount>
-{{--        <cbc:TaxInclusiveAmount currencyID="SAR">1110.90</cbc:TaxInclusiveAmount>--}}
-{{--        <cbc:AllowanceTotalAmount currencyID="SAR">2.00</cbc:AllowanceTotalAmount>--}}
-{{--        <cbc:PrepaidAmount currencyID="SAR">0.00</cbc:PrepaidAmount>--}}
-{{--        <cbc:PayableAmount currencyID="SAR">1110.90</cbc:PayableAmount>--}}
+        <cbc:LineExtensionAmount currencyID="SAR">{{ str_replace('SAR ', '', $receipt_details->taxed_subtotal) }}</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="SAR">{{ str_replace('SAR ', '', $receipt_details->taxed_subtotal) }}</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="SAR">{{ str_replace('SAR ', '', $receipt_details->total) }}</cbc:TaxInclusiveAmount>
+        <cbc:AllowanceTotalAmount currencyID="SAR">2.00</cbc:AllowanceTotalAmount>
+        <cbc:PrepaidAmount currencyID="SAR">0.00</cbc:PrepaidAmount>
+        <cbc:PayableAmount currencyID="SAR">{{ str_replace('SAR ', '', $receipt_details->total) }}</cbc:PayableAmount>
     </cac:LegalMonetaryTotal>
     <cac:InvoiceLine>
-        <cbc:ID>1</cbc:ID>
-        <cbc:InvoicedQuantity unitCode="PCE">44.000000</cbc:InvoicedQuantity>
-        <cbc:LineExtensionAmount currencyID="SAR">968.00</cbc:LineExtensionAmount>
+        @foreach($receipt_details->lines as $line)
+        <cbc:ID>{{$loop->iteration}}</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="PCE">{{$line['quantity']}} </cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="SAR">{{$line['unit_price_before_discount']}}</cbc:LineExtensionAmount>
         <cac:TaxTotal>
-            <cbc:TaxAmount currencyID="SAR">145.20</cbc:TaxAmount>
-            <cbc:RoundingAmount currencyID="SAR">1113.20</cbc:RoundingAmount>
+            <cbc:TaxAmount currencyID="SAR">{{ $line['unit_price_before_discount']*str_replace('SAR ', '', $receipt_details->tax)/100 }}</cbc:TaxAmount>
+            <cbc:RoundingAmount currencyID="SAR">{{ $line['unit_price_before_discount']*str_replace('SAR ', '', $receipt_details->tax)/100+$line['unit_price_before_discount'] }}</cbc:RoundingAmount>
 
         </cac:TaxTotal>
         <cac:Item>
@@ -223,5 +224,6 @@
                 <cbc:Amount currencyID="SAR">2.00</cbc:Amount>
             </cac:AllowanceCharge>
         </cac:Price>
+            @endforeach
     </cac:InvoiceLine>
 </Invoice>
