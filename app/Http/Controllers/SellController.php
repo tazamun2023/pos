@@ -343,11 +343,11 @@ class SellController extends Controller
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-left" role="menu">';
 
-                        if (auth()->user()->can('sell.view') || auth()->user()->can('direct_sell.view') || auth()->user()->can('view_own_sell_only')) {
-                            $html .= '<li>
-                                        <a href="#" data-href="'.route('send.invoice.to.zatka', \Illuminate\Support\Facades\Crypt::encrypt($row->id)).'" class="btn-modal send-invoice-link " data-container=".send-invoice-link"><i class="fas fa-eye" aria-hidden="true"></i> '.__('sale.zatca_invoice').'</a>
-                                        </li>';
-                        }
+//                        if (auth()->user()->can('sell.view') || auth()->user()->can('direct_sell.view') || auth()->user()->can('view_own_sell_only')) {
+//                            $html .= '<li>
+//                                        <a href="#" data-href="'.route('send.invoice.to.zatka', \Illuminate\Support\Facades\Crypt::encrypt($row->id)).'" class="btn-modal send-invoice-link " data-container=".send-invoice-link"><i class="fas fa-eye" aria-hidden="true"></i> '.__('sale.zatca_invoice').'</a>
+//                                        </li>';
+//                        }
                         if (auth()->user()->can('sell.view') || auth()->user()->can('direct_sell.view') || auth()->user()->can('view_own_sell_only')) {
                             $html .= '<li><a href="#" data-href="'.action([\App\Http\Controllers\SellController::class, 'show'], [$row->id]).'" class="btn-modal" data-container=".view_modal"><i class="fas fa-eye" aria-hidden="true"></i> '.__('messages.view').'</a></li>';
                         }

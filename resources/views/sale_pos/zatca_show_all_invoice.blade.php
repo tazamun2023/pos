@@ -50,7 +50,7 @@
                         <th>@lang('sale.customer_name')</th>
                         <th>@lang('lang_v1.contact_no')</th>
                         <th>@lang('sale.location')</th>
-                        <th>@lang('sale.zatka_status')</th>
+                        <th>@lang('sale.zatca_invoice_status')</th>
                         <th>@lang('sale.payment_status')</th>
                         <th>@lang('lang_v1.payment_method')</th>
                     </tr>
@@ -111,7 +111,7 @@ $(document).ready( function(){
         serverSide: true,
         aaSorting: [[1, 'desc']],
         "ajax": {
-            "url": "/sells",
+            "url": "/all-invoice-zatca",
             "data": function ( d ) {
                 if($('#sell_list_filter_date_range').val()) {
                     var start = $('#sell_list_filter_date_range').data('daterangepicker').startDate.format('YYYY-MM-DD');
@@ -167,6 +167,99 @@ $(document).ready( function(){
         sell_table.ajax.reload();
     });
 });
+</script>
+
+<script>
+    $('#sell_table').on('click', '.send-invoice-link', function(e){
+
+        Swal.fire({
+            html: `<div style='padding: 20px 40px'>Sending Invoice To ZATKA...</div>`,
+            allowClickOutside: true,
+            showConfirmButton: false,
+        });
+        e.preventDefault();
+        let url = $(this).attr('data-href');
+        // console.log(url);
+        axios.get(url)
+            .then(function(response){
+                Swal.close();
+                // recent_transaction.modal('show');
+                switch (response.status){
+                    case 200:
+                        window.location.reload();
+                        break;
+                    case 202:
+                        window.location.reload();
+                        console.log('request accepted. but warning');
+                        break;
+                    default:
+                        alert('Something went wrong');
+                        break;
+                }
+            })
+            .catch(function(error){
+
+                Swal.close();
+
+                let response = error.response;
+                switch (response.status){
+                    case 303:
+                        Swal.fire({
+                            html: `<div style='padding: 20px 40px'>Something went wrong</div>`,
+                            allowClickOutside: true,
+                            showConfirmButton: false,
+                        });
+                        setInterval(function() {
+                            Swal.close();
+                        }, 1000);
+                        break;
+                    case 400:
+                        Swal.fire({
+                            html: `<div style='padding: 20px 40px'>Something went wrong</div>`,
+                            allowClickOutside: true,
+                            showConfirmButton: false,
+                        });
+                        setInterval(function() {
+                            Swal.close();
+                        }, 1000);
+                        break;
+                    case 401:
+                        Swal.fire({
+                            html: `<div style='padding: 20px 40px'>Something went wrong</div>`,
+                            allowClickOutside: true,
+                            showConfirmButton: false,
+                        });
+                        setInterval(function() {
+                            Swal.close();
+                        }, 1000);
+                        break;
+                    case 500:
+                        Swal.fire({
+                            html: `<div style='padding: 20px 40px'>Something went wrong</div>`,
+                            allowClickOutside: true,
+                            showConfirmButton: false,
+                        });
+                        setInterval(function() {
+                            Swal.close();
+                        }, 1000);
+
+                        break;
+                    default:
+                        Swal.fire({
+                            html: `<div style='padding: 20px 40px'>Something went wrong</div>`,
+                            allowClickOutside: true,
+                            showConfirmButton: false,
+                        });
+                        setInterval(function() {
+                            Swal.close();
+                        }, 1000);
+                        break;
+                }
+                if(response.status === 400){
+                    console.log()
+                }
+            })
+    })
 </script>
 <script src="{{ asset('js/payment.js?v=' . $asset_v) }}"></script>
 @endsection

@@ -611,7 +611,7 @@ public function showAllZatca(){
                 return $html;
             })
             ->addColumn('zatka_status', function ($row) {
-                return $row->id;
+                return $row->zatka_info ? ($row->zatka_info->status_code < 300 ? '<span class="label bg-light-green">Accept</span>' : '<span class="label bg-light-gray">Not Accept</span>') : '<span class="label bg-warning text-black">Not Accept</span>';
             })
             ->setRowAttr([
                 'data-href' => function ($row) {
