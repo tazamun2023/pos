@@ -151,6 +151,31 @@ class SellPosController extends Controller
 
         return view('sale_pos.index')->with(compact('business_locations', 'customers', 'sales_representative', 'is_cmsn_agent_enabled', 'commission_agents', 'service_staffs', 'is_tables_enabled', 'is_service_staff_enabled', 'is_types_service_enabled', 'shipping_statuses'));
     }
+    public function showAllZatca()
+    {
+        $is_admin = $this->businessUtil->is_admin(auth()->user());
+
+        if (! $is_admin && ! auth()->user()->hasAnyPermission(['sell.view', 'sell.create', 'direct_sell.access', 'direct_sell.view', 'view_own_sell_only', 'view_commission_agent_sell', 'access_shipping', 'access_own_shipping', 'access_commission_agent_shipping', 'so.view_all', 'so.view_own'])) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        if (request()->ajax()) {
+//            $transactions = Transaction::all();
+
+            $datatable = Datatables::of($transactions)
+                ->removeColumn('id')
+                ->addColumn('action', function ($row){
+
+                })
+                ->editColumn('transaction_date', '{{@format_datetime($transaction_date)}}')
+            ;
+            $rawColumns = ['final_total', 'action'];
+            return $datatable->rawColumns($rawColumns)
+                ->make(true);
+        }
+
+        return view('sale_pos.zatca_show_all_invoice');
+    }
 
     /**
      * Show the form for creating a new resource.
@@ -1966,7 +1991,7 @@ class SellPosController extends Controller
         $receipt_printer_type = is_null($printer_type) ? $location_details->receipt_printer_type : $printer_type;
 
         $receipt_details = $this->transactionUtil->getReceiptDetails($transaction->id, $transaction->location_id, $invoice_layout, $business_details, $location_details, $receipt_printer_type);
-//        dd($receipt_details->invoice_date);
+//        dd($receipt_details);
         $invoice_xml =  view('invoice', compact('transaction', 'receipt_details'));
 
 
@@ -1991,11 +2016,14 @@ class SellPosController extends Controller
         $url = "https://gw-fatoora.zatca.gov.sa/e-invoicing/developer-portal/invoices/reporting/single";
 
         $response = Http::withHeaders($header)->post($url, $body);
-        ZatkaInfo::create([
-           'trx_id' => $trx_id,
-            'info' => 'nothing to store',
-            'status_code' => $response->status()
-        ]);
+//        if ($response->status()==200){
+            ZatkaInfo::create([
+                'trx_id' => $trx_id,
+                'info' => 'nothing to store',
+                'status_code' => $response->status()
+            ]);
+//        }
+
         return response($response->json(), $response->status());
 
     }
@@ -3180,5 +3208,11 @@ class SellPosController extends Controller
                             ->update(['paused_at' => null, 'available_at' => null]);
 
         return ['success' => true];
+    }
+
+    public function sendZatcaInvoice()
+    {
+        dd('here');
+        return view('sale_pos.partials.zatca_invoice');
     }
 }

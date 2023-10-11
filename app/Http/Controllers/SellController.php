@@ -329,6 +329,7 @@ class SellController extends Controller
                 $sells->addSelect('transactions.is_recurring', 'transactions.recur_parent_id');
             }
             $sales_order_statuses = Transaction::sales_order_statuses();
+//            dd($sales_order_statuses);
             $datatable = Datatables::of($sells)
                 ->addColumn(
                     'action',
@@ -342,6 +343,11 @@ class SellController extends Controller
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-left" role="menu">';
 
+                        if (auth()->user()->can('sell.view') || auth()->user()->can('direct_sell.view') || auth()->user()->can('view_own_sell_only')) {
+                            $html .= '<li>
+                                        <a href="#" data-href="'.route('send.invoice.to.zatka', \Illuminate\Support\Facades\Crypt::encrypt($row->id)).'" class="btn-modal send-invoice-link " data-container=".send-invoice-link"><i class="fas fa-eye" aria-hidden="true"></i> '.__('sale.zatca_invoice').'</a>
+                                        </li>';
+                        }
                         if (auth()->user()->can('sell.view') || auth()->user()->can('direct_sell.view') || auth()->user()->can('view_own_sell_only')) {
                             $html .= '<li><a href="#" data-href="'.action([\App\Http\Controllers\SellController::class, 'show'], [$row->id]).'" class="btn-modal" data-container=".view_modal"><i class="fas fa-eye" aria-hidden="true"></i> '.__('messages.view').'</a></li>';
                         }
@@ -1664,5 +1670,20 @@ class SellController extends Controller
 
         echo 'Mapping reset success';
         exit;
+    }
+
+    public function showAllZatca()
+    {
+        $is_admin = $this->businessUtil->is_admin(auth()->user());
+
+        if (! $is_admin && ! auth()->user()->hasAnyPermission(['sell.view', 'sell.create', 'direct_sell.access', 'direct_sell.view', 'view_own_sell_only', 'view_commission_agent_sell', 'access_shipping', 'access_own_shipping', 'access_commission_agent_shipping', 'so.view_all', 'so.view_own'])) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        if (request()->ajax()) {
+            dd('ajax');
+        }
+
+        return view('sale_pos.zatca_show_all_invoice');
     }
 }
