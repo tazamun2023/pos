@@ -274,6 +274,13 @@ class AdminSidebarMenu
                                         ['icon' => 'fa fas fa-list', 'active' => request()->segment(1) == 'pos' && request()->segment(2) == null]
                                     );
                                 }
+                                if (auth()->user()->can('sell.view')) {
+                                    $sub->url(
+                                        action([\App\Http\Controllers\SellPosController::class, 'showAllZatca']),
+                                        __('sale.zatca_invoice'),
+                                        ['icon' => 'fa fas fa-list', 'active' => request()->segment(1) == 'all-invoice-zatca' && request()->segment(2) == 'null']
+                                    );
+                                }
 
                                 $sub->url(
                                     action([\App\Http\Controllers\SellPosController::class, 'create']),

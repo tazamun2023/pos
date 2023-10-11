@@ -71,7 +71,9 @@
 			showConfirmButton: false,
 		});
 		e.preventDefault();
+
 		let url = $(this).attr('url');
+		console.log(url);
 		axios.get(url)
 		.then(function(response){
 			Swal.close();

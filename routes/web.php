@@ -59,6 +59,7 @@ use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VariationTemplateController;
 use App\Http\Controllers\WarrantyController;
+use App\Http\Controllers\ZatcaShowAllInvoiceController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -198,6 +199,7 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('/sells/quotations', 'SellController@getQuotations');
     Route::get('/sells/draft-dt', 'SellController@getDraftDatables');
     Route::resource('sells', 'SellController');
+
     Route::get('/sells/copy-quotation/{id}', [SellPosController::class, 'copyQuotation']);
 
     Route::post('/import-purchase-products', [PurchaseController::class, 'importPurchaseProducts']);
@@ -233,6 +235,8 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('/reset-mapping', [SellController::class, 'resetMapping']);
 
     Route::resource('pos', SellPosController::class);
+    Route::get('/all-invoice-zatca', [SellPosController::class, 'showAllZatca']);
+//    Route::get('sells/invoice-zatca', [SellController::class, 'showAllZatca']);
 
     Route::resource('roles', RoleController::class);
 
@@ -501,6 +505,7 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone'])
     Route::get('/download-purchase-order/{id}/pdf', [PurchaseOrderController::class, 'downloadPdf'])->name('purchaseOrder.downloadPdf');
     Route::get('/sells/{id}', [SellController::class, 'show']);
     Route::get('/sells/{transaction_id}/print', [SellPosController::class, 'printInvoice'])->name('sell.printInvoice');
+    Route::resource('zatca-all-invoice', ZatcaShowAllInvoiceController::class);
     Route::get('/download-sells/{transaction_id}/pdf', [SellPosController::class, 'downloadPdf'])->name('sell.downloadPdf');
     Route::get('/download-quotation/{id}/pdf', [SellPosController::class, 'downloadQuotationPdf'])
         ->name('quotation.downloadPdf');
