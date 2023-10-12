@@ -171,10 +171,10 @@
         </cac:TaxCategory>
     </cac:AllowanceCharge>
     <cac:TaxTotal>
-        <cbc:TaxAmount currencyID="SAR">{{ str_replace('﷼ ', '', $receipt_details->tax) }}</cbc:TaxAmount>
+        <cbc:TaxAmount currencyID="SAR">{{ preg_match('/\d+(\.\d+)?/', $receipt_details->tax, $match) ? $match[0] : 0 }}</cbc:TaxAmount>
         <cac:TaxSubtotal>
-            <cbc:TaxableAmount currencyID="SAR">{{ str_replace('﷼ ', '', $receipt_details->taxed_subtotal) }}</cbc:TaxableAmount>
-            <cbc:TaxAmount currencyID="SAR">{{ str_replace('﷼ ', '', $receipt_details->tax) }}</cbc:TaxAmount>
+            <cbc:TaxableAmount currencyID="SAR">{{ preg_match('/\d+(\.\d+)?/', $receipt_details->taxed_subtotal, $match) ? $match[0] : 0 }}</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="SAR">{{ preg_match('/\d+(\.\d+)?/', $receipt_details->tax, $match) ? $match[0] : 0 }}</cbc:TaxAmount>
             <cac:TaxCategory>
                 <cbc:ID schemeAgencyID="6" schemeID="UN/ECE 5305">S</cbc:ID>
                 <cbc:Percent>15.00</cbc:Percent>
@@ -185,16 +185,16 @@
         </cac:TaxSubtotal>
     </cac:TaxTotal>
     <cac:TaxTotal>
-        <cbc:TaxAmount currencyID="SAR">{{ str_replace('﷼ ', '', $receipt_details->tax) }}</cbc:TaxAmount>
+        <cbc:TaxAmount currencyID="SAR">{{ preg_match('/\d+(\.\d+)?/', $receipt_details->tax, $match) ? $match[0] : 0 }}</cbc:TaxAmount>
 
     </cac:TaxTotal>
     <cac:LegalMonetaryTotal>
-        <cbc:LineExtensionAmount currencyID="SAR">{{ str_replace('﷼ ', '', $receipt_details->taxed_subtotal) }}</cbc:LineExtensionAmount>
-        <cbc:TaxExclusiveAmount currencyID="SAR">{{ str_replace('﷼ ', '', $receipt_details->taxed_subtotal) }}</cbc:TaxExclusiveAmount>
-        <cbc:TaxInclusiveAmount currencyID="SAR">{{ str_replace('﷼ ', '', $receipt_details->total) }}</cbc:TaxInclusiveAmount>
+        <cbc:LineExtensionAmount currencyID="SAR">{{ preg_match('/\d+(\.\d+)?/', $receipt_details->taxed_subtotal, $match) ? $match[0] : 0 }}</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="SAR">{{ preg_match('/\d+(\.\d+)?/', $receipt_details->taxed_subtotal, $match) ? $match[0] : 0 }}</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="SAR">{{ preg_match('/\d+(\.\d+)?/', $receipt_details->total, $match) ? $match[0] : 0 }}</cbc:TaxInclusiveAmount>
         <cbc:AllowanceTotalAmount currencyID="SAR">2.00</cbc:AllowanceTotalAmount>
         <cbc:PrepaidAmount currencyID="SAR">0.00</cbc:PrepaidAmount>
-        <cbc:PayableAmount currencyID="SAR">{{ str_replace('﷼ ', '', $receipt_details->total) }}</cbc:PayableAmount>
+        <cbc:PayableAmount currencyID="SAR">{{ preg_match('/\d+(\.\d+)?/', $receipt_details->total, $match) ? $match[0] : 0 }}</cbc:PayableAmount>
     </cac:LegalMonetaryTotal>
     <cac:InvoiceLine>
         @foreach($receipt_details->lines as $line)
@@ -202,8 +202,8 @@
         <cbc:InvoicedQuantity unitCode="PCE">{{$line['quantity']}} </cbc:InvoicedQuantity>
         <cbc:LineExtensionAmount currencyID="SAR">{{$line['unit_price_before_discount']}}</cbc:LineExtensionAmount>
         <cac:TaxTotal>
-            <cbc:TaxAmount currencyID="SAR">{{ $line['unit_price_before_discount']*str_replace('﷼ ', '', $receipt_details->tax)/100 }}</cbc:TaxAmount>
-            <cbc:RoundingAmount currencyID="SAR">{{ $line['unit_price_before_discount']*str_replace('﷼ ', '', $receipt_details->tax)/100+$line['unit_price_before_discount'] }}</cbc:RoundingAmount>
+            <cbc:TaxAmount currencyID="SAR">{{ $line['unit_price_before_discount']*preg_match('/\d+(\.\d+)?/', $receipt_details->tax, $match) ? $match[0] : 0/100 }}</cbc:TaxAmount>
+            <cbc:RoundingAmount currencyID="SAR">{{ $line['unit_price_before_discount']*preg_match('/\d+(\.\d+)?/', $receipt_details->tax, $match) ? $match[0] : 0/100+$line['unit_price_before_discount'] }}</cbc:RoundingAmount>
 
         </cac:TaxTotal>
         <cac:Item>
