@@ -235,13 +235,13 @@ $(document).ready( function(){
                         break;
                     case 500:
                         Swal.fire({
-                            html: `<div style='padding: 20px 40px'>Something went wrong</div>`,
+                            html: `<div style='padding: 15px 20px; font-size: large;'>Zatca not accept this invoice!</div>`,
                             allowClickOutside: true,
                             showConfirmButton: false,
                         });
                         setInterval(function() {
                             Swal.close();
-                        }, 1000);
+                        }, 3000);
 
                         break;
                     default:

@@ -12,7 +12,7 @@ return [
     */
 
     'note' => 'Note',
-    'zatca_invoice' => 'ZATCA Invoice',
+    'zatca_invoice' => 'Send to Zatca',
     'zatca_invoice_status' => 'ZATCA Status',
     'sale' => 'Sell',
     'sells' => 'Sales',
