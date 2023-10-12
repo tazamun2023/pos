@@ -12,6 +12,8 @@ return [
     */
 
     'note' => 'Note',
+    'zatca_invoice' => 'ZATCA Invoice',
+    'zatca_invoice_status' => 'ZATCA Status',
     'sale' => 'Sell',
     'sells' => 'Sales',
     'list_sale' => 'List Sales',

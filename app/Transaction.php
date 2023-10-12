@@ -50,6 +50,10 @@ class Transaction extends Model
     {
         return $this->belongsTo(\App\Contact::class, 'contact_id');
     }
+    public function zatka_info()
+    {
+        return $this->belongsTo(ZatkaInfo::class, 'id', 'trx_id');
+    }
 
     public function payment_lines()
     {

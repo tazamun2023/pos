@@ -95,17 +95,17 @@
             @else
 {{--            ----}}
            @endif</td>
-        <td> @if(!empty($receipt_details->customer_tax_label))
-           {{ $receipt_details->customer_tax_label }}
-            @else
-            Tax No: {{ $receipt_details->location_custom_fields }}
-           @endif
-           <br>
-           @if(!empty($receipt_details->customer_tax_label))
-             {{ $receipt_details->customer_tax_number }}
-             @else
+{{--        <td> @if(!empty($receipt_details->customer_tax_label))--}}
+{{--           {{ $receipt_details->customer_tax_label }}--}}
+{{--            @else--}}
+{{--            Tax No: {{ $receipt_details->location_custom_fields }}--}}
+{{--           @endif--}}
+{{--           <br>--}}
+{{--           @if(!empty($receipt_details->customer_tax_label))--}}
+{{--             {{ $receipt_details->customer_tax_number }}--}}
+{{--             @else--}}
 {{--             ----}}
-        @endif</td>
+{{--        @endif</td>--}}
         <td>
             Contact: <br>
             @if(!empty($receipt_details->contact))
