@@ -1766,6 +1766,7 @@ class ReportController extends Controller
                     'c.contact_id',
                     't.id as transaction_id',
                     't.invoice_no',
+                    't.payment_status',
                     't.transaction_date as transaction_date',
                     'transaction_sell_lines.unit_price_before_discount as unit_price',
                     'transaction_sell_lines.unit_price_inc_tax as unit_sale_price',
@@ -1779,7 +1780,7 @@ class ReportController extends Controller
                     DB::raw('((transaction_sell_lines.quantity - transaction_sell_lines.quantity_returned) * transaction_sell_lines.unit_price_inc_tax) as subtotal')
                 )
                 ->groupBy('transaction_sell_lines.id');
-
+//dd($query->get());
             if (! empty($variation_id)) {
                 $query->where('transaction_sell_lines.variation_id', $variation_id);
             }
@@ -2437,6 +2438,7 @@ class ReportController extends Controller
         $business_locations = BusinessLocation::forDropdown($business_id);
         $customers = Contact::customersDropdown($business_id, false);
         $customer_groups = CustomerGroup::forDropdown($business_id, false, true);
+
 
         return view('report.sell_payment_report')
             ->with(compact('business_locations', 'customers', 'payment_types', 'customer_groups'));

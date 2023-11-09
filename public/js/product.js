@@ -90,11 +90,13 @@ $(document).ready(function() {
 
         var profit_percent = __read_number($('#profit_percent'));
         profit_percent = profit_percent == undefined ? 0 : profit_percent;
+
         var selling_price = __add_percent(purchase_exc_tax, profit_percent);
         __write_number($('input#single_dsp'), selling_price);
 
         var selling_price_inc_tax = __add_percent(selling_price, tax_rate);
         __write_number($('input#single_dsp_inc_tax'), selling_price_inc_tax);
+
     });
 
     $(document).on('change', 'input#profit_percent', function(e) {

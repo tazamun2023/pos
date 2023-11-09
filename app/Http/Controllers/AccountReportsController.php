@@ -227,7 +227,7 @@ class AccountReportsController extends Controller
         }
 
         $business_id = session()->get('user.business_id');
-
+        $payment_types = $this->transactionUtil->payment_types(null, true, $business_id);
         if (request()->ajax()) {
             $query = TransactionPayment::leftjoin(
                 'transactions as T',
@@ -255,8 +255,9 @@ class AccountReportsController extends Controller
                                         'c.type as contact_type',
                                         'transaction_payments.is_advance',
                                         'transaction_payments.amount',
+                                        'transaction_payments.method',
                                     ]);
-
+//dd($query->get());
             $permitted_locations = auth()->user()->permitted_locations();
             if ($permitted_locations != 'all') {
                 $query->whereIn('T.location_id', $permitted_locations);
@@ -275,6 +276,10 @@ class AccountReportsController extends Controller
                 $query->whereNull('account_id');
             } elseif (! empty($account_id)) {
                 $query->where('account_id', $account_id);
+            }
+//dd(\request()->all());
+            if (! empty(request()->input('payment_types'))) {
+                $query->where('transaction_payments.method', request()->input('payment_types'));
             }
 
             return DataTables::of($query)
@@ -295,6 +300,28 @@ class AccountReportsController extends Controller
 
                         return $details;
                     })
+                ->editColumn('method', function ($row) use ($payment_types) {
+//                    dd($row->method);
+                    $method = ! empty($payment_types[$row->method]) ? $payment_types[$row->method] : '';
+                    if ($row->method == 'cheque') {
+                        $method .= '<br>('.__('lang_v1.cheque_no').': '.$row->cheque_number.')';
+                    } elseif ($row->method == 'card') {
+                        $method .= '<br>('.__('lang_v1.card_transaction_no').': '.$row->card_transaction_number.')';
+                    }  elseif ($row->method == 'bank_transfer') {
+                        $method .= '<br>('.__('lang_v1.bank_account_no').': '.$row->bank_account_number.')';
+                    } elseif ($row->method == 'custom_pay_1') {
+                        $method .= '<br>('.__('lang_v1.transaction_no').': '.$row->transaction_no.')';
+                    } elseif ($row->method == 'custom_pay_2') {
+                        $method .= '<br>('.__('lang_v1.transaction_no').': '.$row->transaction_no.')';
+                    } elseif ($row->method == 'custom_pay_3') {
+                        $method .= '<br>('.__('lang_v1.transaction_no').': '.$row->transaction_no.')';
+                    }
+                    if ($row->is_return == 1) {
+                        $method .= '<br><small>('.__('lang_v1.change_return').')</small>';
+                    }
+
+                    return $method;
+                })
                     ->addColumn('action', function ($row) {
                         $action = '<button type="button" class="btn btn-info 
                         btn-xs btn-modal"
@@ -353,7 +380,7 @@ class AccountReportsController extends Controller
         $accounts = ['' => __('messages.all'), 'none' => __('lang_v1.none')] + $accounts;
 
         return view('account_reports.payment_account_report')
-                ->with(compact('accounts'));
+                ->with(compact('accounts', 'payment_types'));
     }
 
     /**

@@ -934,6 +934,7 @@ class PurchaseController extends Controller
             }
 
             $business_id = request()->session()->get('user.business_id');
+
             $q = Product::leftJoin(
                 'variations',
                 'products.id',

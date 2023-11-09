@@ -37,6 +37,23 @@
                             {!! Form::text('date_range', null, ['placeholder' => __('lang_v1.select_a_date_range'), 'class' => 'form-control', 'id' => 'date_filter', 'readonly']); !!}
                         </div>
                     </div>
+
+                    <div class="col-md-3">
+                        <div class="form-group addProduct_form">
+                            {!! Form::label('payment_types', __('lang_v1.payment_method') . ':') !!}
+                            <div class="input-group w-full">
+                                {{-- <span class="input-group-addon">
+                                <i class="fas fa-money-bill-alt"></i>
+                            </span> --}}
+                                {!! Form::select('payment_types', $payment_types, null, [
+                                    'class' => 'form-control select2',
+                                    'id' => 'payment_types',
+                                    'placeholder' => __('messages.all'),
+                                    'required',
+                                ]) !!}
+                            </div>
+                        </div>
+                    </div>
                 </div>
               </div>
             </div>
@@ -55,6 +72,7 @@
                                 <th>@lang('account.invoice_ref_no')</th>
                                 <th>@lang('sale.amount')</th>
                                 <th>@lang('lang_v1.payment_type')</th>
+                                <th>@lang('lang_v1.payment_method')</th>
                                 <th>@lang('account.account')</th>
                                 <th>@lang( 'lang_v1.description' )</th>
                                 <th>@lang('messages.action')</th>
@@ -98,6 +116,7 @@
                                 "url": "{{action([\App\Http\Controllers\AccountReportsController::class, 'paymentAccountReport'])}}",
                                 "data": function ( d ) {
                                     d.account_id = $('#account_id').val();
+                                    d.payment_types = $('#payment_types').val();
                                     var start_date = '';
                                     var endDate = '';
                                     if($('#date_filter').val()){
@@ -118,6 +137,7 @@
                                 {data: 'payment_ref_no', name: 'payment_ref_no'},
                                 {data: 'transaction_number', name: 'transaction_number'},
                                 {data: 'amount', name: 'amount'},
+                                {data: 'method', name: 'method'},
                                 {data: 'type', name: 'T.type'},
                                 {data: 'account', name: 'account'},
                                 {data: 'details', name: 'details', "searchable": false},
@@ -128,7 +148,7 @@
                             }
                         });
             
-            $('select#account_id, #date_filter').change( function(){
+            $('select#account_id, #date_filter, #payment_types').change( function(){
                 payment_account_report.ajax.reload();
             });
         })
