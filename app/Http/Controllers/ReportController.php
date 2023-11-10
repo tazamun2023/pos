@@ -1733,6 +1733,8 @@ class ReportController extends Controller
         }
 
         $business_id = $request->session()->get('user.business_id');
+        $payment_types = $this->transactionUtil->payment_types(null, true, $business_id);
+
         if ($request->ajax()) {
             $variation_id = $request->get('variation_id', null);
             $query = TransactionSellLine::join(
@@ -1766,7 +1768,7 @@ class ReportController extends Controller
                     'c.contact_id',
                     't.id as transaction_id',
                     't.invoice_no',
-                    't.payment_status',
+                    't.payment_status as payment_status',
                     't.transaction_date as transaction_date',
                     'transaction_sell_lines.unit_price_before_discount as unit_price',
                     'transaction_sell_lines.unit_price_inc_tax as unit_sale_price',
@@ -1820,6 +1822,11 @@ class ReportController extends Controller
             $brand_id = $request->get('brand_id', null);
             if (! empty($brand_id)) {
                 $query->where('p.brand_id', $brand_id);
+            }
+
+            $payment_method = $request->get('payment_method', null);
+            if (! empty($payment_method)) {
+                $query->where('t.payment_status', $payment_method);
             }
 
             return Datatables::of($query)
@@ -1884,7 +1891,7 @@ class ReportController extends Controller
 
         return view('report.product_sell_report')
             ->with(compact('business_locations', 'customers', 'categories', 'brands',
-                'customer_group'));
+                'customer_group', 'payment_types'));
     }
 
     /**

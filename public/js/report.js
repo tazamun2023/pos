@@ -891,6 +891,7 @@ $(document).ready(function() {
                 var end = '';
                 var start_time = $('#product_sr_start_time').val();
                 var end_time = $('#product_sr_end_time').val();
+                var payment_method = $('#payment_method').val();
 
                 if ($('#product_sr_date_filter').val()) {
                     start = $('input#product_sr_date_filter')
@@ -909,6 +910,7 @@ $(document).ready(function() {
                 d.variation_id = $('#variation_id').val();
                 d.customer_id = $('select#customer_id').val();
                 d.location_id = $('select#location_id').val();
+                d.payment_method = $('select#payment_method').val();
                 d.category_id = $('select#psr_filter_category_id').val();
                 d.brand_id = $('select#psr_filter_brand_id').val();
                 d.customer_group_id = $('#psr_customer_group_id').val();
@@ -921,6 +923,7 @@ $(document).ready(function() {
             { data: 'contact_id', name: 'c.contact_id' },
             { data: 'invoice_no', name: 't.invoice_no' },
             { data: 'transaction_date', name: 't.transaction_date' },
+            { data: 'payment_status', name: 't.payment_status' },
             { data: 'sell_qty', name: 'transaction_sell_lines.quantity' },
             { data: 'unit_price', name: 'transaction_sell_lines.unit_price_before_discount' },
             { data: 'discount_amount', name: 'transaction_sell_lines.line_discount_amount' },
@@ -1041,7 +1044,7 @@ $(document).ready(function() {
     });
 
     $(
-        '#psr_customer_group_id, #psr_filter_category_id, #psr_filter_brand_id, #product_sell_report_form #variation_id, #product_sell_report_form #location_id, #product_sell_report_form #customer_id'
+        '#psr_customer_group_id, #psr_filter_category_id, #psr_filter_brand_id, #payment_method, #product_sell_report_form #variation_id, #product_sell_report_form #location_id, #product_sell_report_form #customer_id'
     ).change(function() {
         product_sell_report.ajax.reload();
         product_sell_grouped_report.ajax.reload();
@@ -1243,7 +1246,7 @@ $(document).ready(function() {
             data: function(d) {
                 d.supplier_id = $('select#customer_id').val();
                 d.location_id = $('select#location_id').val();
-                d.payment_types = $('select#payment_types').val();
+                d.payment_method = $('select#payment_method').val();
                 d.customer_group_id = $('select#customer_group_filter').val();
                 var start = '';
                 var end = '';
@@ -1334,7 +1337,7 @@ $(document).ready(function() {
         });
     }
 
-    $('#sell_payment_report_form #location_id, #sell_payment_report_form #customer_id, #sell_payment_report_form #payment_types, #sell_payment_report_form #customer_group_filter').change(
+    $('#sell_payment_report_form #location_id, #sell_payment_report_form #customer_id, #sell_payment_report_form #payment_method, #sell_payment_report_form #customer_group_filter').change(
         function() {
             sell_payment_report.ajax.reload();
         }

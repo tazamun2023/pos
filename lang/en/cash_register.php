@@ -36,5 +36,9 @@ return [
     'close' => 'Close',
     'total_refund' => 'Total Refund',
     'refunds' => 'Refunds',
+    'total_sale_without_tax' => 'Total sales without tax',
+    'total_sales_with_tax' => 'Total sales with tax',
+    'total_tax' => 'Total tax',
+    'net_cash_in_hand' => 'Net cash in hand',
 
 ];

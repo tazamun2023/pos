@@ -1,8 +1,10 @@
 <div class="row">
   <div class="col-md-12">
     <hr>
+    <button type="button" class="btn btn-primary no-print" id="product_details_button">@lang('lang_v1.visible')</button>
+    <button type="button" class="btn btn-primary no-print" style='display: none' id="product_details_button1">@lang('lang_v1.invisible')</button>
     <h3>@lang('lang_v1.product_sold_details_register')</h3>
-    <table class="table table-condensed">
+    <table class="table table-condensed" id='detailsTable'>
       <tr>
         <th>#</th>
         <th>@lang('product.sku')</th>
@@ -96,8 +98,10 @@
 <div class="row">
   <div class="col-md-12">
     <hr>
+    <button type="button" class="btn btn-primary no-print" id="by_brand">@lang('lang_v1.visible')</button>
+    <button type="button" class="btn btn-primary no-print" style='display: none' id="by_brand1">@lang('lang_v1.invisible')</button>
     <h3>@lang('lang_v1.product_sold_details_register') (@lang('lang_v1.by_brand'))</h3>
-    <table class="table table-condensed">
+    <table class="table table-condensed" id='by_brand_table'>
       <tr>
         <th>#</th>
         <th>@lang('brand.brands')</th>
@@ -232,3 +236,74 @@
     </div>
   </div>
 @endif
+
+<script>
+  document.getElementById('product_details_button').addEventListener('click', function() {
+    var table = document.getElementById('detailsTable');
+    var btnStyle = document.getElementById('product_details_button');
+    var btnStyle1 = document.getElementById('product_details_button1');
+
+    if (table.style.display === 'none' || table.style.display === '') {
+      // If the table is hidden or not set, show it
+      table.style.display = 'table';
+
+      // Hide product_details_button and show product_details_button1
+      btnStyle.style.display = 'none';
+      btnStyle1.style.display = 'block';
+    } else {
+      // If the table is visible, hide it
+      table.style.display = 'none';
+    }
+  });
+  document.getElementById('product_details_button1').addEventListener('click', function() {
+    var table = document.getElementById('detailsTable');
+    var btnStyle = document.getElementById('product_details_button');
+    var btnStyle1 = document.getElementById('product_details_button1');
+
+    if (table.style.display === 'none' || table.style.display === '') {
+      // If the table is hidden or not set, show it
+      table.style.display = 'table';
+
+      // Hide product_details_button and show product_details_button1
+      btnStyle1.style.display = 'none';
+      btnStyle.style.display = 'block';
+    } else {
+      // If the table is visible, hide it
+      table.style.display = 'none';
+    }
+  });
+  document.getElementById('by_brand').addEventListener('click', function() {
+    var table = document.getElementById('by_brand_table');
+    var btnStyle = document.getElementById('by_brand');
+    var btnStyle1 = document.getElementById('by_brand1');
+
+    if (table.style.display === 'none' || table.style.display === '') {
+      // If the table is hidden or not set, show it
+      table.style.display = 'table';
+
+      // Hide product_details_button and show product_details_button1
+      btnStyle.style.display = 'none';
+      btnStyle1.style.display = 'block';
+    } else {
+      // If the table is visible, hide it
+      table.style.display = 'none';
+    }
+  });
+  document.getElementById('by_brand1').addEventListener('click', function() {
+    var table = document.getElementById('by_brand_table');
+    var btnStyle = document.getElementById('by_brand');
+    var btnStyle1 = document.getElementById('by_brand1');
+
+    if (table.style.display === 'none' || table.style.display === '') {
+      // If the table is hidden or not set, show it
+      table.style.display = 'table';
+
+      // Hide product_details_button and show product_details_button1
+      btnStyle1.style.display = 'none';
+      btnStyle.style.display = 'block';
+    } else {
+      // If the table is visible, hide it
+      table.style.display = 'none';
+    }
+  });
+</script>
