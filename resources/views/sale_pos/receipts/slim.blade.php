@@ -601,7 +601,7 @@
 			@if(!empty($receipt_details->total_quantity_label))
 				<div class="flex-box">
 					<p class="left text-right">
-						{!! $receipt_details->total_quantity_label !!} 00000000
+						{!! $receipt_details->total_quantity_label !!} 
 					</p>
 					<p class="width-50 text-right">
 						{{$receipt_details->total_quantity}}
