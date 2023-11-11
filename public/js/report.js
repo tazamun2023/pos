@@ -887,6 +887,7 @@ $(document).ready(function() {
         ajax: {
             url: '/reports/product-sell-report',
             data: function(d) {
+                console.log('product_sell_report_table', d);
                 var start = '';
                 var end = '';
                 var start_time = $('#product_sr_start_time').val();
@@ -920,6 +921,7 @@ $(document).ready(function() {
             { data: 'product_name', name: 'p.name' },
             { data: 'sub_sku', name: 'v.sub_sku' },
             { data: 'customer', name: 'c.name' },
+            { data: 'user_name', name: 'user_name' },
             { data: 'contact_id', name: 'c.contact_id' },
             { data: 'invoice_no', name: 't.invoice_no' },
             { data: 'transaction_date', name: 't.transaction_date' },

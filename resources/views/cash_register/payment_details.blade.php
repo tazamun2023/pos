@@ -201,6 +201,14 @@
       </tr>
       <tr>
         <td>
+          @lang('cash_register.total_sell_return'):
+        </td>
+        <td>
+          <span class="display_currency" data-currency_symbol="true">{{ $register_details->total_sell_return }}</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
           @lang('cash_register.total_tax'):
         </td>
         <td>

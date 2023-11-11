@@ -1767,6 +1767,7 @@ class ReportController extends Controller
                     'c.supplier_business_name',
                     'c.contact_id',
                     't.id as transaction_id',
+                    'transaction_sell_lines.user_id',
                     't.invoice_no',
                     't.payment_status as payment_status',
                     't.transaction_date as transaction_date',
@@ -1842,6 +1843,9 @@ class ReportController extends Controller
                      return '<a data-href="'.action([\App\Http\Controllers\SellController::class, 'show'], [$row->transaction_id])
                             .'" href="#" data-container=".view_modal" class="btn-modal">'.$row->invoice_no.'</a>';
                  })
+                ->editColumn('user_name', function ($row) {
+                    return $row->user->surename.' '.$row->user->first_name.' '. $row->user->last_name;
+                })
                 ->editColumn('transaction_date', '{{@format_datetime($transaction_date)}}')
                 ->editColumn('unit_sale_price', function ($row) {
                     return '<span class="unit_sale_price" data-orig-value="'.$row->unit_sale_price.'">'.
@@ -1888,10 +1892,10 @@ class ReportController extends Controller
         $categories = Category::forDropdown($business_id, 'product');
         $brands = Brands::forDropdown($business_id);
         $customer_group = CustomerGroup::forDropdown($business_id, false, true);
-
+        $users = User::forDropdown($business_id, false);
         return view('report.product_sell_report')
             ->with(compact('business_locations', 'customers', 'categories', 'brands',
-                'customer_group', 'payment_types'));
+                'customer_group', 'payment_types', 'users'));
     }
 
     /**
