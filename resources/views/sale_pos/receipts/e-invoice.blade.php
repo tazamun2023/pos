@@ -45,11 +45,17 @@
     </thead>
    </table>
 
-   <table width="100%">
+   <table  width="100%">
     <tbody>
         @if(!empty($receipt_details->display_name))
     <tr>
-        <td colspan="4" style="text-align: right"><strong>  {{$receipt_details->display_name}}</strong></td>
+        <td colspan="4" @if ($app->getLocale() == "ar")
+           style="text-align: left"
+           
+            @else
+           style="text-align: right"
+        @endif>
+        <strong>  {{$receipt_details->display_name}}</strong></td>
     </tr>
     <tr>
         <td>{{ $receipt_details->saller_id_label }}: {{ $receipt_details->saller_id }}<br>
@@ -73,7 +79,12 @@
         <td colspan="5">&nbsp; &nbsp; &nbsp; <br></td>
     </tr>
     <tr>
-        <td colspan="4" style="text-align: right;">
+        <td colspan="4"  @if ($app->getLocale() == "ar")
+            style="text-align: left"
+            
+             @else
+            style="text-align: right"
+         @endif>
            <strong style="padding-top:30px;">
             @if(!empty($receipt_details->customer_name))
             {{$receipt_details->customer_name}}
