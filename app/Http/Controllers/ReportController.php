@@ -1819,6 +1819,10 @@ class ReportController extends Controller
             if (! empty($category_id)) {
                 $query->where('p.category_id', $category_id);
             }
+            $filter_user_id = $request->get('filter_user_id', null);
+            if (! empty($filter_user_id)) {
+                $query->where('user_id', $filter_user_id);
+            }
 
             $brand_id = $request->get('brand_id', null);
             if (! empty($brand_id)) {

@@ -880,6 +880,14 @@ $(document).ready(function() {
         });
 
     }
+
+    $('#filter_user_id').on('change', function() {
+        product_sell_report.ajax.reload();
+        product_sell_grouped_report.ajax.reload();
+        product_sell_report_with_purchase_table.ajax.reload();
+        $('.nav-tabs li.active').find('a[data-toggle="tab"]').trigger('shown.bs.tab');
+    })
+
     product_sell_report = $('table#product_sell_report_table').DataTable({
         processing: true,
         serverSide: true,
@@ -893,6 +901,7 @@ $(document).ready(function() {
                 var start_time = $('#product_sr_start_time').val();
                 var end_time = $('#product_sr_end_time').val();
                 var payment_method = $('#payment_method').val();
+                var filter_user_id = $('#filter_user_id').val();
 
                 if ($('#product_sr_date_filter').val()) {
                     start = $('input#product_sr_date_filter')
@@ -910,6 +919,7 @@ $(document).ready(function() {
 
                 d.variation_id = $('#variation_id').val();
                 d.customer_id = $('select#customer_id').val();
+                d.filter_user_id = $('select#filter_user_id').val();
                 d.location_id = $('select#location_id').val();
                 d.payment_method = $('select#payment_method').val();
                 d.category_id = $('select#psr_filter_category_id').val();
@@ -942,6 +952,8 @@ $(document).ready(function() {
             __currency_convert_recursively($('#product_sell_report_table'));
         },
     });
+
+
 
     var is_lot_enabled = $('#lot_enabled').length > 0 ? true : false;
     product_sell_report_with_purchase_table = $('table#product_sell_report_with_purchase_table').DataTable({
@@ -1046,7 +1058,7 @@ $(document).ready(function() {
     });
 
     $(
-        '#psr_customer_group_id, #psr_filter_category_id, #psr_filter_brand_id, #payment_method, #product_sell_report_form #variation_id, #product_sell_report_form #location_id, #product_sell_report_form #customer_id'
+        '#psr_customer_group_id, #psr_filter_category_id, #psr_filter_brand_id, #payment_method, #product_sell_report_form #variation_id, #product_sell_report_form #location_id, #product_sell_report_form #customer_id #filter_user_id'
     ).change(function() {
         product_sell_report.ajax.reload();
         product_sell_grouped_report.ajax.reload();
