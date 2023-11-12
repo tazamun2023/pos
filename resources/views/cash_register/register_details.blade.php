@@ -52,7 +52,7 @@
           </div>
         </div>
       @endif
-      
+
       <div class="row">
         <div class="col-xs-6">
           <b>@lang('report.user'):</b> {{ $register_details->user_name}}<br>
@@ -69,13 +69,13 @@
     </div>
 
     <div class="modal-footer">
-      <button type="button" class="btn btn-primary no-print" 
-        aria-label="Print" 
+      <button type="button" class="btn btn-primary no-print"
+        aria-label="Print"
           onclick="$(this).closest('div.modal').printThis();">
         <i class="fa fa-print"></i> @lang( 'messages.print' )
       </button>
 
-      <button type="button" class="btn btn-default no-print" 
+      <button type="button" class="btn btn-default no-print"
         data-dismiss="modal">@lang( 'messages.cancel' )
       </button>
     </div>

@@ -183,6 +183,38 @@
           <span class="display_currency" data-currency_symbol="true">{{ $register_details->total_sale }}</span>
         </td>
       </tr>
+      <tr>
+        <td>
+          @lang('cash_register.total_sale_without_tax'):
+        </td>
+        <td>
+          <span class="display_currency" data-currency_symbol="true">{{ $register_details->total_sale }}</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          @lang('cash_register.total_sales_with_tax'):
+        </td>
+        <td>
+          <span class="display_currency" data-currency_symbol="true">{{ $register_details->total_sale_include_tax }}</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          @lang('cash_register.total_sell_return'):
+        </td>
+        <td>
+          <span class="display_currency" data-currency_symbol="true">{{ $register_details->total_sell_return }}</span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          @lang('cash_register.total_tax'):
+        </td>
+        <td>
+          <span class="display_currency" data-currency_symbol="true">{{ $register_details->total_sale_include_tax-$register_details->total_sale }}</span>
+        </td>
+      </tr>
       <tr class="danger">
         <th>
           @lang('cash_register.total_refund')

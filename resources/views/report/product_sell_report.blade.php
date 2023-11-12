@@ -69,6 +69,32 @@
                 </div>
                 <div class="col-md-3">
                     <div class="form-group addProduct_form">
+                        {!! Form::label('payment_types', __('lang_v1.payment_method') . ':') !!}
+                        <div class="input-group w-full">
+                            {{-- <span class="input-group-addon">
+                            <i class="fas fa-money-bill-alt"></i>
+                        </span> --}}
+                            {!! Form::select('payment_types', $payment_types, null, [
+                                'class' => 'form-control select2',
+                                'placeholder' => __('messages.all'),
+                                'id' => 'payment_method',
+                                'required',
+                            ]) !!}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group addProduct_form">
+                        {!! Form::label('filter_user_id', __('report.user') . ':') !!}
+                        {!! Form::select('filter_user_id', $users, null, [
+                            'class' => 'form-control select2',
+                            'style' => 'width:100%',
+                            'placeholder' => __('report.all_users'),
+                        ]) !!}
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group addProduct_form">
                         {!! Form::label('product_sr_date_filter', __('report.date_range') . ':') !!}
                         {!! Form::text('date_range', null, ['placeholder' => __('lang_v1.select_a_date_range'), 'class' => 'form-control', 'id' => 'product_sr_date_filter', 'readonly']); !!}
                     </div>
@@ -118,9 +144,11 @@
                                         <th>@lang('sale.product')</th>
                                         <th>@lang('product.sku')</th>
                                         <th>@lang('sale.customer_name')</th>
+                                        <th>@lang('sale.user')</th>
                                         <th>@lang('lang_v1.contact_id')</th>
                                         <th>@lang('sale.invoice_no')</th>
                                         <th>@lang('messages.date')</th>
+                                        <th>@lang('lang_v1.payment_method')</th>
                                         <th>@lang('sale.qty')</th>
                                         <th>@lang('sale.unit_price')</th>
                                         <th>@lang('sale.discount')</th>
@@ -131,7 +159,7 @@
                                 </thead>
                                 <tfoot>
                                     <tr class="bg-gray font-17 footer-total text-center">
-                                        <td colspan="6"><strong>@lang('sale.total'):</strong></td>
+                                        <td colspan="8"><strong>@lang('sale.total'):</strong></td>
                                         <td id="footer_total_sold"></td>
                                         <td></td>
                                         <td></td>

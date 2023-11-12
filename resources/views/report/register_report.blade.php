@@ -21,8 +21,8 @@
                     ]) !!}
                     <div class="col-md-4">
                         <div class="form-group addProduct_form">
-                            {!! Form::label('register_user_id', __('report.user') . ':') !!}
-                            {!! Form::select('register_user_id', $users, null, [
+                            {!! Form::label('filter_user_id', __('report.user') . ':') !!}
+                            {!! Form::select('filter_user_id', $users, null, [
                                 'class' => 'form-control select2',
                                 'style' => 'width:100%',
                                 'placeholder' => __('report.all_users'),
