@@ -283,12 +283,8 @@
 	        <div class="textbox-info">
 				<table style="width: 100%">
 					<tr>
-						<td><strong>{{$receipt_details->customer_label ?? ''}}</strong></td>
-						<td @if ($app->getLocale() == "ar")
-							style="text-align: left;"
-							@else
-							style="text-align: right;"
-						@endif><span>@if(!empty($receipt_details->customer_info))
+						{{--  <td><strong>{{$receipt_details->customer_label ?? ''}}</strong></td>  --}}
+						<td colspan="2"<span>@if(!empty($receipt_details->customer_info))
 							<div class="bw">
 							{!! $receipt_details->customer_info !!}
 							</div>
