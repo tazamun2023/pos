@@ -111,10 +111,14 @@ class SellController extends Controller
                 }
             }
 
-//            if (\request()->payment_method){
-//                $sells->where('transactions.payment_method', \request()->payment_method);
-//            }
-
+           if (\request()->payment_method){
+               $sells->where('tp.method', \request()->payment_method);
+           }
+        // if (request()->has('payment_method') && array_key_exists(request()->payment_method, $payment_types)) {
+        //     $sells->whereHas('transactions', function ($query) {
+        //         $query->where('payment_method', request()->payment_method);
+        //     });
+        // }
             $partial_permissions = ['view_own_sell_only', 'view_commission_agent_sell', 'access_own_shipping', 'access_commission_agent_shipping'];
             if (! auth()->user()->can('direct_sell.view')) {
                 $sells->where(function ($q) {
