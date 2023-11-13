@@ -34,6 +34,7 @@ class CashRegisterUtil extends Util
      */
     public function addSellPayments($transaction, $payments)
     {
+//        dd($payments);
         $user_id = auth()->user()->id;
         $register = CashRegister::where('user_id', $user_id)
                                 ->where('status', 'open')

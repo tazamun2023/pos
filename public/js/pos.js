@@ -1766,7 +1766,7 @@ function calculate_billing_details(price_total) {
         $('#packing_charge_text').text(__currency_trans_from_en(packing_charge, false));
     }
 
-    var total_payable = Math.round(price_total + order_tax - discount + shipping_charges + packing_charge + additional_expense);
+    var total_payable =price_total + order_tax - discount + shipping_charges + packing_charge + additional_expense;
 
     var rounding_multiple = $('#amount_rounding_method').val() ? parseFloat($('#amount_rounding_method').val()) : 0;
     var round_off_data = __round(total_payable, rounding_multiple);
