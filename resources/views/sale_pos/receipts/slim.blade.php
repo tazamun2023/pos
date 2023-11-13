@@ -280,11 +280,30 @@
 	        @endif
 
 	        <!-- customer info -->
-	        <div class="textbox-info">
+	        {{--  <div class="textbox-info">
 				<table style="width: 100%">
 					<tr>
-						{{--  <td><strong>{{$receipt_details->customer_label ?? ''}}</strong></td>  --}}
+						<td><strong>{{$receipt_details->customer_label ?? ''}}</strong></td>
 						<td colspan="2"<span>@if(!empty($receipt_details->customer_info))
+							<div class="bw">
+							{!! $receipt_details->customer_info !!}
+							</div>
+						@endif</span></td>
+					</tr>
+				</table>
+	        </div>  --}}
+			<div class="textbox-info">
+				<table style="width: 100%">
+					<tr>
+						<td colspan="2"><strong>{{$receipt_details->customer_label ?? ''}}</strong></td>
+						
+					</tr>
+				</table>
+	        </div>
+			<div class="textbox-info">
+				<table style="width: 100%">
+					<tr>
+						<td colspan="2"><span>@if(!empty($receipt_details->customer_info))
 							<div class="bw">
 							{!! $receipt_details->customer_info !!}
 							</div>
