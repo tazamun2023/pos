@@ -14,6 +14,7 @@ use App\Product;
 use App\SellingPriceGroup;
 use App\TaxRate;
 use App\Transaction;
+use App\TransactionPayment;
 use App\TransactionSellLine;
 use App\TypesOfService;
 use App\User;
@@ -110,6 +111,10 @@ class SellController extends Controller
                 }
             }
 
+//            if (\request()->payment_method){
+//                $sells->where('transactions.payment_method', \request()->payment_method);
+//            }
+
             $partial_permissions = ['view_own_sell_only', 'view_commission_agent_sell', 'access_own_shipping', 'access_commission_agent_shipping'];
             if (! auth()->user()->can('direct_sell.view')) {
                 $sells->where(function ($q) {
@@ -182,6 +187,7 @@ class SellController extends Controller
                 }
             }
 
+
             if (! empty(request()->input('rewards_only')) && request()->input('rewards_only') == true) {
                 $sells->where(function ($q) {
                     $q->whereNotNull('transactions.rp_earned')
@@ -240,6 +246,7 @@ class SellController extends Controller
                         ->orWhere('transactions.is_recurring', 1);
                 });
             }
+
 
             if (! empty(request()->list_for) && request()->list_for == 'service_staff_report') {
                 $sells->whereNotNull('transactions.res_waiter_id');
@@ -612,9 +619,9 @@ class SellController extends Controller
         if ($is_woocommerce) {
             $sources['woocommerce'] = 'Woocommerce';
         }
-
+        $payment_types = $this->transactionUtil->payment_types(null, true, $business_id);
         return view('sell.index')
-        ->with(compact('business_locations', 'customers', 'is_woocommerce', 'sales_representative', 'is_cmsn_agent_enabled', 'commission_agents', 'service_staffs', 'is_tables_enabled', 'is_service_staff_enabled', 'is_types_service_enabled', 'shipping_statuses', 'sources'));
+        ->with(compact('business_locations', 'payment_types', 'customers', 'is_woocommerce', 'sales_representative', 'is_cmsn_agent_enabled', 'commission_agents', 'service_staffs', 'is_tables_enabled', 'is_service_staff_enabled', 'is_types_service_enabled', 'shipping_statuses', 'sources'));
     }
 
     /**

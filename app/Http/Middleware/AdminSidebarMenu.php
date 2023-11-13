@@ -512,6 +512,14 @@ class AdminSidebarMenu
                             );
                         }
 
+                        if (auth()->user()->can('access_sell_return') || auth()->user()->can('access_own_sell_return')) {
+                            $sub->url(
+                                action([\App\Http\Controllers\SellReturnController::class, 'index']),
+                                __('lang_v1.list_sell_return'),
+                                ['icon' => 'fa fas fa-undo', 'active' => request()->segment(1) == 'sell-return' && request()->segment(2) == null]
+                            );
+                        }
+
                         if (auth()->user()->can('tax_report.view')) {
                             $sub->url(
                                 action([\App\Http\Controllers\ReportController::class, 'getTaxReport']),

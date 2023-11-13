@@ -14,8 +14,6 @@
                 <p>Here is a quick overview of your store activities since you last visited.</p>
             </div>
 
-
-
         </div>
 
     </section>

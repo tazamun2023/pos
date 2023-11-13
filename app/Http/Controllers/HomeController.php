@@ -65,7 +65,9 @@ class HomeController extends Controller
             return redirect()->action([\Modules\Crm\Http\Controllers\DashboardController::class, 'index']);
         }
 
+
         $business_id = request()->session()->get('user.business_id');
+        $users = User::forDropdown($business_id, false);
 
         $is_admin = $this->businessUtil->is_admin(auth()->user());
 
@@ -205,7 +207,7 @@ class HomeController extends Controller
 
         $common_settings = ! empty(session('business.common_settings')) ? session('business.common_settings') : [];
 
-        return view('home.index', compact('sells_chart_1', 'sells_chart_2', 'widgets', 'all_locations', 'common_settings', 'is_admin'));
+        return view('home.index', compact('users', 'sells_chart_1', 'sells_chart_2', 'widgets', 'all_locations', 'common_settings', 'is_admin'));
     }
 
     /**

@@ -25,6 +25,23 @@
     </div>
 </div>
 @endif
+
+            <div class="col-md-3">
+                <div class="form-group addProduct_form">
+                    {!! Form::label('payment_method', __('lang_v1.payment_method') . ':') !!}
+                    <div class="input-group w-full">
+                        {{-- <span class="input-group-addon">
+                        <i class="fas fa-money-bill-alt"></i>
+                    </span> --}}
+                        {!! Form::select('payment_method', $payment_types, null, [
+                            'class' => 'form-control select2',
+                            'placeholder' => __('messages.all'),
+                            'id' => 'payment_method',
+                            'required',
+                        ]) !!}
+                    </div>
+                </div>
+            </div>
 @if(empty($only) || in_array('sell_list_filter_date_range', $only))
 <div class="col-md-3">
     <div class="form-group f_product_form-group">
