@@ -95,6 +95,7 @@ $(document).ready(function() {
         __write_number($('input#single_dsp'), selling_price);
 
         var selling_price_inc_tax = __add_percent(selling_price, tax_rate);
+        console.log('single_dpp_inc_tax', selling_price, tax_rate, selling_price_inc_tax);
         __write_number($('input#single_dsp_inc_tax'), selling_price_inc_tax);
 
     });
