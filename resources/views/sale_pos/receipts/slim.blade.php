@@ -305,7 +305,7 @@
 					<tr>
 						<td colspan="2"><span>@if(!empty($receipt_details->customer_info))
 							<div class="bw">
-							{!! $receipt_details->customer_info !!}
+							{{ $receipt_details->customer_info }}
 							</div>
 						@endif</span></td>
 					</tr>
