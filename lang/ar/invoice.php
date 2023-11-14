@@ -56,4 +56,7 @@
      'show_customer' => 'عرض معلومات العميل',
      'paid_label' => 'تسمية قيمة المبلغ المدفوع',
      'customer_label' => 'تسمية العميل',
+     'customer_name'=> 'اسم الزبون',
+     'mobile'=>'متحرك',
+     'address'=>'عنوان',
  ];

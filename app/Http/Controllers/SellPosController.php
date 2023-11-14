@@ -1275,7 +1275,7 @@ public function showAllZatca(){
         $receipt_printer_type = is_null($printer_type) ? $location_details->receipt_printer_type : $printer_type;
 
         $receipt_details = $this->transactionUtil->getReceiptDetails($transaction_id, $location_id, $invoice_layout, $business_details, $location_details, $receipt_printer_type);
-//dd($receipt_details);
+// dd($receipt_details);
         $currency_details = [
             'symbol' => $business_details->currency_symbol,
             'thousand_separator' => $business_details->thousand_separator,
@@ -1306,7 +1306,7 @@ public function showAllZatca(){
 
             $output['html_content'] = view($layout, compact('receipt_details'))->render();
         }
-//dd($receipt_details->design);
+// dd($receipt_details->design);
 
         return $output;
     }
@@ -2448,7 +2448,6 @@ public function showAllZatca(){
                     'msg' => trans('messages.something_went_wrong'),
                 ];
             }
-
             return $output;
         }
     }
