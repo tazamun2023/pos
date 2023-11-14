@@ -288,6 +288,7 @@ $(document).ready(function() {
 
     //Update line total and check for quantity not greater than max quantity
     $('table#pos_table tbody').on('change', 'input.pos_quantity', function() {
+
         if (sell_form_validator) {
             sell_form.valid();
         }
@@ -300,8 +301,10 @@ $(document).ready(function() {
         var tr = $(this).parents('tr');
 
         var unit_price_inc_tax = __read_number(tr.find('input.pos_unit_price_inc_tax'));
+        console.log('unit_price_inc_tax', unit_price_inc_tax);
         var line_total = entered_qty * unit_price_inc_tax;
-
+        // var line_total = 17.39;
+        console.log('line_total', line_total);
         __write_number(tr.find('input.pos_line_total'), line_total, false, 2);
         tr.find('span.pos_line_total_text').text(__currency_trans_from_en(line_total, true));
 
@@ -1811,23 +1814,50 @@ function pos_discount(total_amount) {
     return discount;
 }
 
+// function pos_order_tax(price_total, discount) {
+//     var tax_rate_id = $('#tax_rate_id').val();
+//     var calculation_type = 'percentage';
+//     var calculation_amount = __read_number($('#tax_calculation_amount'));
+//     var total_amount = price_total - discount;
+//
+//     if (tax_rate_id) {
+//         var order_tax = __calculate_amount(calculation_type, calculation_amount, total_amount);
+//
+//     } else {
+//         var order_tax = 0;
+//     }
+//
+//     $('span#order_tax').text(__currency_trans_from_en(order_tax, false));
+//
+//     return order_tax;
+// }
 function pos_order_tax(price_total, discount) {
     var tax_rate_id = $('#tax_rate_id').val();
     var calculation_type = 'percentage';
     var calculation_amount = __read_number($('#tax_calculation_amount'));
     var total_amount = price_total - discount;
+    // console.log('tax_rate_id', tax_rate_id);
+    // console.log('calculation_type', calculation_type);
+    // console.log('calculation_amount', calculation_amount);
+    console.log('total_amount', total_amount);
+    console.log('calculation_amount', calculation_amount);
+    // Adjust the tax calculation to round to 2 decimal places
+    var order_tax = 0;
 
     if (tax_rate_id) {
-        var order_tax = __calculate_amount(calculation_type, calculation_amount, total_amount);
-
-    } else {
-        var order_tax = 0;
+        order_tax = __calculate_amount(calculation_type, calculation_amount, total_amount);
+        // Round the result to 2 decimal places
+        // console.log('order_tax', order_tax.toFixed(2));
+        order_tax = parseFloat(order_tax.toFixed(2));
     }
 
+    // Update the displayed tax value
     $('span#order_tax').text(__currency_trans_from_en(order_tax, false));
 
     return order_tax;
 }
+
+
 
 function calculate_balance_due() {
     var total_payable = __read_number($('#final_total_input'));

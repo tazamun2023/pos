@@ -12,11 +12,11 @@ function __calculate_amount(calculation_type, calculation_amount, amount) {
             return parseFloat(calculation_amount);
         case 'percentage':
         case 'percent':
-                // var div = Decimal.div(calculation_amount, 100).toNumber();
-                var div = calculation_amount/100;
+                var div = Decimal.div(calculation_amount, 100).toNumber();
+
+            //     var div = calculation_amount/100;
             return Decimal.mul(div, amount).toNumber();
 
-            // return div*amount;
         default:
             return 0;
     }
