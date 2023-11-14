@@ -80,7 +80,7 @@
 										{!! Form::select('price_group', $price_groups, $selected_price_group, ['class' => 'form-control select2', 'id' => 'price_group', 'style' => 'width: 100%;']); !!}
 										<span class="input-group-addon">
 											@show_tooltip(__('lang_v1.price_group_help_text'))
-										</span> 
+										</span>
 									</div>
 								</div>
 							</div>
@@ -107,7 +107,7 @@
 
 										<span class="input-group-addon">
 											@show_tooltip(__('lang_v1.types_of_service_help'))
-										</span> 
+										</span>
 									</div>
 									<small><p class="help-block hide" id="price_group_text">@lang('lang_v1.price_group'): <span></span></p></small>
 								</div>
@@ -132,11 +132,11 @@
 									<span class="input-group-addon">
 										<i class="fa fa-user"></i>
 									</span>
-									<input type="hidden" id="default_customer_id" 
+									<input type="hidden" id="default_customer_id"
 									value="{{ $walk_in_customer['id']}}" >
-									<input type="hidden" id="default_customer_name" 
+									<input type="hidden" id="default_customer_name"
 									value="{{ $walk_in_customer['name']}}" >
-									{!! Form::select('contact_id', 
+									{!! Form::select('contact_id',
 										[], null, ['class' => 'form-control mousetrap', 'id' => 'customer_id', 'placeholder' => 'Enter Customer name / phone', 'required', 'style' => 'width: 100%;']); !!}
 									<span class="input-group-btn">
 										<button type="button" class="btn btn-default bg-white btn-flat add_new_customer" data-name=""  @if(!auth()->user()->can('customer.create')) disabled @endif><i class="fa fa-plus-circle text-primary fa-lg"></i></button>
@@ -146,11 +146,11 @@
 						</div>
 						<input type="hidden" name="pay_term_number" id="pay_term_number" value="{{$walk_in_customer['pay_term_number']}}">
 						<input type="hidden" name="pay_term_type" id="pay_term_type" value="{{$walk_in_customer['pay_term_type']}}">
-						
+
 						@if(!empty($commission_agent))
 							<div class="col-sm-4">
 								<div class="form-group">
-								{!! Form::select('commission_agent', 
+								{!! Form::select('commission_agent',
 											$commission_agent, null, ['class' => 'form-control select2', 'placeholder' => __('lang_v1.commission_agent')]); !!}
 								</div>
 							</div>
@@ -187,7 +187,7 @@
 						<input type="hidden" name="sell_price_tax" id="sell_price_tax" value="{{$business_details->sell_price_tax}}">
 
 						<!-- Keeps count of product rows -->
-						<input type="hidden" id="product_row_count" 
+						<input type="hidden" id="product_row_count"
 							value="0">
 						@php
 							$hide_tax = '';
@@ -198,7 +198,7 @@
 						<table class="table table-condensed table-bordered table-striped table-responsive" id="pos_table">
 							<thead>
 								<tr>
-									<th class="tex-center @if(!empty($pos_settings['inline_service_staff'])) col-md-3 @else col-md-4 @endif">	
+									<th class="tex-center @if(!empty($pos_settings['inline_service_staff'])) col-md-3 @else col-md-4 @endif">
 										@lang('sale.product') @show_tooltip(__('lang_v1.tooltip_sell_product_column'))
 									</th>
 									<th class="text-center col-md-3">
@@ -252,10 +252,10 @@
 	@include('contact.create', ['quick_add' => true])
 </div>
 <!-- /.content -->
-<div class="modal fade register_details_modal" tabindex="-1" role="dialog" 
+<div class="modal fade register_details_modal" tabindex="-1" role="dialog"
 	aria-labelledby="gridSystemModalLabel">
 </div>
-<div class="modal fade close_register_modal" tabindex="-1" role="dialog" 
+<div class="modal fade close_register_modal" tabindex="-1" role="dialog"
 	aria-labelledby="gridSystemModalLabel">
 </div>
 <!-- quick product modal -->

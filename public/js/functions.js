@@ -12,8 +12,11 @@ function __calculate_amount(calculation_type, calculation_amount, amount) {
             return parseFloat(calculation_amount);
         case 'percentage':
         case 'percent':
-                var div = Decimal.div(calculation_amount, 100).toNumber();
+                // var div = Decimal.div(calculation_amount, 100).toNumber();
+                var div = calculation_amount/100;
             return Decimal.mul(div, amount).toNumber();
+
+            // return div*amount;
         default:
             return 0;
     }
@@ -21,12 +24,25 @@ function __calculate_amount(calculation_type, calculation_amount, amount) {
 
 //Add specified percentage to the input amount.
 function __add_percent(amount, percentage = 0) {
+
+    // var amount = parseFloat(amount);
+    // var percentage = isNaN(percentage) ? 0 : parseFloat(percentage);
+    // console.log('amount', amount);
+    // var div = Decimal.div(percentage, 100).toNumber();
+    // var mul = Decimal.mul(div, amount).toNumber();
+    // console.log('div', div);
+    // console.log('mul', mul);
+    // return Decimal.add(amount, mul).toNumber();
+    // return amount*1.15;
+
     var amount = parseFloat(amount);
     var percentage = isNaN(percentage) ? 0 : parseFloat(percentage);
+   var dvid = percentage/100;
+    var mul = dvid*amount;
+    var add = amount+mul;
+    // console.log('amount', add);
 
-    var div = Decimal.div(percentage, 100).toNumber();
-    var mul = Decimal.mul(div, amount).toNumber();
-    return Decimal.add(amount, mul).toNumber();
+    return add.toFixed(2);
 }
 
 //Substract specified percentage to the input amount.

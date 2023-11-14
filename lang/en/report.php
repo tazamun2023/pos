@@ -78,4 +78,6 @@ return [
     'net_profit' => 'Net Profit',
     'total_stock_adjustment' => 'Total Stock Adjustment',
     'total_stock_recovered' => 'Total Stock Recovered',
+    'net_cash_bal_in_hand' => 'Net cash balance in hand',
+    'net_card_bal' => 'Net Card balance'
 ];
