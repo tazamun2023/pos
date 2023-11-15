@@ -65,4 +65,7 @@ return [
     'show_customer' => 'Show Customer information',
     'paid_label' => 'Amount Paid Label',
     'customer_label' => 'Customer Label',
+    'customer_name'=> 'Customer Name',
+    'mobile'=>'Mobile',
+    'address'=>'Address',
 ];

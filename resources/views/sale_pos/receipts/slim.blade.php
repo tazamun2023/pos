@@ -280,18 +280,97 @@
 	        @endif
 
 	        <!-- customer info -->
+			@php
+			if(!empty($receipt_details->customer_info)){
+			$name = '';
+			$mobile = '';
+			$nameAndMobile = strip_tags($receipt_details->customer_info);
+		
+			// Remove HTML tags
+			$cleanedString = strip_tags($nameAndMobile);
+			$delimiter = __('contact.mobile').":";
+			// Replace specific elements
+			$replacedString = str_replace(['<br>', '<b>', '</b>', $delimiter], [' ', '', ' ', ' '.$delimiter], $cleanedString);
+			$parts = explode($delimiter, $replacedString, 2);
+			if (count($parts) === 2) {
+				$name = trim($parts[0]);
+				$mobile = trim($delimiter . $parts[1]);
+			} 
+		 }
+			@endphp
 	        <div class="textbox-info">
 				<table style="width: 100%">
 					<tr>
-						{{--  <td><strong>{{$receipt_details->customer_label ?? ''}}</strong></td>  --}}
-						<td colspan="2"<span>@if(!empty($receipt_details->customer_info))
+						<td><strong>{{$receipt_details->customer_label ?? ''}}</strong></td>
+						<td @if ($app->getLocale() == "ar")
+							style="text-align: left;"
+							@else
+							style="text-align: right;"
+						@endif <span>@if(!empty($receipt_details->customer_info))
+							{{ $name ?? ''}}
+						@endif</span></td>
+					</tr>
+					<tr>
+						<td><strong>{{$delimiter}}</td>
+						<td @if ($app->getLocale() == "ar")
+							style="text-align: left;"
+							@else
+							style="text-align: right;"
+						@endif>{{$parts[1] ?? ''}}</td>
+					</tr>
+				</table>
+	        </div>
+			{{--  @if(!empty($receipt_details->customer_name))
+			<div class="textbox-info">
+				<table style="width: 100%">
+					<tr>
+						<td><strong>@lang('invoice.customer_name')</strong></td>
+						<td @if ($app->getLocale() == "ar")
+							style="text-align: left;"
+							@else
+							style="text-align: right;"
+						@endif><span>{{$receipt_details->customer_name ?? ''}}</span></td>
+					</tr>
+				</table>
+	        </div>
+			@endif
+			<div class="textbox-info">
+				<table style="width: 100%">
+					<tr>
+						<td><strong>@lang('invoice.mobile')</strong></td>
+						<td @if ($app->getLocale() == "ar")
+							style="text-align: left;"
+							@else
+							style="text-align: right;"
+						@endif><span>{{ $receipt_details->customer_mobile ?? '' }}</span></td>
+					</tr>
+				</table>
+	        </div>  --}}
+			{{--  @if(!empty($receipt_details->customer_info_address))
+			<div class="textbox-info">
+				<table style="width: 100%">
+					<tr>
+						<td><strong>@lang('invoice.address')</strong></td>
+						<td @if ($app->getLocale() == "ar")
+							style="text-align: left;"
+							@else
+							style="text-align: right;"
+						@endif><span>{{ strip_tags($receipt_details->customer_info_address) ?? ''}}</span></td>
+					</tr>
+				</table>
+	        </div>
+			@endif  --}}
+			{{--  <div class="textbox-info">
+				<table style="width: 100%">
+					<tr>
+						<td colspan="2"><span>@if(!empty($receipt_details->customer_name))
 							<div class="bw">
-							{!! $receipt_details->customer_info !!}
+							{{ $receipt_details->customer_info }}
 							</div>
 						@endif</span></td>
 					</tr>
 				</table>
-	        </div>
+	        </div>  --}}
 			
 			@if(!empty($receipt_details->client_id_label))
 				<div class="textbox-info">
