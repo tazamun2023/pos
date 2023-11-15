@@ -45,7 +45,8 @@ $(document).ready(function() {
 
         var purchase_inc_tax = __add_percent(purchase_exc_tax, tax_rate);
 
-        __write_number($('input#single_dpp_inc_tax'), purchase_inc_tax);
+        /*this coments for create issue in products pages inc tax*/
+        // __write_number($('input#single_dpp_inc_tax'), purchase_inc_tax);
 
         var profit_percent = __read_number($('#profit_percent'));
         var selling_price = __add_percent(purchase_exc_tax, profit_percent);
@@ -77,7 +78,7 @@ $(document).ready(function() {
 
     //If purchase price inc tax is changed
     $(document).on('change', 'input#single_dpp_inc_tax', function(e) {
-        var purchase_inc_tax = __read_number($('input#single_dpp_inc_tax'));
+        var purchase_inc_tax = __read_number($('input#single_dpp_inc_tax')); //purchase price inc tax
         purchase_inc_tax = purchase_inc_tax == undefined ? 0 : purchase_inc_tax;
         var tax_rate = $('select#tax')
             .find(':selected')

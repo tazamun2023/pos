@@ -12,11 +12,9 @@ function __calculate_amount(calculation_type, calculation_amount, amount) {
             return parseFloat(calculation_amount);
         case 'percentage':
         case 'percent':
-                var div = Decimal.div(calculation_amount, 100).toNumber();
-
-            //     var div = calculation_amount/100;
+            var div = Decimal.div(calculation_amount, 100).toNumber();
+            console.log('percentage rate', div);
             return Decimal.mul(div, amount).toNumber();
-
         default:
             return 0;
     }
@@ -24,25 +22,12 @@ function __calculate_amount(calculation_type, calculation_amount, amount) {
 
 //Add specified percentage to the input amount.
 function __add_percent(amount, percentage = 0) {
-
-    // var amount = parseFloat(amount);
-    // var percentage = isNaN(percentage) ? 0 : parseFloat(percentage);
-    // console.log('amount', amount);
-    // var div = Decimal.div(percentage, 100).toNumber();
-    // var mul = Decimal.mul(div, amount).toNumber();
-    // console.log('div', div);
-    // console.log('mul', mul);
-    // return Decimal.add(amount, mul).toNumber();
-    // return amount*1.15;
-
     var amount = parseFloat(amount);
     var percentage = isNaN(percentage) ? 0 : parseFloat(percentage);
-   var dvid = percentage/100;
-    var mul = dvid*amount;
-    var add = amount+mul;
-    // console.log('amount', add);
 
-    return add.toFixed(2);
+    var div = Decimal.div(percentage, 100).toNumber();
+    var mul = Decimal.mul(div, amount).toNumber();
+    return Decimal.add(amount, mul).toNumber();
 }
 
 //Substract specified percentage to the input amount.
@@ -115,7 +100,9 @@ function __currency_trans_from_en(
         precision = __quantity_precision;
     }
 
+    // precision = 2;
     return accounting.formatMoney(input, symbol, precision, thousand, decimal, format);
+    // return
 }
 
 function __currency_convert_recursively(element, use_page_currency = false) {
@@ -127,8 +114,8 @@ function __currency_convert_recursively(element, use_page_currency = false) {
             show_symbol = false;
         }
 
-        //If data-use_page_currency is present in the element use_page_currency 
-        //value will be over written 
+        //If data-use_page_currency is present in the element use_page_currency
+        //value will be over written
         if (typeof $(this).data('use_page_currency') !== 'undefined') {
             use_page_currency = $(this).data('use_page_currency');
         }
@@ -211,6 +198,18 @@ function __write_number(
     }
 
     input_element.val(__number_f(value, false, use_page_currency, precision));
+}
+
+function __write_number_for_tax(
+    input_element,
+    value,
+    use_page_currency = false,
+    precision = __currency_precision
+) {
+    if(input_element.hasClass('input_quantity')) {
+        precision = __quantity_precision;
+    }
+    input_element.val(__number_f(value, false, use_page_currency, 4));
 }
 
 //Return the font-awesome html based on class value
@@ -404,7 +403,7 @@ function __print_receipt(section_id = null) {
     } else {
         var imgs = document.images;
     }
-    
+
     img_len = imgs.length;
     if (img_len) {
         img_counter = 0;
@@ -419,7 +418,7 @@ function __print_receipt(section_id = null) {
             // setTimeout(function() {
             //     $('#receipt_section').html('');
             // }, 5000);
-            
+
         }, 1000);
     }
 }
@@ -428,7 +427,7 @@ function incrementImageCounter() {
     img_counter++;
     if ( img_counter === img_len ) {
         window.print();
-        
+
         // setTimeout(function() {
         //     $('#receipt_section').html('');
         // }, 5000);
@@ -457,7 +456,7 @@ function __round(number, multiple = 0){
         number: rounded_number,
         diff: rounded_number - number
     }
-    
+
     return output;
 }
 
@@ -480,7 +479,7 @@ function __page_leave_confirmation(form) {
     var orig_form_data = form_obj.serialize();
 
     setTimeout(function(){ orig_form_data = form_obj.serialize(); }, 1000);
-    
+
     $(document).on("submit", "form", function(event){
         window.onbeforeunload = null;
     });
@@ -496,15 +495,15 @@ function init_tinymce(editor_id) {
     tinymce.init({
         selector: 'textarea#' + editor_id,
         plugins: [
-        'advlist autolink link image lists charmap print preview hr anchor pagebreak',
-        'searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking',
-        'table template paste help'
+            'advlist autolink link image lists charmap print preview hr anchor pagebreak',
+            'searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking',
+            'table template paste help'
         ],
         toolbar: 'undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify |' +
-          ' bullist numlist outdent indent | link image | print preview fullpage | ' +
-          'forecolor backcolor',
+            ' bullist numlist outdent indent | link image | print preview fullpage | ' +
+            'forecolor backcolor',
         menu: {
-          favs: {title: 'My Favorites', items: 'code | searchreplace'}
+            favs: {title: 'My Favorites', items: 'code | searchreplace'}
         },
         menubar: 'favs file edit view insert format tools table help'
     });
@@ -517,12 +516,12 @@ function getSelectedRows() {
         selected_rows[i++] = $(this).val();
     });
 
-    return selected_rows; 
+    return selected_rows;
 }
 
 function __is_online() {
     return true;
-    
+
     //if localhost always return true
     if ($('#__is_localhost').length > 0) {
         return true;
