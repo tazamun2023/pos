@@ -239,7 +239,7 @@
           @lang('report.net_cash_bal_in_hand')
         </th>
         <td>
-          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->cash_in_hand + $register_details->total_cash - $register_details->total_cash_refund }}</span></b>
+          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->net_card_balance + $register_details->total_cash - $register_details->total_cash_refund }}</span></b>
         </td>
       </tr>
 
@@ -248,7 +248,7 @@
           @lang('report.net_card_bal'):
         </th>
         <td>
-          <b><span class="display_currency" data-currency_symbol="true">{{ $details['transaction_details']->total_sales }}</span></b>
+          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->net_card_balance }}</span></b>
         </td>
       </tr>
 
