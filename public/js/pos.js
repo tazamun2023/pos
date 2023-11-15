@@ -1930,7 +1930,7 @@ function pos_discount(total_amount) {
     return discount;
 }
 
-function pos_order_tax(price_total, discount) { 
+function pos_order_tax(price_total, discount) {
     var tax_rate_id = $('#tax_rate_id').val();
     var calculation_type = 'percentage';
     var calculation_amount = __read_number($('#tax_calculation_amount'));
