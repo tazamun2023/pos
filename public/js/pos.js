@@ -1818,13 +1818,19 @@ function pos_order_tax(price_total, discount) {
 
     if (tax_rate_id) {
         var order_tax = __calculate_amount(calculation_type, calculation_amount, total_amount);
+        // let originalNumber = 3.4567; // Replace this with your actual number
+        // let truncatedNumber = Math.floor(originalNumber * 100) / 100;
+        //
+        // console.log('truncatedNumber', truncatedNumber);
+        // console.log('order_tax', order_tax);
     } else {
         var order_tax = 0;
     }
 
-    $('span#order_tax').text(__currency_trans_from_en(order_tax, false));
+    $('span#order_tax').text(__currency_trans_from_en(Math.floor(order_tax * 100) / 100, false));
 
-    return order_tax;
+    // return order_tax;
+    return Math.floor(order_tax * 100) / 100
 }
 
 function calculate_balance_due() {

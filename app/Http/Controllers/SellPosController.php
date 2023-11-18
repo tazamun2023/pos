@@ -1133,15 +1133,15 @@ public function showAllZatca(){
                     $number = $contacts->mobile;
                     $is_valid_num = validate_mobile($number);;
                     $is_admin = $this->isAdmin();
-                    if ($request->contact_id != 1 && $is_valid_num && $is_admin){
-//                        $transaction = Transaction::where('business_id', $business_id)
-//                            ->findorfail($transaction->id);
-                        $url = $this->transactionUtil->getInvoiceUrl($transaction->id, $business_id);
-//                        $new_url = is_short_url($url);
-                        $body = $contacts->name.' '.'فاتورتك جاهزة. على الرابط'.' '.$url;
-//                        dd($number);
-                        OurSMS($number, $body);
-                    }
+//                    if ($request->contact_id != 1 && $is_valid_num && $is_admin){
+////                        $transaction = Transaction::where('business_id', $business_id)
+////                            ->findorfail($transaction->id);
+//                        $url = $this->transactionUtil->getInvoiceUrl($transaction->id, $business_id);
+////                        $new_url = is_short_url($url);
+//                        $body = $contacts->name.' '.'فاتورتك جاهزة. على الرابط'.' '.$url;
+////                        dd($number);
+//                        OurSMS($number, $body);
+//                    }
 
                     $receipt = $this->receiptContent($business_id, $input['location_id'], $transaction->id, null, false, true, $invoice_layout_id);
                 }
@@ -1275,7 +1275,7 @@ public function showAllZatca(){
         $receipt_printer_type = is_null($printer_type) ? $location_details->receipt_printer_type : $printer_type;
 
         $receipt_details = $this->transactionUtil->getReceiptDetails($transaction_id, $location_id, $invoice_layout, $business_details, $location_details, $receipt_printer_type);
-// dd($receipt_details);
+// dd($receipt_details->tax);
         $currency_details = [
             'symbol' => $business_details->currency_symbol,
             'thousand_separator' => $business_details->thousand_separator,

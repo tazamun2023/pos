@@ -653,6 +653,18 @@ class ProductUtil extends Util
             if (! empty($tax_details)) {
                 $output['tax_id'] = $tax_id;
                 $output['tax'] = ($tax_details->amount / 100) * ($output['total_before_tax'] - $output['discount']);
+//                $output['tax'] = (number_format($tax_details->amount, 2, '.', '') / 100) * ($output['total_before_tax'] - $output['discount']);
+                $formattedString = (string)$output['tax'];
+
+// Check if the character after the decimal point is 5 or greater
+                if (isset($formattedString[4]) && (int)$formattedString[4] >= 5) {
+                    // Replace it with 4
+                    $formattedString[4] = '4';
+                }
+
+                $output['tax'] = number_format($formattedString, 2, '.', '');
+
+//                dd(number_format($formattedString, 2, '.', ''));
             }
         }
 

@@ -13,7 +13,6 @@ function __calculate_amount(calculation_type, calculation_amount, amount) {
         case 'percentage':
         case 'percent':
             var div = Decimal.div(calculation_amount, 100).toNumber();
-            console.log('percentage rate', div);
             return Decimal.mul(div, amount).toNumber();
         default:
             return 0;
