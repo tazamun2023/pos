@@ -1828,7 +1828,7 @@ function pos_order_tax(price_total, discount) {
     }
 
     $('span#order_tax').text(__currency_trans_from_en(Math.floor(order_tax * 100) / 100, false));
-
+    console.log('order_tax', order_tax);
     // return order_tax;
     return Math.floor(order_tax * 100) / 100
 }

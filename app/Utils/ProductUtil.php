@@ -38,6 +38,7 @@ class ProductUtil extends Util
      */
     public function createSingleProductVariation($product, $sku, $purchase_price, $dpp_inc_tax, $profit_percent, $selling_price, $selling_price_inc_tax, $combo_variations = [])
     {
+//        dd($purchase_price);
         if (! is_object($product)) {
             $product = Product::find($product);
         }
@@ -2256,5 +2257,9 @@ class ProductUtil extends Util
             $vld->qty_available = $stock;
             $vld->save();
         }
+    }
+
+    function systemDoubleValue($value, $digits = 4){
+        return sprintf('%.'.$digits.'f', floor($value*10000*($value>0?1:-1))/10000*($value>0?1:-1));
     }
 }
