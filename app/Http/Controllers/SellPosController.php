@@ -2285,7 +2285,7 @@ public function showAllZatca(){
             }
 
             $output = $this->getSellLineRow($variation_id, $location_id, $quantity, $row_count, $is_direct_sell);
-
+//dd($output);
             if ($this->transactionUtil->isModuleEnabled('modifiers') && ! $is_direct_sell) {
                 $variation = Variation::find($variation_id);
                 $business_id = request()->session()->get('user.business_id');
