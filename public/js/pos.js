@@ -298,8 +298,13 @@ $(document).ready(function() {
         var entered_qty = __read_number($(this));
 
         var tr = $(this).parents('tr');
-
-        var unit_price_inc_tax = __read_number(tr.find('input.pos_unit_price_inc_tax'));
+        // console.log('tr', tr.find('input#pos_line_total_00').val());
+        // var unit_price_inc_tax = __read_number(tr.find('input.pos_unit_price_inc_tax'));
+        var unit_price_inc_tax = __read_number(tr.find('input#pos_line_total_00'));
+        // var unit_price_inc_tax = tr.find('input.pos_unit_price_inc_tax').val();
+        // var unit_price_inc_tax = tr.find('input.pos_unit_price_inc_tax');
+        console.log('unit_price_inc_tax', unit_price_inc_tax);
+        console.log('entered_qty', entered_qty);
         var line_total = entered_qty * unit_price_inc_tax;
 
         __write_number(tr.find('input.pos_line_total'), line_total, false, 2);
@@ -1827,10 +1832,10 @@ function pos_order_tax(price_total, discount) {
         var order_tax = 0;
     }
 
-    $('span#order_tax').text(__currency_trans_from_en(Math.floor(order_tax * 100) / 100, false));
-    console.log('order_tax', order_tax);
-    // return order_tax;
-    return Math.floor(order_tax * 100) / 100
+    $('span#order_tax').text(__currency_trans_from_en(order_tax, false));
+    // console.log('order_tax', order_tax);
+    return order_tax;
+    // return Math.floor(order_tax * 100) / 100
 }
 
 function calculate_balance_due() {

@@ -166,7 +166,6 @@ function __number_uf(input, use_page_currency = false) {
     } else {
         var decimal = __currency_decimal_separator;
     }
-
     return accounting.unformat(input, decimal);
 }
 
