@@ -5689,11 +5689,11 @@ class TransactionUtil extends Util
         //update payment status
         $this->updatePaymentStatus($transaction->id, $transaction->final_total);
         //insert data to cash register transaction
-        $this->insertCashTransactionData($transaction_data['final_total'],$payments[0]['method'],'debit',$transaction->id);
+        $this->insertCashTransactionData($transaction_data['final_total'],$payments[0]['method'],'debit',$transaction->id,'expense');
 
         return $transaction;
     }
-    public function insertCashTransactionData($amount,$pay_method,$type,$transaction_id){
+    public function insertCashTransactionData($amount,$pay_method,$type,$transaction_id,$transaction_type){
         $user_id = auth()->user()->id;
         $register = CashRegister::where('user_id', $user_id)
                 ->where('status', 'open')
@@ -5703,7 +5703,7 @@ class TransactionUtil extends Util
             $data['amount']=$amount;
             $data['pay_method']=$pay_method;
             $data['type']=$type;
-            $data['transaction_type']='expense';
+            $data['transaction_type']=$transaction_type;
             $data['transaction_id']=$transaction_id;
            
             CashRegisterTransaction::create($data);

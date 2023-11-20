@@ -60,6 +60,7 @@ class TransactionPaymentController extends Controller
      */
     public function store(Request $request)
     {
+         
         try {
             $business_id = $request->session()->get('user.business_id');
             $transaction_id = $request->input('transaction_id');
@@ -119,6 +120,7 @@ class TransactionPaymentController extends Controller
                 if (! empty($inputs['amount'])) {
                     $tp = TransactionPayment::create($inputs);
 
+                    $this->transactionUtil->insertCashTransactionData($payment_amount,$inputs['method'],'debit',$tp->id,'sell_return');
                     if (! empty($request->input('denominations'))) {
                         $this->transactionUtil->addCashDenominations($tp, $request->input('denominations'));
                     }
