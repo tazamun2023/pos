@@ -6,6 +6,8 @@ use App\AccountTransaction;
 use App\Business;
 use App\BusinessLocation;
 use App\CashDenomination;
+use App\CashRegister;
+use App\CashRegisterTransaction;
 use App\Contact;
 use App\Currency;
 use App\Events\TransactionPaymentAdded;
@@ -5672,17 +5674,40 @@ class TransactionUtil extends Util
         if (! empty($document_name)) {
             $transaction_data['document'] = $document_name;
         }
-
+        
         $transaction = Transaction::create($transaction_data);
+
+      
+       
+
+       
 
         $payments = ! empty($request->input('payment')) ? $request->input('payment') : [];
         //add expense payment
         $this->createOrUpdatePaymentLines($transaction, $payments, $business_id);
-
+ 
         //update payment status
         $this->updatePaymentStatus($transaction->id, $transaction->final_total);
+        //insert data to cash register transaction
+        $this->insertCashTransactionData($transaction_data['final_total'],$payments[0]['method'],'debit',$transaction->id);
 
         return $transaction;
+    }
+    public function insertCashTransactionData($amount,$pay_method,$type,$transaction_id){
+        $user_id = auth()->user()->id;
+        $register = CashRegister::where('user_id', $user_id)
+                ->where('status', 'open')
+                ->first();
+        if($register){
+            $data['cash_register_id']=$register->id;
+            $data['amount']=$amount;
+            $data['pay_method']=$pay_method;
+            $data['type']=$type;
+            $data['transaction_type']='expense';
+            $data['transaction_id']=$transaction_id;
+           
+            CashRegisterTransaction::create($data);
+        }
     }
 
     public function updateExpense($request, $id, $business_id, $format_data = true)
