@@ -252,7 +252,7 @@ class SellReturnController extends Controller
 
             $sell->sell_lines[$key]->formatted_qty = $this->transactionUtil->num_f($value->quantity, false, null, true);
         }
-
+//dd($sell->sell_lines);
         return view('sell_return.add')
             ->with(compact('sell'));
     }

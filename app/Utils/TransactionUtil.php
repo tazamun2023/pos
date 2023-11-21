@@ -289,6 +289,7 @@ class TransactionUtil extends Util
         $combo_lines = [];
         $products_modified_combo = [];
         foreach ($products as $product) {
+//            dd($product);
             $multiplier = 1;
             if (isset($product['sub_unit_id']) && $product['sub_unit_id'] == $product['product_unit_id']) {
                 unset($product['sub_unit_id']);
@@ -351,8 +352,9 @@ class TransactionUtil extends Util
                 }
                 $uf_quantity = $uf_data ? $this->num_uf($product['quantity']) : $product['quantity'];
                 $uf_item_tax = $uf_data ? $this->num_uf($product['item_tax']) : $product['item_tax'];
-                $uf_unit_price_inc_tax = $uf_data ? $this->num_uf($product['unit_price_inc_tax']) : $product['unit_price_inc_tax'];
-
+//                $uf_unit_price_inc_tax = $uf_data ? $this->num_uf($product['unit_price_inc_tax']) : $product['unit_price_inc_tax'];
+                $uf_unit_price_inc_tax = $uf_data ? $this->systemDoubleValue($product['unit_price_inc_tax']) : $product['unit_price_inc_tax'];
+//dd($uf_unit_price_inc_tax);
                 $line_discount_amount = 0;
                 if (! empty($product['line_discount_amount'])) {
                     $line_discount_amount = $uf_data ? $this->num_uf($product['line_discount_amount']) : $product['line_discount_amount'];

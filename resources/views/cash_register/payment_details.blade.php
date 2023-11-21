@@ -239,7 +239,8 @@
           @lang('report.net_cash_bal_in_hand')
         </th>
         <td>
-          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->total_cash_sell - ($register_details->total_cash_sell_return + $register_details->total_cash_expense_return) }}</span></b>
+{{--          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->total_cash_sell - ($register_details->total_cash_sell_return + $register_details->total_cash_expense_return) }}</span></b>--}}
+          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->net_cash_bal_in_hand }}</span></b>
         </td>
       </tr>
 
@@ -248,7 +249,8 @@
           @lang('report.net_card_bal'):
         </th>
         <td>
-          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->total_card_sell - ($register_details->total_card_sell_return + $register_details->total_card_expense_return) }}</span></b>
+{{--            <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->total_card_sell - ($register_details->total_card_sell_return + $register_details->total_card_expense_return) }}</span></b>--}}
+            <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->net_card_bal }}</span></b>
         </td>
       </tr>
 

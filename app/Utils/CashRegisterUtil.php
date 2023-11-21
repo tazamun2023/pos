@@ -263,14 +263,36 @@ class CashRegisterUtil extends Util
             DB::raw("SUM(IF(transaction_type='sell_return', amount, IF(transaction_type='sell_return', -1 * amount, 0))) as total_refund"),
             DB::raw("SUM(IF(type='credit', amount, IF(transaction_type='sell', -1 * amount, 0))) as total_credit_sell"),
             /*for card*/
-            DB::raw("SUM(IF(pay_method='card', amount, IF(transaction_type='sell', -1 * amount, 0))) as total_card_sell"),
-            DB::raw("SUM(IF(pay_method='card', amount, IF(transaction_type='sell_return', -1 * amount, 0))) as total_card_sell_return"),
-            DB::raw("SUM(IF(pay_method='card', amount, IF(transaction_type='expense', -1 * amount, 0))) as total_card_expense_return"),
+//            DB::raw("SUM(IF(pay_method='card', amount, 0)) as total_card_sell"),
+//            DB::raw("SUM(IF(pay_method='card', amount, IF(transaction_type='sell', -1 * amount, 0))) as total_card_sell"),
+//            DB::raw("SUM(IF(pay_method='card', amount, IF(transaction_type='sell_return', -1 * amount, 0))) as total_card_sell_return"),
+//            DB::raw("SUM(IF(pay_method='card', amount, IF(transaction_type='expense', -1 * amount, 0))) as total_card_expense_return"),
+            DB::raw("
+    SUM(
+        CASE
+            WHEN pay_method = 'card' AND transaction_type = 'sell' THEN amount
+            WHEN pay_method = 'card' AND transaction_type = 'sell_return' THEN -1 * amount
+            WHEN pay_method = 'card' AND transaction_type = 'expense' THEN -1 * amount
+            ELSE 0
+        END
+    ) as net_card_bal
+"),
             /*end for card*/
             /*for cash*/
-            DB::raw("SUM(IF(pay_method='cash', amount, IF(transaction_type='sell', -1 * amount, 0))) as total_cash_sell"),
-            DB::raw("SUM(IF(pay_method='cash', amount, IF(transaction_type='sell_return', -1 * amount, 0))) as total_cash_sell_return"),
-            DB::raw("SUM(IF(pay_method='cash', amount, IF(transaction_type='expense', -1 * amount, 0))) as total_cash_expense_return"),
+//            DB::raw("SUM(IF(pay_method='cash', amount, IF(transaction_type='sell', -1 * amount, 0))) as total_cash_sell"),
+//            DB::raw("SUM(IF(pay_method='cash', amount, IF(transaction_type='sell_return', -1 * amount, 0))) as total_cash_sell_return"),
+//            DB::raw("SUM(IF(pay_method='cash', amount, IF(transaction_type='expense', -1 * amount, 0))) as total_cash_expense_return"),
+
+            DB::raw("
+    SUM(
+        CASE
+            WHEN pay_method = 'cash' AND transaction_type = 'sell' THEN amount
+            WHEN pay_method = 'cash' AND transaction_type = 'sell_return' THEN -1 * amount
+            WHEN pay_method = 'cash' AND transaction_type = 'expense' THEN -1 * amount
+            ELSE 0
+        END
+    ) as net_cash_bal_in_hand
+"),
             /*end for cash*/
 
             DB::raw("SUM(IF(transaction_type='expense', IF(transaction_type='refund', -1 * amount, amount), 0)) as total_expense"),

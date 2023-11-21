@@ -877,6 +877,7 @@ public function showAllZatca(){
                 $discount = ['discount_type' => $input['discount_type'],
                     'discount_amount' => $input['discount_amount'],
                 ];
+
                 $invoice_total = $this->productUtil->calculateInvoiceTotal($input['products'], $input['tax_rate_id'], $discount);
 
                 DB::beginTransaction();
@@ -985,7 +986,7 @@ public function showAllZatca(){
 
                 //Upload Shipping documents
                 Media::uploadMedia($business_id, $transaction, $request, 'shipping_documents', false, 'shipping_document');
-
+//dd($input['products']);
                 $this->transactionUtil->createOrUpdateSellLines($transaction, $input['products'], $input['location_id']);
 
                 $change_return['amount'] = $input['change_return'] ?? 0;

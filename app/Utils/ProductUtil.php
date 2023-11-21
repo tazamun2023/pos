@@ -620,9 +620,13 @@ class ProductUtil extends Util
 
         //Sub Total
         foreach ($products as $product) {
-            $unit_price_inc_tax = $uf_number ? $this->num_uf($product['unit_price_inc_tax']) : $product['unit_price_inc_tax'];
+//            $unit_price_inc_tax = $uf_number ? $this->num_uf($product['unit_price_inc_tax']) : $product['unit_price_inc_tax'];
+            $variation_id = $product['variation_id'];
+            $variation = Variation::find($variation_id);
+//            dd($variation->default_sell_price);
+            $unit_price_inc_tax = $uf_number ? $this->systemDoubleValue($variation->default_sell_price) : $product['unit_price_inc_tax'];
             $quantity = $uf_number ? $this->num_uf($product['quantity']) : $product['quantity'];
-
+//dd($unit_price_inc_tax);
             $output['total_before_tax'] += $quantity * $unit_price_inc_tax;
 
             //Add modifier price to total if exists
@@ -654,23 +658,12 @@ class ProductUtil extends Util
             if (! empty($tax_details)) {
                 $output['tax_id'] = $tax_id;
                 $output['tax'] = ($tax_details->amount / 100) * ($output['total_before_tax'] - $output['discount']);
-//                $output['tax'] = (number_format($tax_details->amount, 2, '.', '') / 100) * ($output['total_before_tax'] - $output['discount']);
-                $formattedString = (string)$output['tax'];
-
-// Check if the character after the decimal point is 5 or greater
-                if (isset($formattedString[4]) && (int)$formattedString[4] >= 5) {
-                    // Replace it with 4
-                    $formattedString[4] = '4';
-                }
-
-                $output['tax'] = number_format($formattedString, 2, '.', '');
-
-//                dd(number_format($formattedString, 2, '.', ''));
             }
         }
 
         //Calculate total
-        $output['final_total'] = $output['total_before_tax'] + $output['tax'] - $output['discount'];
+        $output['final_total_no_round'] = $output['total_before_tax'] + $output['tax'] - $output['discount'];
+        $output['final_total'] = round($output['final_total_no_round'], 2);
 
         return $output;
     }
