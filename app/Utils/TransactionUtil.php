@@ -289,6 +289,11 @@ class TransactionUtil extends Util
         $combo_lines = [];
         $products_modified_combo = [];
         foreach ($products as $product) {
+            $products_tax_type = Product::find($product['product_id'])->tax_type;
+            if ($products_tax_type=='inclusive'){
+                $product['unit_price_inc_tax'] = Variation::find($product['variation_id'])->default_purchase_price;
+                $product['unit_price'] = Variation::find($product['variation_id'])->default_purchase_price;
+            }
 //            dd($product);
             $multiplier = 1;
             if (isset($product['sub_unit_id']) && $product['sub_unit_id'] == $product['product_unit_id']) {
@@ -317,6 +322,7 @@ class TransactionUtil extends Util
                             } else {
                                 if (! empty($product['modifier_price'][$key])) {
                                     $this_price = $uf_data ? $this->num_uf($product['modifier_price'][$key]) : $product['modifier_price'][$key];
+//                                    dd($this_price);
                                     $modifier_quantity = isset($product['modifier_quantity'][$key]) ? $product['modifier_quantity'][$key] : 1;
                                     $modifiers_formatted[] = new TransactionSellLine([
                                         'product_id' => $product['modifier_set_id'][$key],
