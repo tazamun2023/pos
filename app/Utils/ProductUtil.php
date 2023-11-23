@@ -639,7 +639,6 @@ class ProductUtil extends Util
                 $output['total_before_tax'] += $quantity * $unit_price_inc_tax;
             }
 
-//dd($output['total_before_tax']);
             //Add modifier price to total if exists
             if (! empty($product['modifier_price'])) {
                 foreach ($product['modifier_price'] as $key => $modifier_price) {
