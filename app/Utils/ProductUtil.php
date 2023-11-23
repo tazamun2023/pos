@@ -616,7 +616,7 @@ class ProductUtil extends Util
             return false;
         }
 
-        $output = ['total_before_tax' => 0, 'tax' => 0, 'discount' => 0, 'final_total' => 0];
+        $output = ['total_before_tax' => 0, 'tax' => 0, 'discount' => 0, 'final_total' => 0, 'total_with_tax' =>0];
 
         //Sub Total
         foreach ($products as $product) {
@@ -628,7 +628,9 @@ class ProductUtil extends Util
             $quantity = $uf_number ? $this->num_uf($product['quantity']) : $product['quantity'];
 //dd($unit_price_inc_tax);
             $output['total_before_tax'] += $quantity * $unit_price_inc_tax;
+            $output['total_with_tax'] += $quantity * $variation->sell_price_inc_tax;
 
+//dd($output['total_before_tax']);
             //Add modifier price to total if exists
             if (! empty($product['modifier_price'])) {
                 foreach ($product['modifier_price'] as $key => $modifier_price) {
@@ -657,7 +659,10 @@ class ProductUtil extends Util
             $tax_details = TaxRate::find($tax_id);
             if (! empty($tax_details)) {
                 $output['tax_id'] = $tax_id;
-                $output['tax'] = ($tax_details->amount / 100) * ($output['total_before_tax'] - $output['discount']);
+//                dd($output);
+//                $output['tax'] = ($tax_details->amount / 100) * ($output['total_before_tax'] - $output['discount']);
+                $output['tax'] = $output['total_with_tax'] - $output['total_before_tax'] - $output['discount'];
+//                dd($output['tax']);
             }
         }
 

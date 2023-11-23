@@ -57,6 +57,7 @@ class TransactionUtil extends Util
             $pay_term_number = $contact->pay_term_number;
             $pay_term_type = $contact->pay_term_type;
         }
+//        dd($invoice_total);
         $transaction = Transaction::create([
             'business_id' => $business_id,
             'location_id' => $input['location_id'],
@@ -358,6 +359,7 @@ class TransactionUtil extends Util
                 }
                 $uf_quantity = $uf_data ? $this->num_uf($product['quantity']) : $product['quantity'];
                 $uf_item_tax = $uf_data ? $this->num_uf($product['item_tax']) : $product['item_tax'];
+
 //                $uf_unit_price_inc_tax = $uf_data ? $this->num_uf($product['unit_price_inc_tax']) : $product['unit_price_inc_tax'];
                 $uf_unit_price_inc_tax = $uf_data ? $this->systemDoubleValue($product['unit_price_inc_tax']) : $product['unit_price_inc_tax'];
 //dd($uf_unit_price_inc_tax);
@@ -370,6 +372,8 @@ class TransactionUtil extends Util
                     }
                 }
 
+
+//dd($taxTotal);
                 $line = [
                     'product_id' => $product['product_id'],
                     'variation_id' => $product['variation_id'],

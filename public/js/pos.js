@@ -303,10 +303,10 @@ $(document).ready(function() {
         var unit_price_inc_tax = __read_number(tr.find('input#pos_line_total_00'));
         // var unit_price_inc_tax = tr.find('input.pos_unit_price_inc_tax').val();
         // var unit_price_inc_tax = tr.find('input.pos_unit_price_inc_tax');
-        console.log('unit_price_inc_tax', unit_price_inc_tax);
-        console.log('entered_qty', entered_qty);
+        // console.log('unit_price_inc_tax', unit_price_inc_tax);
+        // console.log('entered_qty', entered_qty);
         var line_total = entered_qty * unit_price_inc_tax;
-
+        // console.log('line_total', line_total);
         __write_number(tr.find('input.pos_line_total'), line_total, false, 2);
         tr.find('span.pos_line_total_text').text(__currency_trans_from_en(line_total, true));
 
@@ -1715,9 +1715,16 @@ function get_subtotal() {
     var price_total = 0;
 
     $('table#pos_table tbody tr').each(function() {
-        price_total = price_total + __read_number($(this).find('input.pos_line_total'));
-    });
+        // price_total = price_total + __read_number($(this).find('input.pos_line_total'));
+        let qty = __read_number($(this).find('input.pos_quantity'));
+        let totalPrice = qty*__read_number($(this).find('input#pos_line_total_item_tax'));
 
+        // price_total = price_total + __read_number($(this).find('input.pos_line_total'));
+        price_total = price_total + totalPrice/1.15;
+        // console.log('price_total', $(this).find('input.pos_line_total').val());
+        // price_total = 330.434782612;
+    });
+    console.log('price_total', price_total);
     //Go through the modifier prices.
     $('input.modifiers_price').each(function() {
         var modifier_price = __read_number($(this));

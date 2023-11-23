@@ -83,6 +83,7 @@
   				$sell_line_note = $so_line->sell_line_note;
   			}
 
+              $singleTotal = App\Variation::find($product->variation_id)->sell_price_inc_tax;
   		@endphp
 
 		@if(!empty($discount))
@@ -394,6 +395,8 @@
 		@endphp
 		<input type="{{$subtotal_type}}" class="form-control pos_line_total @if(!empty($pos_settings['is_pos_subtotal_editable'])) input_number @endif" value="{{$product->quantity_ordered*$unit_price_inc_tax}}">
 		<input type="hidden" value="{{ $unit_price_inc_tax }}" id='pos_line_total_00'>
+		<input type="hidden" value="{{ $singleTotal }}" id='pos_line_total_item_tax'>
+{{--		<input type="hidden" value="8.695652174" id='pos_line_total_00' class='pos_line_total_00'>--}}
 		<span class="display_currency pos_line_total_text @if(!empty($pos_settings['is_pos_subtotal_editable'])) hide @endif" data-currency_symbol="true">{{$product->quantity_ordered*$unit_price_inc_tax}}</span>
 	</td>
 	<td class="text-center v-center">
