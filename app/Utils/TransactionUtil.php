@@ -5911,7 +5911,7 @@ class TransactionUtil extends Util
         return $parent_payment;
     }
 
-    public function addSellReturn($input, $business_id, $user_id, $uf_number = true)
+    public function addSellReturn($input, $business_id, $user_id, $uf_number = true, $sell_return=false)
     {
         $discount = [
             'discount_type' => $input['discount_type'] ?? 'fixed',
@@ -5924,7 +5924,7 @@ class TransactionUtil extends Util
 
         $input['tax_id'] = $input['tax_id'] ?? null;
 
-        $invoice_total = $productUtil->calculateInvoiceTotal($input['products'], $input['tax_id'], $discount, $uf_number);
+        $invoice_total = $productUtil->calculateInvoiceTotal($input['products'], $input['tax_id'], $discount, $uf_number, true);
 
         //Get parent sale
         $sell = Transaction::where('business_id', $business_id)

@@ -610,7 +610,7 @@ class ProductUtil extends Util
      * @param  array  $discount['discount_type', 'discount_amount']
      * @return mixed (false, array)
      */
-    public function calculateInvoiceTotal($products, $tax_id, $discount = null, $uf_number = true)
+    public function calculateInvoiceTotal($products, $tax_id, $discount = null, $uf_number = true, $sell_return=false)
     {
         if (empty($products)) {
             return false;
@@ -620,15 +620,24 @@ class ProductUtil extends Util
 
         //Sub Total
         foreach ($products as $product) {
+
 //            $unit_price_inc_tax = $uf_number ? $this->num_uf($product['unit_price_inc_tax']) : $product['unit_price_inc_tax'];
-            $variation_id = $product['variation_id'];
-            $variation = Variation::find($variation_id);
-//            dd($variation->default_sell_price);
-            $unit_price_inc_tax = $uf_number ? $this->systemDoubleValue($variation->default_sell_price) : $product['unit_price_inc_tax'];
-            $quantity = $uf_number ? $this->num_uf($product['quantity']) : $product['quantity'];
+            if (!$sell_return){
+                $variation_id = $product['variation_id'];
+
+                $variation = Variation::find($variation_id);
+
+                $unit_price_inc_tax = $uf_number ? $this->systemDoubleValue($variation->default_sell_price) : $product['unit_price_inc_tax'];
+                $quantity = $uf_number ? $this->num_uf($product['quantity']) : $product['quantity'];
 //dd($unit_price_inc_tax);
-            $output['total_before_tax'] += $quantity * $unit_price_inc_tax;
-            $output['total_with_tax'] += $quantity * $variation->sell_price_inc_tax;
+                $output['total_before_tax'] += $quantity * $unit_price_inc_tax;
+                $output['total_with_tax'] += $quantity * $variation->sell_price_inc_tax;
+            }else{
+                $unit_price_inc_tax = $uf_number ? $this->num_uf($product['unit_price_inc_tax']) : $product['unit_price_inc_tax'];
+                $quantity = $uf_number ? $this->num_uf($product['quantity']) : $product['quantity'];
+
+                $output['total_before_tax'] += $quantity * $unit_price_inc_tax;
+            }
 
 //dd($output['total_before_tax']);
             //Add modifier price to total if exists
