@@ -256,6 +256,7 @@ class AccountReportsController extends Controller
                                         'transaction_payments.is_advance',
                                         'transaction_payments.amount',
                                         'transaction_payments.method',
+                                        'T.payment_status',
                                     ]);
 //dd($query->get());
             $permitted_locations = auth()->user()->permitted_locations();
@@ -280,6 +281,10 @@ class AccountReportsController extends Controller
 //dd(\request()->all());
             if (! empty(request()->input('payment_types'))) {
                 $query->where('transaction_payments.method', request()->input('payment_types'));
+            }
+            if (! empty(request()->input('payment_status'))) {
+//                dd(request()->input('payment_status'));
+                $query->where('T.payment_status', request()->input('payment_status'));
             }
 
             return DataTables::of($query)
