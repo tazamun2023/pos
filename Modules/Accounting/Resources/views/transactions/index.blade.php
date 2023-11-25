@@ -32,7 +32,7 @@
                 @include('accounting::transactions.partials.payments', ['id' => "sell_payment_table"])
             </div>
             <div class="col-lg-10 col-md-10 col-sm-10 col-xs-10 pos-tab">
-                @include('accounting::transactions.partials.purchases')
+                @include('accounting::transactions.partials.purchases',['id' => "purchases_table"])
             </div>
             <div class="col-lg-10 col-md-10 col-sm-10 col-xs-10 pos-tab">
                 @include('accounting::transactions.partials.payments', ['id' => "purchase_payment_table"])
@@ -127,21 +127,39 @@
         sell_table.ajax.reload();
     });
 
+    $(document).on('change', '#sell_payment_table_created_by,#sell_payment_table_payment_method',
+    function() {
+        sell_payment_table.ajax.reload();
+    }); 
+
+        $('#sell_payment_table_date_range').daterangepicker(
+                dateRangeSettings,
+                function(start, end) {
+                    $('#sell_payment_table_date_range').val(start.format(moment_date_format) + ' ~ ' + end.format(
+                        moment_date_format));
+                        sell_payment_table.ajax.reload();
+                }
+            );
+        $('#sell_payment_table_date_range').on('cancel.daterangepicker', function(ev, picker) {
+            $('#sell_payment_table_date_range').val('');
+            sell_payment_table.ajax.reload();
+        });
+
         sell_payment_table = $('#sell_payment_table').DataTable({
                             processing: true,
                             serverSide: true,
                             "ajax": {
                                 "url": "/accounting/transactions/?transaction_type=sell&datatable=payment",
-                                "data": function ( d ) {
-                                    // d.account_id = $('#account_id').val();
-                                    // var start_date = '';
-                                    // var endDate = '';
-                                    // if($('#date_filter').val()){
-                                    //     var start_date = $('#date_filter').data('daterangepicker').startDate.format('YYYY-MM-DD');
-                                    //     var endDate = $('#date_filter').data('daterangepicker').endDate.format('YYYY-MM-DD');
-                                    // }
-                                    // d.start_date = start_date;
-                                    // d.end_date = endDate;
+                                "data": function ( d ) { 
+                                    if($('#sell_payment_table_date_range').val()) {
+                                        var start = $('#sell_payment_table_date_range').data('daterangepicker').startDate.format('YYYY-MM-DD');
+                                        var end = $('#sell_payment_table_date_range').data('daterangepicker').endDate.format('YYYY-MM-DD');
+                                        d.start_date = start;
+                                        d.end_date = end;
+                                    }
+                                 
+                                    d.payment_method = $('#sell_payment_table_payment_method').val(); 
+                                    d.created_by = $('#sell_payment_table_created_by').val();
                                 }
                             },
                             columnDefs:[{
@@ -162,21 +180,40 @@
                                 __currency_convert_recursively($('#sell_payment_table'));
                             }
                         });
+
+     $(document).on('change', '#purchase_payment_table_created_by,#purchase_payment_table_payment_method',
+    function() {
+        purchase_payment_table.ajax.reload();
+    }); 
+
+        $('#purchase_payment_table_date_range').daterangepicker(
+                dateRangeSettings,
+                function(start, end) {
+                    $('#purchase_payment_table_date_range').val(start.format(moment_date_format) + ' ~ ' + end.format(
+                        moment_date_format));
+                        purchase_payment_table.ajax.reload();
+                }
+            );
+        $('#purchase_payment_table_date_range').on('cancel.daterangepicker', function(ev, picker) {
+            $('#purchase_payment_table_date_range').val('');
+            purchase_payment_table.ajax.reload();
+        });
+
         purchase_payment_table = $('#purchase_payment_table').DataTable({
                             processing: true,
                             serverSide: true,
                             "ajax": {
                                 "url": "/accounting/transactions/?transaction_type=purchase&datatable=payment",
                                 "data": function ( d ) {
-                                    // d.account_id = $('#account_id').val();
-                                    // var start_date = '';
-                                    // var endDate = '';
-                                    // if($('#date_filter').val()){
-                                    //     var start_date = $('#date_filter').data('daterangepicker').startDate.format('YYYY-MM-DD');
-                                    //     var endDate = $('#date_filter').data('daterangepicker').endDate.format('YYYY-MM-DD');
-                                    // }
-                                    // d.start_date = start_date;
-                                    // d.end_date = endDate;
+                                    if($('#purchase_payment_table_date_range').val()) {
+                                        var start = $('#purchase_payment_table_date_range').data('daterangepicker').startDate.format('YYYY-MM-DD');
+                                        var end = $('#purchase_payment_table_date_range').data('daterangepicker').endDate.format('YYYY-MM-DD');
+                                        d.start_date = start;
+                                        d.end_date = end;
+                                    }
+                                 
+                                    d.payment_method = $('#purchase_payment_table_payment_method').val(); 
+                                    d.created_by = $('#purchase_payment_table_created_by').val();
                                 }
                             },
                             columnDefs:[{
@@ -199,37 +236,42 @@
                         });
 
         //Purchase table
+
+        
+     $(document).on('change', '#purchases_table_created_by,#purchases_table_payment_method',
+    function() {
+        purchase_table.ajax.reload();
+    }); 
+
+        $('#purchases_table_date_range').daterangepicker(
+                dateRangeSettings,
+                function(start, end) {
+                    $('#purchases_table_date_range').val(start.format(moment_date_format) + ' ~ ' + end.format(
+                        moment_date_format));
+                        purchase_table.ajax.reload();
+                }
+            );
+        $('#purchases_table_date_range').on('cancel.daterangepicker', function(ev, picker) {
+            $('#purchases_table_date_range').val('');
+            purchase_table.ajax.reload();
+        });
+
         purchase_table = $('#purchase_table').DataTable({
             processing: true,
             serverSide: true,
             ajax: {
                 url: '/accounting/transactions/?datatable=purchase',
                 data: function(d) {
-                    if ($('#purchase_list_filter_location_id').length) {
-                        d.location_id = $('#purchase_list_filter_location_id').val();
-                    }
-                    if ($('#purchase_list_filter_supplier_id').length) {
-                        d.supplier_id = $('#purchase_list_filter_supplier_id').val();
-                    }
-                    if ($('#purchase_list_filter_payment_status').length) {
-                        d.payment_status = $('#purchase_list_filter_payment_status').val();
-                    }
-                    if ($('#purchase_list_filter_status').length) {
-                        d.status = $('#purchase_list_filter_status').val();
-                    }
-
-                    var start = '';
-                    var end = '';
-                    if ($('#purchase_list_filter_date_range').val()) {
-                        start = $('input#purchase_list_filter_date_range')
-                            .data('daterangepicker')
-                            .startDate.format('YYYY-MM-DD');
-                        end = $('input#purchase_list_filter_date_range')
-                            .data('daterangepicker')
-                            .endDate.format('YYYY-MM-DD');
-                    }
-                    d.start_date = start;
-                    d.end_date = end;
+                             if($('#purchases_table_date_range').val()) {
+                                        var start = $('#purchases_table_date_range').data('daterangepicker').startDate.format('YYYY-MM-DD');
+                                        var end = $('#purchases_table_date_range').data('daterangepicker').endDate.format('YYYY-MM-DD');
+                                        d.start_date = start;
+                                        d.end_date = end;
+                                    }
+                                 
+                                    d.payment_method = $('#purchases_table_payment_method').val(); 
+                                    d.created_by = $('#purchases_table_created_by').val();
+                                
 
                     d = __datatable_ajax_callback(d);
                 },

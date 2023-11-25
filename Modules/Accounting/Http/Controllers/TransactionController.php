@@ -282,6 +282,20 @@ class TransactionController extends Controller
                         'transaction_payments.id as transaction_payment_id',
                     ]);
 
+            if(!empty(request()->payment_method)){
+                $query->where('transaction_payments.method',request()->payment_method);
+            }
+            if(!empty(request()->created_by)){
+                $query->where('transaction_payments.created_by',request()->created_by);
+ 
+            }
+            if (! empty(request()->start_date) && ! empty(request()->end_date)) {
+                $start = request()->start_date;
+                $end = request()->end_date;
+                $query->whereDate('T.transaction_date', '>=', $start)
+                        ->whereDate('T.transaction_date', '<=', $end);
+            }
+
         return DataTables::of($query)
                 ->editColumn('paid_on', function ($row) {
                     return $this->transactionUtil->format_date($row->paid_on, true);
@@ -366,6 +380,20 @@ class TransactionController extends Controller
     {
         $business_id = request()->session()->get('user.business_id');
         $purchases = $this->transactionUtil->getListPurchases($business_id);
+
+        if(!empty(request()->payment_method)){
+            $purchases->where('TP.method',request()->payment_method);
+        }
+        if(!empty(request()->created_by)){
+            $purchases->where('TP.created_by',request()->created_by);
+
+        }
+        if (! empty(request()->start_date) && ! empty(request()->end_date)) {
+            $start = request()->start_date;
+            $end = request()->end_date;
+            $purchases->whereDate('transactions.transaction_date', '>=', $start)
+                    ->whereDate('transactions.transaction_date', '<=', $end);
+        }
 
         return Datatables::of($purchases)
                 ->addColumn('action', function ($row) {
