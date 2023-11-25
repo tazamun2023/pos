@@ -4,7 +4,7 @@
    
                 <div class="col-md-4">
                         <div class="form-group ">
-                            {!! Form::label($id.'created_by', __('report.user') . ':') !!}
+                            {!! Form::label($id.'_created_by', __('report.user') . ':') !!}
                             {!! Form::select($id.'_created_by', $sales_representative, null, [
                                 'class' => 'form-control select2',
                                 'style' => 'width:100%',
