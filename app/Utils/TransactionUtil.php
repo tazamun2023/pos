@@ -2995,12 +2995,13 @@ class TransactionUtil extends Util
     public function calculatePaymentStatus($transaction_id, $final_amount = null)
     {
         $total_paid = $this->getTotalPaid($transaction_id);
-
+//dd($final_amount);
         if (is_null($final_amount)) {
             $final_amount = Transaction::find($transaction_id)->final_total;
         }
 
         $status = 'due';
+//        dd($final_amount , $total_paid);
         if ($final_amount <= $total_paid) {
             $status = 'paid';
         } elseif ($total_paid > 0 && $final_amount > $total_paid) {

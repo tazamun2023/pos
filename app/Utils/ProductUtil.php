@@ -620,7 +620,7 @@ class ProductUtil extends Util
 
         //Sub Total
         foreach ($products as $product) {
-
+//dd($sell_return);
 //            $unit_price_inc_tax = $uf_number ? $this->num_uf($product['unit_price_inc_tax']) : $product['unit_price_inc_tax'];
             if (!$sell_return){
                 $variation_id = $product['variation_id'];
@@ -633,6 +633,11 @@ class ProductUtil extends Util
                 $output['total_before_tax'] += $quantity * $unit_price_inc_tax;
                 $output['total_with_tax'] += $quantity * $variation->sell_price_inc_tax;
             }else{
+//                $unit_price_inc_tax = $uf_number ? $this->num_uf($product['unit_price_inc_tax']) : $product['unit_price_inc_tax'];
+//                $quantity = $uf_number ? $this->num_uf($product['quantity']) : $product['quantity'];
+//
+//                $output['total_before_tax'] += $quantity * $unit_price_inc_tax;
+
                 $unit_price_inc_tax = $uf_number ? $this->num_uf($product['unit_price_inc_tax']) : $product['unit_price_inc_tax'];
                 $quantity = $uf_number ? $this->num_uf($product['quantity']) : $product['quantity'];
 
@@ -661,16 +666,27 @@ class ProductUtil extends Util
             }
         }
 
-        //Tax
-        $output['tax'] = 0;
-        if (! empty($tax_id)) {
-            $tax_details = TaxRate::find($tax_id);
-            if (! empty($tax_details)) {
-                $output['tax_id'] = $tax_id;
+        if (!$sell_return){
+            //Tax
+            $output['tax'] = 0;
+            if (! empty($tax_id)) {
+                $tax_details = TaxRate::find($tax_id);
+                if (! empty($tax_details)) {
+                    $output['tax_id'] = $tax_id;
 //                dd($output);
 //                $output['tax'] = ($tax_details->amount / 100) * ($output['total_before_tax'] - $output['discount']);
-                $output['tax'] = $output['total_with_tax'] - $output['total_before_tax'] - $output['discount'];
+                    $output['tax'] = $output['total_with_tax'] - $output['total_before_tax'] - $output['discount'];
 //                dd($output['tax']);
+                }
+            }
+        }else{
+            $output['tax'] = 0;
+            if (! empty($tax_id)) {
+                $tax_details = TaxRate::find($tax_id);
+                if (! empty($tax_details)) {
+                    $output['tax_id'] = $tax_id;
+                    $output['tax'] = ($tax_details->amount / 100) * ($output['total_before_tax'] - $output['discount']);
+                }
             }
         }
 
