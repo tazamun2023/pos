@@ -2320,13 +2320,15 @@ class TransactionUtil extends Util
             } else {
                 $prefix = $scheme->prefix . date('Y') . config('constants.invoice_scheme_separator');
             }
-
+          
             //Count
             $count = $scheme->start_number + $scheme->invoice_count;
             $count = str_pad($count, $scheme->total_digits, '0', STR_PAD_LEFT);
-
+           
             //Prefix + count
-            $invoice_no = $prefix . $count;
+            // $total_invoice_count=InvoiceScheme::sum('invoice_count');
+            // $invoice_no = $prefix . $count;
+            $invoice_no = $prefix . $location_id . $count;
 
             //Increment the invoice count
             $scheme->invoice_count = $scheme->invoice_count + 1;

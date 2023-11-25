@@ -181,9 +181,10 @@
                             }
                         });
 
-     $(document).on('change', '#purchase_payment_table_created_by,#purchase_payment_table_payment_method',
+     $(document).on('change', '#purchase_payment_table_created_by ,#purchase_payment_table_payment_method',
     function() {
         purchase_payment_table.ajax.reload();
+        
     }); 
 
         $('#purchase_payment_table_date_range').daterangepicker(
