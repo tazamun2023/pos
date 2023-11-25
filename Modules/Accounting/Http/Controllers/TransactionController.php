@@ -6,6 +6,7 @@ use App\BusinessLocation;
 use App\Contact;
 use App\Transaction;
 use App\TransactionPayment;
+use App\User;
 use App\Utils\ModuleUtil;
 use App\Utils\TransactionUtil;
 use Modules\Accounting\Utils\AccountingUtil;
@@ -64,10 +65,12 @@ class TransactionController extends Controller
 
         $business_locations = BusinessLocation::forDropdown($business_id);
         $suppliers = Contact::suppliersDropdown($business_id, false);
-        $orderStatuses = $this->transactionUtil->orderStatuses();
-
+        $orderStatuses = $this->transactionUtil->orderStatuses(); 
+        $customers = $suppliers;
+        $sales_representative = User::forDropdown($business_id, false, false, true);
+ 
         return view('accounting::transactions.index')
-            ->with(compact('business_locations', 'suppliers', 'orderStatuses'));
+            ->with(compact('business_locations', 'suppliers', 'orderStatuses','sales_representative','customers'));
     }
 
     protected function _allSales()
