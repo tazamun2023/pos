@@ -66,11 +66,11 @@ class TransactionController extends Controller
         $business_locations = BusinessLocation::forDropdown($business_id);
         $suppliers = Contact::suppliersDropdown($business_id, false);
         $orderStatuses = $this->transactionUtil->orderStatuses(); 
-        $customers = $suppliers;
+        $customers = Contact::customersDropdown($business_id, false);
         $sales_representative = User::forDropdown($business_id, false, false, true);
- 
-        return view('accounting::transactions.index')
-            ->with(compact('business_locations', 'suppliers', 'orderStatuses','sales_representative','customers'));
+        $payment_types = $this->transactionUtil->payment_types(null, true, $business_id);
+         return view('accounting::transactions.index')
+            ->with(compact('business_locations', 'suppliers', 'orderStatuses','sales_representative','customers','payment_types'));
     }
 
     protected function _allSales()
@@ -80,7 +80,33 @@ class TransactionController extends Controller
 
         $sells = $this->transactionUtil->getListSells($business_id, $sale_type);
         $sells->groupBy('transactions.id');
+        if (! empty(request()->created_by)) {
+            $sells->where('transactions.created_by',request()->created_by);
+        } 
 
+        if (! empty(request()->customer_id)) { 
+            $sells->where('contacts.id', request()->customer_id);
+        }
+        if (! empty(request()->payment_method)) { 
+            $sells->where('tp.method', request()->payment_method);
+        }
+        if (! empty(request()->start_date) && ! empty(request()->end_date)) {
+            $start = request()->start_date;
+            $end = request()->end_date;
+            $sells->whereDate('transactions.transaction_date', '>=', $start)
+                    ->whereDate('transactions.transaction_date', '<=', $end);
+        }
+
+        if (! empty(request()->input('payment_status')) && request()->input('payment_status') != 'overdue') {
+            $sells->where('transactions.payment_status', request()->input('payment_status'));
+        } elseif (request()->input('payment_status') == 'overdue') {
+            $sells->whereIn('transactions.payment_status', ['due', 'partial'])
+                ->whereNotNull('transactions.pay_term_number')
+                ->whereNotNull('transactions.pay_term_type')
+                ->whereRaw("IF(transactions.pay_term_type='days', DATE_ADD(transactions.transaction_date, INTERVAL transactions.pay_term_number DAY) < CURDATE(), DATE_ADD(transactions.transaction_date, INTERVAL transactions.pay_term_number MONTH) < CURDATE())");
+        }
+        
+        
         $payment_types = $this->transactionUtil->payment_types(null, true, $business_id);
         $sales_order_statuses = Transaction::sales_order_statuses();
 
