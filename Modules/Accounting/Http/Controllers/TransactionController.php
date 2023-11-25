@@ -6,6 +6,7 @@ use App\BusinessLocation;
 use App\Contact;
 use App\Transaction;
 use App\TransactionPayment;
+use App\User;
 use App\Utils\ModuleUtil;
 use App\Utils\TransactionUtil;
 use Modules\Accounting\Utils\AccountingUtil;
@@ -64,10 +65,12 @@ class TransactionController extends Controller
 
         $business_locations = BusinessLocation::forDropdown($business_id);
         $suppliers = Contact::suppliersDropdown($business_id, false);
-        $orderStatuses = $this->transactionUtil->orderStatuses();
-
-        return view('accounting::transactions.index')
-            ->with(compact('business_locations', 'suppliers', 'orderStatuses'));
+        $orderStatuses = $this->transactionUtil->orderStatuses(); 
+        $customers = Contact::customersDropdown($business_id, false);
+        $sales_representative = User::forDropdown($business_id, false, false, true);
+        $payment_types = $this->transactionUtil->payment_types(null, true, $business_id);
+         return view('accounting::transactions.index')
+            ->with(compact('business_locations', 'suppliers', 'orderStatuses','sales_representative','customers','payment_types'));
     }
 
     protected function _allSales()
@@ -77,7 +80,33 @@ class TransactionController extends Controller
 
         $sells = $this->transactionUtil->getListSells($business_id, $sale_type);
         $sells->groupBy('transactions.id');
+        if (! empty(request()->created_by)) {
+            $sells->where('transactions.created_by',request()->created_by);
+        } 
 
+        if (! empty(request()->customer_id)) { 
+            $sells->where('contacts.id', request()->customer_id);
+        }
+        if (! empty(request()->payment_method)) { 
+            $sells->where('tp.method', request()->payment_method);
+        }
+        if (! empty(request()->start_date) && ! empty(request()->end_date)) {
+            $start = request()->start_date;
+            $end = request()->end_date;
+            $sells->whereDate('transactions.transaction_date', '>=', $start)
+                    ->whereDate('transactions.transaction_date', '<=', $end);
+        }
+
+        if (! empty(request()->input('payment_status')) && request()->input('payment_status') != 'overdue') {
+            $sells->where('transactions.payment_status', request()->input('payment_status'));
+        } elseif (request()->input('payment_status') == 'overdue') {
+            $sells->whereIn('transactions.payment_status', ['due', 'partial'])
+                ->whereNotNull('transactions.pay_term_number')
+                ->whereNotNull('transactions.pay_term_type')
+                ->whereRaw("IF(transactions.pay_term_type='days', DATE_ADD(transactions.transaction_date, INTERVAL transactions.pay_term_number DAY) < CURDATE(), DATE_ADD(transactions.transaction_date, INTERVAL transactions.pay_term_number MONTH) < CURDATE())");
+        }
+        
+        
         $payment_types = $this->transactionUtil->payment_types(null, true, $business_id);
         $sales_order_statuses = Transaction::sales_order_statuses();
 
@@ -253,6 +282,20 @@ class TransactionController extends Controller
                         'transaction_payments.id as transaction_payment_id',
                     ]);
 
+            if(!empty(request()->payment_method)){
+                $query->where('transaction_payments.method',request()->payment_method);
+            }
+            if(!empty(request()->created_by)){
+                $query->where('transaction_payments.created_by',request()->created_by);
+ 
+            }
+            if (! empty(request()->start_date) && ! empty(request()->end_date)) {
+                $start = request()->start_date;
+                $end = request()->end_date;
+                $query->whereDate('T.transaction_date', '>=', $start)
+                        ->whereDate('T.transaction_date', '<=', $end);
+            }
+
         return DataTables::of($query)
                 ->editColumn('paid_on', function ($row) {
                     return $this->transactionUtil->format_date($row->paid_on, true);
@@ -337,6 +380,20 @@ class TransactionController extends Controller
     {
         $business_id = request()->session()->get('user.business_id');
         $purchases = $this->transactionUtil->getListPurchases($business_id);
+
+        if(!empty(request()->payment_method)){
+            $purchases->where('TP.method',request()->payment_method);
+        }
+        if(!empty(request()->created_by)){
+            $purchases->where('TP.created_by',request()->created_by);
+
+        }
+        if (! empty(request()->start_date) && ! empty(request()->end_date)) {
+            $start = request()->start_date;
+            $end = request()->end_date;
+            $purchases->whereDate('transactions.transaction_date', '>=', $start)
+                    ->whereDate('transactions.transaction_date', '<=', $end);
+        }
 
         return Datatables::of($purchases)
                 ->addColumn('action', function ($row) {
