@@ -261,7 +261,18 @@ class CashRegisterUtil extends Util
             DB::raw("SUM(IF(transaction_type='initial', amount, 0)) as cash_in_hand"),
             DB::raw("SUM(IF(transaction_type='sell', amount, IF(transaction_type='refund', -1 * amount, 0))) as total_sale"),
             DB::raw("SUM(IF(transaction_type='sell_return', amount, IF(transaction_type='sell_return', -1 * amount, 0))) as total_refund"),
-            DB::raw("SUM(IF(type='credit', amount, IF(transaction_type='sell', -1 * amount, 0))) as total_credit_sell"),
+//            DB::raw("SUM(IF(type='credit', amount, IF(transaction_type='sell', -1 * amount, 0))) as total_credit_sell"),
+//            DB::raw("SUM(IF(type='credit', amount, IF(transaction_type='suspend', -1 * amount, 0))) as total_credit_sell"),
+
+            DB::raw("
+    SUM(
+        CASE
+            WHEN type = 'credit' AND transaction_type = 'sell_return' THEN amount
+            WHEN type = 'credit' AND transaction_type = 'suspend' THEN amount
+            ELSE 0
+        END
+    ) as total_credit_sell
+"),
             /*for card*/
 //            DB::raw("SUM(IF(pay_method='card', amount, 0)) as total_card_sell"),
 //            DB::raw("SUM(IF(pay_method='card', amount, IF(transaction_type='sell', -1 * amount, 0))) as total_card_sell"),

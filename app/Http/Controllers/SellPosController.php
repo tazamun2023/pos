@@ -1093,6 +1093,13 @@ public function showAllZatca(){
 
                 Media::uploadMedia($business_id, $transaction, $request, 'documents');
 
+                //cash register log
+
+//                dd($payment_status);
+                if ($payment_status=='due'){
+                    $this->transactionUtil->insertCashTransactionData($transaction->final_total, null,'credit', $transaction->id,'suspend');
+                }
+
                 $this->transactionUtil->activityLog($transaction, 'added');
 
                 DB::commit();
