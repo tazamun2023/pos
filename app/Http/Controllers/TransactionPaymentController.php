@@ -118,8 +118,8 @@ class TransactionPaymentController extends Controller
 
                 if (! empty($inputs['amount'])) {
                     $tp = TransactionPayment::create($inputs);
-
-                    $this->transactionUtil->UpdateCashTransactionData($payment_amount,$inputs['method'],'debit',$transaction->id,'sell');
+//dd();
+                    $this->transactionUtil->UpdateCashTransactionData($payment_amount,$inputs['method'],'debit',$transaction->id,$transaction->type);
                     if (! empty($request->input('denominations'))) {
                         $this->transactionUtil->addCashDenominations($tp, $request->input('denominations'));
                     }
