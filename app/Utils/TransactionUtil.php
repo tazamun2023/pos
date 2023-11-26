@@ -32,6 +32,21 @@ use Illuminate\Support\Str;
 class TransactionUtil extends Util
 {
     /**
+     * All Utils instance.
+     */
+    protected $cashRegisterUtil;
+    /**
+     * Constructor
+     *
+     * @param  CashRegisterUtil  $cashRegisterUtil
+     * @return void
+     */
+    public function __construct(CashRegisterUtil $cashRegisterUtil)
+    {
+        $this->cashRegisterUtil = $cashRegisterUtil;
+    }
+
+    /**
      * Add Sell transaction
      *
      * @param int $business_id
@@ -6267,5 +6282,12 @@ class TransactionUtil extends Util
         $mpdf->WriteHTML($body);
 
         return $mpdf;
+    }
+
+    public function checkCashRegisterBalnace($id)
+    {
+        $register_details = $this->cashRegisterUtil->getRegisterDetails($id);
+
+        return $register_details;
     }
 }

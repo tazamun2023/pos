@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\CashRegister;
 use App\Contact;
 use App\Events\TransactionPaymentAdded;
 use App\Events\TransactionPaymentUpdated;
@@ -70,6 +71,7 @@ class TransactionPaymentController extends Controller
             if (! (auth()->user()->can('purchase.payments') || auth()->user()->can('sell.payments') || auth()->user()->can('all_expense.access') || auth()->user()->can('view_own_expense'))) {
                 abort(403, 'Unauthorized action.');
             }
+            $location_id = ! empty($transaction->location_id) ? $transaction->location_id : null;
 
             if ($transaction->payment_status != 'paid') {
                 $inputs = $request->only(['amount', 'method', 'note', 'card_number', 'card_holder_name',
@@ -77,7 +79,19 @@ class TransactionPaymentController extends Controller
                     'cheque_number', 'bank_account_number', ]);
                 $inputs['paid_on'] = $this->transactionUtil->uf_date($request->input('paid_on'), true);
                 $inputs['transaction_id'] = $transaction->id;
+
+                $checkCashRegisters = CashRegister::where('business_id', $business_id)->where('location_id', $location_id)->where('status', 'open')->first();
+                $checkCashRegisterBalnace = $this->transactionUtil->checkCashRegisterBalnace($checkCashRegisters->id);
+                $netCashInHand = $checkCashRegisterBalnace->cash_in_hand+$checkCashRegisterBalnace->net_cash_bal_in_hand;
+                $netCardBal = $checkCashRegisterBalnace->net_card_bal;
+//                dd($netCashInHand);
+                if (($inputs['method'] == 'cash' && $netCashInHand < $inputs['amount']) || ($inputs['method'] == 'card' && $netCardBal < $inputs['amount'])) {
+                    $output = ['success' => false, 'msg' => __('lang_v1.cash_register_out_of_balance'). $inputs['method']];
+                    return redirect()->back()->with(['status' => $output]);
+                }
                 $inputs['amount'] = $this->transactionUtil->num_uf($inputs['amount']);
+
+
                 $inputs['created_by'] = auth()->user()->id;
                 $inputs['payment_for'] = $transaction->contact_id;
 
