@@ -267,12 +267,12 @@ class CashRegisterUtil extends Util
             DB::raw("
     SUM(
         CASE
-            WHEN type = 'credit' AND transaction_type = 'sell_return' THEN amount
             WHEN type = 'credit' AND transaction_type = 'suspend' THEN amount
             ELSE 0
         END
     ) as total_credit_sell
 "),
+//            WHEN type = 'credit' AND transaction_type = 'sell_return' THEN amount
             /*for card*/
 //            DB::raw("SUM(IF(pay_method='card', amount, 0)) as total_card_sell"),
 //            DB::raw("SUM(IF(pay_method='card', amount, IF(transaction_type='sell', -1 * amount, 0))) as total_card_sell"),
