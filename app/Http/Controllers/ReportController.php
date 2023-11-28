@@ -1847,8 +1847,12 @@ class ReportController extends Controller
                      return '<a data-href="'.action([\App\Http\Controllers\SellController::class, 'show'], [$row->transaction_id])
                             .'" href="#" data-container=".view_modal" class="btn-modal">'.$row->invoice_no.'</a>';
                  })
-                ->editColumn('user_name', function ($row) {
-                    return $row->user->surename.' '.$row->user->first_name.' '. $row->user->last_name;
+                 ->editColumn('user_name', function ($row) {
+                    $surename = $row->user->surename ?? '';
+                    $firstName = $row->user->first_name ?? '';
+                    $lastName = $row->user->last_name ?? '';
+                
+                    return $surename . ' ' . $firstName . ' ' . $lastName;
                 })
                 ->editColumn('transaction_date', '{{@format_datetime($transaction_date)}}')
                 ->editColumn('unit_sale_price', function ($row) {
