@@ -1878,6 +1878,7 @@ class ReportController extends Controller
                     return '<span class="unit_price" data-orig-value="'.$row->unit_price.'">'.
                     $this->transactionUtil->num_f($row->unit_price, true).'</span>';
                 })
+                
                 ->editColumn('discount_amount', '
                     @if($discount_type == "percentage")
                         {{@num_format($discount_amount)}} %
@@ -1885,13 +1886,31 @@ class ReportController extends Controller
                         {{@num_format($discount_amount)}}
                     @endif
                     ')
+                // ->editColumn('tax', function ($row) {
+                //     return $this->transactionUtil->num_f($row->item_tax, true)
+                //      .'<br>'.'<span data-orig-value="'.$row->item_tax.'" 
+                //      class="tax" data-unit="'.$row->tax.'"><small>('.$row->tax.')</small></span>';
+                // })
                 ->editColumn('tax', function ($row) {
-                    return $this->transactionUtil->num_f($row->item_tax, true)
-                     .'<br>'.'<span data-orig-value="'.$row->item_tax.'" 
-                     class="tax" data-unit="'.$row->tax.'"><small>('.$row->tax.')</small></span>';
+                    $percentage = 1.15;
+                    $value = $row->subtotal;
+
+                    $result = ($percentage / 100) * $value;              
+                    return $this->transactionUtil->num_f($result,true);
+                })
+                ->editColumn('total', function ($row) {
+                    $percentage = 1.15;
+                    $value = $row->subtotal;
+
+                    $result = ($percentage / 100) * $value;   
+                    $total = $result + $value;   
+                    $class = is_null($row->parent_sell_line_id) ? 'row_total' : '';        
+                    // return $this->transactionUtil->num_f($total, true);
+                    return '<span class="'.$class.'"  data-orig-value="'.$total.'">'.
+                    $this->transactionUtil->num_f($total, true).'</span>';
                 })
                 ->editColumn('customer', '@if(!empty($supplier_business_name)) {{$supplier_business_name}},<br>@endif {{$customer}}')
-                ->rawColumns(['invoice_no', 'unit_sale_price', 'subtotal', 'sell_qty', 'discount_amount', 'unit_price', 'tax', 'customer'])
+                ->rawColumns(['invoice_no', 'unit_sale_price', 'subtotal','total', 'sell_qty', 'discount_amount', 'unit_price', 'tax', 'customer'])
                 ->make(true);
         }
 

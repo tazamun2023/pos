@@ -940,12 +940,16 @@ $(document).ready(function() {
             { data: 'unit_price', name: 'transaction_sell_lines.unit_price_before_discount' },
             { data: 'discount_amount', name: 'transaction_sell_lines.line_discount_amount' },
             { data: 'tax', name: 'tax_rates.name' },
-            { data: 'unit_sale_price', name: 'transaction_sell_lines.unit_price_inc_tax' },
+            // { data: 'unit_sale_price', name: 'transaction_sell_lines.unit_price_inc_tax' },
             { data: 'subtotal', name: 'subtotal', searchable: false },
+            { data: 'total', name: 'total', searchable: false },
         ],
         fnDrawCallback: function(oSettings) {
             $('#footer_subtotal').text(
                 sum_table_col($('#product_sell_report_table'), 'row_subtotal')
+            );
+            $('#footer_total').text(
+                sum_table_col($('#product_sell_report_table'), 'row_total')
             );
             $('#footer_total_sold').html(__sum_stock($('#product_sell_report_table'), 'sell_qty'));
             $('#footer_tax').html(__sum_stock($('#product_sell_report_table'), 'tax', 'left'));
