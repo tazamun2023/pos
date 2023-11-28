@@ -38,6 +38,7 @@ class ProductUtil extends Util
      */
     public function createSingleProductVariation($product, $sku, $purchase_price, $dpp_inc_tax, $profit_percent, $selling_price, $selling_price_inc_tax, $combo_variations = [])
     {
+//        dd($purchase_price);
         if (! is_object($product)) {
             $product = Product::find($product);
         }
@@ -609,20 +610,39 @@ class ProductUtil extends Util
      * @param  array  $discount['discount_type', 'discount_amount']
      * @return mixed (false, array)
      */
-    public function calculateInvoiceTotal($products, $tax_id, $discount = null, $uf_number = true)
+    public function calculateInvoiceTotal($products, $tax_id, $discount = null, $uf_number = true, $sell_return=false)
     {
         if (empty($products)) {
             return false;
         }
 
-        $output = ['total_before_tax' => 0, 'tax' => 0, 'discount' => 0, 'final_total' => 0];
+        $output = ['total_before_tax' => 0, 'tax' => 0, 'discount' => 0, 'final_total' => 0, 'total_with_tax' =>0];
 
         //Sub Total
         foreach ($products as $product) {
-            $unit_price_inc_tax = $uf_number ? $this->num_uf($product['unit_price_inc_tax']) : $product['unit_price_inc_tax'];
-            $quantity = $uf_number ? $this->num_uf($product['quantity']) : $product['quantity'];
+//dd($sell_return);
+//            $unit_price_inc_tax = $uf_number ? $this->num_uf($product['unit_price_inc_tax']) : $product['unit_price_inc_tax'];
+            if (!$sell_return){
+                $variation_id = $product['variation_id'];
 
-            $output['total_before_tax'] += $quantity * $unit_price_inc_tax;
+                $variation = Variation::find($variation_id);
+
+                $unit_price_inc_tax = $uf_number ? $this->systemDoubleValue($variation->default_sell_price) : $product['unit_price_inc_tax'];
+                $quantity = $uf_number ? $this->num_uf($product['quantity']) : $product['quantity'];
+//dd($unit_price_inc_tax);
+                $output['total_before_tax'] += $quantity * $unit_price_inc_tax;
+                $output['total_with_tax'] += $quantity * $variation->sell_price_inc_tax;
+            }else{
+//                $unit_price_inc_tax = $uf_number ? $this->num_uf($product['unit_price_inc_tax']) : $product['unit_price_inc_tax'];
+//                $quantity = $uf_number ? $this->num_uf($product['quantity']) : $product['quantity'];
+//
+//                $output['total_before_tax'] += $quantity * $unit_price_inc_tax;
+
+                $unit_price_inc_tax = $uf_number ? $this->num_uf($product['unit_price_inc_tax']) : $product['unit_price_inc_tax'];
+                $quantity = $uf_number ? $this->num_uf($product['quantity']) : $product['quantity'];
+
+                $output['total_before_tax'] += $quantity * $unit_price_inc_tax;
+            }
 
             //Add modifier price to total if exists
             if (! empty($product['modifier_price'])) {
@@ -646,18 +666,33 @@ class ProductUtil extends Util
             }
         }
 
-        //Tax
-        $output['tax'] = 0;
-        if (! empty($tax_id)) {
-            $tax_details = TaxRate::find($tax_id);
-            if (! empty($tax_details)) {
-                $output['tax_id'] = $tax_id;
-                $output['tax'] = ($tax_details->amount / 100) * ($output['total_before_tax'] - $output['discount']);
+        if (!$sell_return){
+            //Tax
+            $output['tax'] = 0;
+            if (! empty($tax_id)) {
+                $tax_details = TaxRate::find($tax_id);
+                if (! empty($tax_details)) {
+                    $output['tax_id'] = $tax_id;
+//                dd($output);
+//                $output['tax'] = ($tax_details->amount / 100) * ($output['total_before_tax'] - $output['discount']);
+                    $output['tax'] = $output['total_with_tax'] - $output['total_before_tax'] - $output['discount'];
+//                dd($output['tax']);
+                }
+            }
+        }else{
+            $output['tax'] = 0;
+            if (! empty($tax_id)) {
+                $tax_details = TaxRate::find($tax_id);
+                if (! empty($tax_details)) {
+                    $output['tax_id'] = $tax_id;
+                    $output['tax'] = ($tax_details->amount / 100) * ($output['total_before_tax'] - $output['discount']);
+                }
             }
         }
 
         //Calculate total
-        $output['final_total'] = $output['total_before_tax'] + $output['tax'] - $output['discount'];
+        $output['final_total_no_round'] = $output['total_before_tax'] + $output['tax'] - $output['discount'];
+        $output['final_total'] = round($output['final_total_no_round'], 2);
 
         return $output;
     }
@@ -2244,5 +2279,9 @@ class ProductUtil extends Util
             $vld->qty_available = $stock;
             $vld->save();
         }
+    }
+
+    function systemDoubleValue($value, $digits = 4){
+        return sprintf('%.'.$digits.'f', floor($value*10000*($value>0?1:-1))/10000*($value>0?1:-1));
     }
 }

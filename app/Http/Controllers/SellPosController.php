@@ -877,6 +877,7 @@ public function showAllZatca(){
                 $discount = ['discount_type' => $input['discount_type'],
                     'discount_amount' => $input['discount_amount'],
                 ];
+
                 $invoice_total = $this->productUtil->calculateInvoiceTotal($input['products'], $input['tax_rate_id'], $discount);
 
                 DB::beginTransaction();
@@ -985,7 +986,7 @@ public function showAllZatca(){
 
                 //Upload Shipping documents
                 Media::uploadMedia($business_id, $transaction, $request, 'shipping_documents', false, 'shipping_document');
-
+//dd($input['products']);
                 $this->transactionUtil->createOrUpdateSellLines($transaction, $input['products'], $input['location_id']);
 
                 $change_return['amount'] = $input['change_return'] ?? 0;
@@ -1092,6 +1093,13 @@ public function showAllZatca(){
 
                 Media::uploadMedia($business_id, $transaction, $request, 'documents');
 
+                //cash register log
+
+//                dd($payment_status);
+                if ($payment_status=='due'){
+                    $this->transactionUtil->insertCashTransactionData($transaction->final_total, null,'credit', $transaction->id,'suspend');
+                }
+
                 $this->transactionUtil->activityLog($transaction, 'added');
 
                 DB::commit();
@@ -1133,15 +1141,15 @@ public function showAllZatca(){
                     $number = $contacts->mobile;
                     $is_valid_num = validate_mobile($number);;
                     $is_admin = $this->isAdmin();
-                    if ($request->contact_id != 1 && $is_valid_num && $is_admin){
-//                        $transaction = Transaction::where('business_id', $business_id)
-//                            ->findorfail($transaction->id);
-                        $url = $this->transactionUtil->getInvoiceUrl($transaction->id, $business_id);
-//                        $new_url = is_short_url($url);
-                        $body = $contacts->name.' '.'فاتورتك جاهزة. على الرابط'.' '.$url;
-//                        dd($number);
-                        OurSMS($number, $body);
-                    }
+//                    if ($request->contact_id != 1 && $is_valid_num && $is_admin){
+////                        $transaction = Transaction::where('business_id', $business_id)
+////                            ->findorfail($transaction->id);
+//                        $url = $this->transactionUtil->getInvoiceUrl($transaction->id, $business_id);
+////                        $new_url = is_short_url($url);
+//                        $body = $contacts->name.' '.'فاتورتك جاهزة. على الرابط'.' '.$url;
+////                        dd($number);
+//                        OurSMS($number, $body);
+//                    }
 
                     $receipt = $this->receiptContent($business_id, $input['location_id'], $transaction->id, null, false, true, $invoice_layout_id);
                 }
@@ -1275,7 +1283,7 @@ public function showAllZatca(){
         $receipt_printer_type = is_null($printer_type) ? $location_details->receipt_printer_type : $printer_type;
 
         $receipt_details = $this->transactionUtil->getReceiptDetails($transaction_id, $location_id, $invoice_layout, $business_details, $location_details, $receipt_printer_type);
-// dd($receipt_details);
+// dd($receipt_details->tax);
         $currency_details = [
             'symbol' => $business_details->currency_symbol,
             'thousand_separator' => $business_details->thousand_separator,
@@ -2285,7 +2293,7 @@ public function showAllZatca(){
             }
 
             $output = $this->getSellLineRow($variation_id, $location_id, $quantity, $row_count, $is_direct_sell);
-
+//dd($output);
             if ($this->transactionUtil->isModuleEnabled('modifiers') && ! $is_direct_sell) {
                 $variation = Variation::find($variation_id);
                 $business_id = request()->session()->get('user.business_id');

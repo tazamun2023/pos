@@ -505,7 +505,17 @@ class ProductController extends Controller
             }
 
             if ($product->type == 'single') {
-                $this->productUtil->createSingleProductVariation($product->id, $product->sku, $request->input('single_dpp'), $request->input('single_dpp_inc_tax'), $request->input('profit_percent'), $request->input('single_dsp'), $request->input('single_dsp_inc_tax'));
+                if ($request->input('tax_type')== 'inclusive'){
+                    $getTaxRate = TaxRate::where('id', $request->input('tax'))->first();
+                    $rate = $getTaxRate->amount/100;
+                    $ratio = 1 + $rate;
+                    $final_dpp = $request->input('single_dpp_inc_tax')/$ratio;
+                    $final_dpp_inc_tax = $this->productUtil->systemDoubleValue($final_dpp);
+                    $this->productUtil->createSingleProductVariation($product->id, $product->sku, $final_dpp_inc_tax, $request->input('single_dpp_inc_tax'), $request->input('profit_percent'), $final_dpp_inc_tax, $request->input('single_dsp_inc_tax'));
+
+                }else{
+                    $this->productUtil->createSingleProductVariation($product->id, $product->sku, $request->input('single_dpp'), $request->input('single_dpp_inc_tax'), $request->input('profit_percent'), $request->input('single_dsp'), $request->input('single_dsp_inc_tax'));
+                }
             } elseif ($product->type == 'variable') {
                 if (! empty($request->input('product_variation'))) {
                     $input_variations = $request->input('product_variation');
@@ -780,10 +790,30 @@ class ProductController extends Controller
                 $variation = Variation::find($single_data['single_variation_id']);
 
                 $variation->sub_sku = $product->sku;
-                $variation->default_purchase_price = $this->productUtil->num_uf($single_data['single_dpp']);
+
+                if ($product->tax_type== 'inclusive'){
+
+                    $getTaxRate = TaxRate::where('id', $product->tax)->first();
+                    $rate = $getTaxRate->amount/100;
+                    $ratio = 1 + $rate;
+
+                    $final_dpp = $request->input('single_dpp_inc_tax')/$ratio;
+//                    dd($this->productUtil->systemDoubleValue($final_dpp));
+
+
+                    $final_dpp_inc_tax = $this->productUtil->systemDoubleValue($final_dpp);
+//dd($final_dpp_inc_tax);
+//                    $variation->default_purchase_price = $this->productUtil->num_uf($single_data['single_dpp']);
+                    $variation->default_purchase_price = $final_dpp_inc_tax;
+//                    $variation->default_sell_price = $this->productUtil->num_uf($single_data['single_dsp']);
+                    $variation->default_sell_price = $final_dpp_inc_tax;
+                }else{
+                    $variation->default_purchase_price = $this->productUtil->num_uf($single_data['single_dpp']);
+                    $variation->default_sell_price = $this->productUtil->num_uf($single_data['single_dsp']);
+                }
                 $variation->dpp_inc_tax = $this->productUtil->num_uf($single_data['single_dpp_inc_tax']);
                 $variation->profit_percent = $this->productUtil->num_uf($single_data['profit_percent']);
-                $variation->default_sell_price = $this->productUtil->num_uf($single_data['single_dsp']);
+
                 $variation->sell_price_inc_tax = $this->productUtil->num_uf($single_data['single_dsp_inc_tax']);
                 $variation->save();
 

@@ -104,7 +104,8 @@
 
 								<td>
 									<input type="text" name="products[{{$loop->index}}][quantity]" value="{{@format_quantity($sell_line->quantity_returned)}}" class="form-control input-sm input_number return_qty input_quantity" data-rule-abs_digit="{{$check_decimal}}" data-msg-abs_digit="@lang('lang_v1.decimal_value_not_allowed')" data-rule-max-value="{{$sell_line->quantity}}" data-msg-max-value="@lang('validation.custom-messages.quantity_not_available', ['qty' => $sell_line->formatted_qty, 'unit' => $unit_name ])">
-									<input name="products[{{$loop->index}}][unit_price_inc_tax]" type="hidden" class="unit_price" value="{{@num_format($sell_line->unit_price_inc_tax)}}">
+{{--									<input name="products[{{$loop->index}}][unit_price_inc_tax]" type="hidden" class="unit_price" value="{{@num_format($sell_line->unit_price_inc_tax)}}">--}}
+									<input name="products[{{$loop->index}}][unit_price_inc_tax]" type="hidden" class="unit_price" value="{{$sell_line->unit_price_inc_tax}}">
 									<input name="products[{{$loop->index}}][sell_line_id]" type="hidden" value="{{$sell_line->id}}">
 								</td>
 								<td>
@@ -191,6 +192,7 @@
 		$('table#sell_return_table tbody tr').each(function() {
 			var quantity = __read_number($(this).find('input.return_qty'));
 			var unit_price = __read_number($(this).find('input.unit_price'));
+			console.log('unit_price', unit_price);
 			var subtotal = quantity * unit_price;
 			$(this).find('.return_subtotal').text(__currency_trans_from_en(subtotal, true));
 			net_return += subtotal;
@@ -202,8 +204,9 @@
 			var discount_percent = __read_number($("#discount_amount"));
 			discount = __calculate_amount('percentage', discount_percent, net_return);
 		}
+		console.log('net_return', net_return);
 		discounted_net_return = net_return - discount;
-
+		// console.log('discounted_net_return', discounted_net_return);
 		var tax_percent = $('input#tax_percent').val();
 		var total_tax = __calculate_amount('percentage', tax_percent, discounted_net_return);
 		var net_return_inc_tax = total_tax + discounted_net_return;

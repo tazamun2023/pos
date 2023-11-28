@@ -336,6 +336,7 @@ class ExpenseController extends Controller
      */
     public function store(Request $request)
     {
+         
         if (! auth()->user()->can('expense.add')) {
             abort(403, 'Unauthorized action.');
         }

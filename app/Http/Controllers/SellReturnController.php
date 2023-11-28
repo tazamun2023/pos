@@ -252,7 +252,7 @@ class SellReturnController extends Controller
 
             $sell->sell_lines[$key]->formatted_qty = $this->transactionUtil->num_f($value->quantity, false, null, true);
         }
-
+//dd($sell->sell_lines);
         return view('sell_return.add')
             ->with(compact('sell'));
     }
@@ -285,9 +285,10 @@ class SellReturnController extends Controller
                 DB::beginTransaction();
 
                 $sell_return = $this->transactionUtil->addSellReturn($input, $business_id, $user_id);
-
+//dd($sell_return);
                 $receipt = $this->receiptContent($business_id, $sell_return->location_id, $sell_return->id);
-
+                //for register report
+                $this->transactionUtil->insertCashTransactionData($sell_return->final_total, null,'credit',$sell_return->id,'sell_return');
                 DB::commit();
 
                 $output = ['success' => 1,

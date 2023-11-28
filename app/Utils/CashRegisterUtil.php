@@ -260,8 +260,51 @@ class CashRegisterUtil extends Util
             'cash_registers.denominations',
             DB::raw("SUM(IF(transaction_type='initial', amount, 0)) as cash_in_hand"),
             DB::raw("SUM(IF(transaction_type='sell', amount, IF(transaction_type='refund', -1 * amount, 0))) as total_sale"),
-//            DB::raw("SUM(IF(transaction_type='sell', amount, IF(transaction_type='refund', -1 * amount, 0))) as total_sale_include_tax"),
-//            DB::raw("SUM(IF(transaction_type='sell', amount + tax_amount, 0)) as total_sale_include_tax"),
+            DB::raw("SUM(IF(transaction_type='sell_return', amount, IF(transaction_type='sell_return', -1 * amount, 0))) as total_refund"),
+//            DB::raw("SUM(IF(type='credit', amount, IF(transaction_type='sell', -1 * amount, 0))) as total_credit_sell"),
+//            DB::raw("SUM(IF(type='credit', amount, IF(transaction_type='suspend', -1 * amount, 0))) as total_credit_sell"),
+
+            DB::raw("
+    SUM(
+        CASE
+            WHEN type = 'credit' AND transaction_type = 'suspend' THEN amount
+            ELSE 0
+        END
+    ) as total_credit_sell
+"),
+//            WHEN type = 'credit' AND transaction_type = 'sell_return' THEN amount
+            /*for card*/
+//            DB::raw("SUM(IF(pay_method='card', amount, 0)) as total_card_sell"),
+//            DB::raw("SUM(IF(pay_method='card', amount, IF(transaction_type='sell', -1 * amount, 0))) as total_card_sell"),
+//            DB::raw("SUM(IF(pay_method='card', amount, IF(transaction_type='sell_return', -1 * amount, 0))) as total_card_sell_return"),
+//            DB::raw("SUM(IF(pay_method='card', amount, IF(transaction_type='expense', -1 * amount, 0))) as total_card_expense_return"),
+            DB::raw("
+    SUM(
+        CASE
+            WHEN pay_method = 'card' AND transaction_type = 'sell' THEN amount
+            WHEN pay_method = 'card' AND transaction_type = 'sell_return' THEN -1 * amount
+            WHEN pay_method = 'card' AND transaction_type = 'expense' THEN -1 * amount
+            ELSE 0
+        END
+    ) as net_card_bal
+"),
+            /*end for card*/
+            /*for cash*/
+//            DB::raw("SUM(IF(pay_method='cash', amount, IF(transaction_type='sell', -1 * amount, 0))) as total_cash_sell"),
+//            DB::raw("SUM(IF(pay_method='cash', amount, IF(transaction_type='sell_return', -1 * amount, 0))) as total_cash_sell_return"),
+//            DB::raw("SUM(IF(pay_method='cash', amount, IF(transaction_type='expense', -1 * amount, 0))) as total_cash_expense_return"),
+
+            DB::raw("
+    SUM(
+        CASE
+            WHEN pay_method = 'cash' AND transaction_type = 'sell' THEN amount
+            WHEN pay_method = 'cash' AND transaction_type = 'sell_return' THEN -1 * amount
+            WHEN pay_method = 'cash' AND transaction_type = 'expense' THEN -1 * amount
+            ELSE 0
+        END
+    ) as net_cash_bal_in_hand
+"),
+            /*end for cash*/
 
             DB::raw("SUM(IF(transaction_type='expense', IF(transaction_type='refund', -1 * amount, amount), 0)) as total_expense"),
             DB::raw("SUM(IF(pay_method='cash', IF(transaction_type='sell', amount, 0), 0)) as total_cash"),
@@ -291,7 +334,7 @@ class CashRegisterUtil extends Util
             DB::raw("SUM(IF(pay_method='custom_pay_5', IF(transaction_type='expense', amount, 0), 0)) as total_custom_pay_5_expense"),
             DB::raw("SUM(IF(pay_method='custom_pay_6', IF(transaction_type='expense', amount, 0), 0)) as total_custom_pay_6_expense"),
             DB::raw("SUM(IF(pay_method='custom_pay_7', IF(transaction_type='expense', amount, 0), 0)) as total_custom_pay_7_expense"),
-            DB::raw("SUM(IF(transaction_type='refund', amount, 0)) as total_refund"),
+
             DB::raw("SUM(IF(transaction_type='refund', IF(pay_method='cash', amount, 0), 0)) as total_cash_refund"),
             DB::raw("SUM(IF(transaction_type='refund', IF(pay_method='cheque', amount, 0), 0)) as total_cheque_refund"),
             DB::raw("SUM(IF(transaction_type='refund', IF(pay_method='card', amount, 0), 0)) as total_card_refund"),

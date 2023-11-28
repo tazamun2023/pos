@@ -1,10 +1,10 @@
 <div class="row">
-  <div class="col-md-12">
+  <button type="button" class="btn btn-primary no-print" id="product_details_button">@lang('lang_v1.visible')</button>
+  <button type="button" class="btn btn-primary no-print" style='display: none' id="product_details_button1">@lang('lang_v1.invisible')</button>
+  <div class="col-md-12" id='detailsTable'>
     <hr>
-    <button type="button" class="btn btn-primary no-print" id="product_details_button">@lang('lang_v1.visible')</button>
-    <button type="button" class="btn btn-primary no-print" style='display: none' id="product_details_button1">@lang('lang_v1.invisible')</button>
     <h3>@lang('lang_v1.product_sold_details_register')</h3>
-    <table class="table table-condensed" id='detailsTable'>
+    <table class="table table-condensed">
       <tr>
         <th>#</th>
         <th>@lang('product.sku')</th>
@@ -95,13 +95,15 @@
     </table>
   </div>
 </div>
+<br>
 <div class="row">
-  <div class="col-md-12">
+  <button type="button" class="btn btn-primary no-print" id="by_brand">@lang('lang_v1.visible')</button>
+  <button type="button" class="btn btn-primary no-print" style='display: none' id="by_brand1">@lang('lang_v1.invisible')</button>
+  <div class="col-md-12" id='by_brand_table'>
     <hr>
-    <button type="button" class="btn btn-primary no-print" id="by_brand">@lang('lang_v1.visible')</button>
-    <button type="button" class="btn btn-primary no-print" style='display: none' id="by_brand1">@lang('lang_v1.invisible')</button>
+
     <h3>@lang('lang_v1.product_sold_details_register') (@lang('lang_v1.by_brand'))</h3>
-    <table class="table table-condensed" id='by_brand_table'>
+    <table class="table table-condensed" >
       <tr>
         <th>#</th>
         <th>@lang('brand.brands')</th>

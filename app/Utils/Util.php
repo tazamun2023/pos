@@ -47,6 +47,10 @@ class Util
         return (float) $num;
     }
 
+    function systemDoubleValue($value, $digits = 4){
+        return sprintf('%.'.$digits.'f', floor($value*10000*($value>0?1:-1))/10000*($value>0?1:-1));
+    }
+
     /**
      * This function formats a number and returns them in specified format
      *

@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'cash_register_out_of_balance' => 'Insufficient balance, there is not enough money in ',
     'payment_amount' => 'Payment Amount',
     'add_product' => 'Add Product',
     'login_heading_brand' => 'Login to POS',

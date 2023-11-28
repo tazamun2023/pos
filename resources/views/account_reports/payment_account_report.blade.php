@@ -54,6 +54,13 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="col-md-3">
+                        <div class="form-group f_product_form-group">
+                            {!! Form::label('payment_status',  __('purchase.payment_status') . ':') !!}
+                            {!! Form::select('payment_status', ['paid' => __('lang_v1.paid'), 'due' => __('lang_v1.due'), 'partial' => __('lang_v1.partial'), 'overdue' => __('lang_v1.overdue')], null, ['class' => 'form-control select2', 'id'=> 'payment_status', 'style' => 'width:100%', 'placeholder' => __('lang_v1.all')]); !!}
+                        </div>
+                    </div>
                 </div>
               </div>
             </div>
@@ -71,8 +78,8 @@
                                 <th>@lang('account.payment_ref_no')</th>
                                 <th>@lang('account.invoice_ref_no')</th>
                                 <th>@lang('sale.amount')</th>
-                                <th>@lang('lang_v1.payment_type')</th>
                                 <th>@lang('lang_v1.payment_method')</th>
+                                <th>@lang('sale.payment_status')</th>
                                 <th>@lang('account.account')</th>
                                 <th>@lang( 'lang_v1.description' )</th>
                                 <th>@lang('messages.action')</th>
@@ -117,6 +124,7 @@
                                 "data": function ( d ) {
                                     d.account_id = $('#account_id').val();
                                     d.payment_types = $('#payment_types').val();
+                                    d.payment_status = $('#payment_status').val();
                                     var start_date = '';
                                     var endDate = '';
                                     if($('#date_filter').val()){
@@ -138,7 +146,7 @@
                                 {data: 'transaction_number', name: 'transaction_number'},
                                 {data: 'amount', name: 'amount'},
                                 {data: 'method', name: 'method'},
-                                {data: 'type', name: 'T.type'},
+                                {data: 'payment_status', name: 'T.payment_status'},
                                 {data: 'account', name: 'account'},
                                 {data: 'details', name: 'details', "searchable": false},
                                 {data: 'action', name: 'action'}
@@ -148,9 +156,10 @@
                             }
                         });
             
-            $('select#account_id, #date_filter, #payment_types').change( function(){
+            $('select#account_id, #date_filter, #payment_types, #payment_status').change( function(){
                 payment_account_report.ajax.reload();
             });
+
         })
 
         $(document).on('submit', 'form#link_account_form', function(e){

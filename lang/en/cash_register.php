@@ -34,7 +34,7 @@ return [
     'close_success' => 'Register closed successfully',
     'open' => 'Open',
     'close' => 'Close',
-    'total_refund' => 'Total Refund',
+    'total_refund' => 'Total Sell Return',
     'refunds' => 'Refunds',
     'total_sale_without_tax' => 'Total sales without tax',
     'total_sales_with_tax' => 'Total sales with tax',
