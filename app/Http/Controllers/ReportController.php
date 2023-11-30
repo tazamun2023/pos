@@ -1892,17 +1892,19 @@ class ReportController extends Controller
                 //      class="tax" data-unit="'.$row->tax.'"><small>('.$row->tax.')</small></span>';
                 // })
                 ->editColumn('tax', function ($row) {
-                    $percentage = 1.15;
+                    $percentage = 0.15;
                     $value = $row->subtotal;
 
-                    $result = ($percentage / 100) * $value;              
+                    // $result = ($percentage / 100) * $value;              
+                    $result = $percentage * $value;              
                     return $this->transactionUtil->num_f($result,true);
                 })
                 ->editColumn('total', function ($row) {
-                    $percentage = 1.15;
+                    $percentage = 0.15;
                     $value = $row->subtotal;
 
-                    $result = ($percentage / 100) * $value;   
+                    // $result = ($percentage / 100) * $value;   
+                    $result = $percentage * $value;   
                     $total = $result + $value;   
                     $class = is_null($row->parent_sell_line_id) ? 'row_total' : '';        
                     // return $this->transactionUtil->num_f($total, true);
