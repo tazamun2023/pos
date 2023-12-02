@@ -222,6 +222,9 @@
                     @lang('sale.price_inc_tax')
                 </th>
                 <th class="text-center col-md-2">
+                    @lang('sale.tax')
+                </th>
+                <th class="text-center col-md-2">
                     @lang('sale.subtotal')
                 </th>
                 <th class="text-center"><i class="fas fa-times" aria-hidden="true"></i></th>

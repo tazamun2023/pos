@@ -306,9 +306,12 @@ $(document).ready(function() {
         // console.log('unit_price_inc_tax', unit_price_inc_tax);
         // console.log('entered_qty', entered_qty);
         var line_total = entered_qty * unit_price_inc_tax;
+        var line_total_tax = (entered_qty * unit_price_inc_tax)*0.15;
         // console.log('line_total', line_total);
         __write_number(tr.find('input.pos_line_total'), line_total, false, 2);
         tr.find('span.pos_line_total_text').text(__currency_trans_from_en(line_total, true));
+        __write_number(tr.find('input.pos_line_tax'), line_total_tax, false, 2);
+        tr.find('span.pos_line_tax_text').text(__currency_trans_from_en(line_total_tax, true));
 
         //Change modifier quantity
         tr.find('.modifier_qty_text').each( function(){
@@ -1826,7 +1829,8 @@ function pos_order_tax(price_total, discount) {
     var tax_rate_id = $('#tax_rate_id').val();
     var calculation_type = 'percentage';
     var calculation_amount = __read_number($('#tax_calculation_amount'));
-    var total_amount = price_total - discount;
+    // var total_amount = price_total - discount;
+    var total_amount = price_total;
 
     if (tax_rate_id) {
         var order_tax = __calculate_amount(calculation_type, calculation_amount, total_amount);
