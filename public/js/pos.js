@@ -301,9 +301,13 @@ $(document).ready(function() {
 
         var unit_price_inc_tax = __read_number(tr.find('input.pos_unit_price_inc_tax'));
         var line_total = entered_qty * unit_price_inc_tax;
+        var line_total_tax = (entered_qty * unit_price_inc_tax)*0.15;
+
 
         __write_number(tr.find('input.pos_line_total'), line_total, false, 2);
+        __write_number(tr.find('input.pos_line_tax'), line_total_tax, false, 2);
         tr.find('span.pos_line_total_text').text(__currency_trans_from_en(line_total, true));
+        tr.find('span.pos_line_total_tax').text(__currency_trans_from_en(line_total_tax, true));
 
         //Change modifier quantity
         tr.find('.modifier_qty_text').each( function(){

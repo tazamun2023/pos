@@ -387,6 +387,11 @@
 		</td>
 	@endif
 	<td class="text-center">
+{{--		<input type='text' value='10'>--}}
+		<input type="hidden" class="form-control pos_line_tax" value="{{@num_format($product->quantity_ordered*$unit_price_inc_tax )*0.15}}">
+		<span class="display_currency pos_line_total_tax" data-currency_symbol="true">{{($product->quantity_ordered*$unit_price_inc_tax)*0.15}}</span>
+	</td>
+	<td class="text-center">
 		@php
 			$subtotal_type = !empty($pos_settings['is_pos_subtotal_editable']) ? 'text' : 'hidden';
 
