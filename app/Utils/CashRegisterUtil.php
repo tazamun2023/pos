@@ -44,7 +44,8 @@ class CashRegisterUtil extends Util
             $payment_amount = (isset($payment['is_return']) && $payment['is_return'] == 1) ? (-1 * $this->num_uf($payment['amount'])) : $this->num_uf($payment['amount']);
             if ($payment_amount != 0) {
                 $type = 'credit';
-                if ($transaction->type == 'expense') {
+                
+                if ($transaction->type == 'expense' || $transaction->type =='sell') {
                     $type = 'debit';
                 }
 
@@ -267,7 +268,8 @@ class CashRegisterUtil extends Util
             DB::raw("
     SUM(
         CASE
-            WHEN type = 'credit' AND transaction_type = 'suspend' OR transaction_type = 'sell' THEN amount
+            WHEN type = 'credit' AND transaction_type = 'suspend' THEN amount
+            WHEN type = 'credit' AND transaction_type = 'sell' THEN amount
             ELSE 0
         END
     ) as total_credit_sell
