@@ -1055,6 +1055,8 @@ public function showAllZatca(){
 
                     //Add payments to Cash Register
                     if (! $is_direct_sale && ! $transaction->is_suspend && ! empty($input['payment']) && ! $is_credit_sale) {
+                        dd($input['payment']);
+//                        dd($input['payment']->method);
                         $this->cashRegisterUtil->addSellPayments($transaction, $input['payment']);
                     }
 

@@ -267,7 +267,7 @@ class CashRegisterUtil extends Util
             DB::raw("
     SUM(
         CASE
-            WHEN type = 'credit' AND transaction_type = 'suspend' THEN amount
+            WHEN type = 'credit' AND transaction_type = 'suspend' OR transaction_type = 'sell' THEN amount
             ELSE 0
         END
     ) as total_credit_sell

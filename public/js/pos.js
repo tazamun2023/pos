@@ -1829,8 +1829,8 @@ function pos_order_tax(price_total, discount) {
     var tax_rate_id = $('#tax_rate_id').val();
     var calculation_type = 'percentage';
     var calculation_amount = __read_number($('#tax_calculation_amount'));
-    // var total_amount = price_total - discount;
-    var total_amount = price_total;
+    var total_amount = price_total - discount;
+    // var total_amount = price_total;
 
     if (tax_rate_id) {
         var order_tax = __calculate_amount(calculation_type, calculation_amount, total_amount);
