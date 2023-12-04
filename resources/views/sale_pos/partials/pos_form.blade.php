@@ -1,7 +1,7 @@
 <div class="row">
     <div class="col-md-4">
         <div class="form-group f_product_form-group addProduct_form">
-            <div class="input-group w-full">
+            <div class="input-group w-full" style="direction: ltr;">
 				{{-- <span class="input-group-addon">
 					<i class="fa fa-user"></i>
 				</span> --}}
@@ -28,28 +28,24 @@
     </div>
     <div class="col-md-8">
         <div class="form-group f_product_form-group addProduct_form">
-            <div class="input-group">
+            <div class="input-group" style="direction: ltr;">
                 <div class="input-group-btn">
                     <button type="button" class="btn btn-default bg-white btn-flat" style="border-bottom-right-radius: 0 !important; border-top-right-radius: 0 !important;" data-toggle="modal" data-target="#configure_search_modal" title="{{__('lang_v1.configure_product_search')}}"><i class="fas fa-search-plus"></i></button>
                 </div>
                 {!! Form::text('search_product', null, ['class' => 'form-control mousetrap', 'id' => 'search_product', 'placeholder' => __('lang_v1.search_product_placeholder'),
                 'disabled' => is_null($default_location)? true : false,
                 'autofocus' => is_null($default_location)? false : true,
+                'style' => 'border-bottom-left-radius: 0 !important;border-top-left-radius: 0 !important;'
                 ]); !!}
                 <span class="input-group-btn">
 
-					<!-- Show button for weighing scale modal -->
-					@if(isset($pos_settings['enable_weighing_scale']) && $pos_settings['enable_weighing_scale'] == 1)
-                        <button type="button" class="btn btn-default bg-white btn-flat" id="weighing_scale_btn" data-toggle="modal" data-target="#weighing_scale_modal"
-                                title="@lang('lang_v1.weighing_scale')"><i class="fa fa-digital-tachograph text-primary fa-lg"></i></button>
-                    @endif
+                    <button type="button" class="btn btn-default bg-white btn-flat pos_add_quick_product" data-href="{{action([\App\Http\Controllers\ProductController::class, 'quickAdd'])}}" data-container=".quick_add_product_modal"><i class="fa fa-plus-circle text-primary fa-lg"></i></button>
 
-
-					<button type="button" class="btn btn-default bg-white btn-flat pos_add_quick_product" style="
-					    border-top-left-radius: 0 !important;
-						border-bottom-left-radius: 0 !important;
-						margin: 0 !important;
-						border-left: 0;" data-href="{{action([\App\Http\Controllers\ProductController::class, 'quickAdd'])}}" data-container=".quick_add_product_modal"><i class="fa fa-plus-circle text-primary fa-lg"></i></button>
+                    <!-- Show button for weighing scale modal -->
+{{--                    @if(isset($pos_settings['enable_weighing_scale']) && $pos_settings['enable_weighing_scale'] == 1)--}}
+{{--                        <button type="button" class="btn btn-default bg-white btn-flat" id="weighing_scale_btn" data-toggle="modal" data-target="#weighing_scale_modal"--}}
+{{--                                title="@lang('lang_v1.weighing_scale')"><i class="fa fa-digital-tachograph text-primary fa-lg"></i></button>--}}
+{{--                    @endif--}}
 				</span>
             </div>
         </div>
@@ -57,7 +53,7 @@
 </div>
 <div class="row">
     @if(!empty($pos_settings['show_invoice_layout']))
-        <div class="col-md-4">
+        <div class="col-md-4 col-sm-6">
             <div class="form-group f_product_form-group addProduct_form">
                 {!! Form::select('invoice_layout_id',
                             $invoice_layouts, $default_location->invoice_layout_id, ['class' => 'form-control select2', 'placeholder' => __('lang_v1.select_invoice_layout'), 'id' => 'invoice_layout_id']); !!}
@@ -71,7 +67,7 @@
         @php
             $is_commission_agent_required = !empty($pos_settings['is_commission_agent_required']);
         @endphp
-        <div class="col-md-4">
+        <div class="col-md-4 col-sm-6">
             <div class="form-group f_product_form-group addProduct_form">
                 {!! Form::select('commission_agent',
                             $commission_agent, null, ['class' => 'form-control select2', 'placeholder' => __('lang_v1.commission_agent'), 'id' => 'commission_agent', 'required' => $is_commission_agent_required]); !!}
@@ -106,9 +102,9 @@
         <div class="col-md-4 col-sm-6">
             <div class="form-group f_product_form-group addProduct_form">
                 <div class="input-group">
-					<span class="input-group-addon">
-						<i class="fas fa-money-bill-alt"></i>
-					</span>
+{{--					<span class="input-group-addon">--}}
+{{--						<i class="fas fa-money-bill-alt"></i>--}}
+{{--					</span>--}}
                     @php
                         reset($price_groups);
                         $selected_price_group = !empty($default_price_group_id) && array_key_exists($default_price_group_id, $price_groups) ? $default_price_group_id : null;
@@ -160,23 +156,27 @@
             }
         @endphp
         <div class="col-md-4 col-sm-6">
-            <div class="form-group">
-                {!! Form::select('invoice_scheme_id', $invoice_schemes, $invoice_scheme_id,
-                    ['class' => 'form-control', 'placeholder' => __('lang_v1.select_invoice_scheme'),
-                    'id' => 'invoice_scheme_id']); !!}
+            <div class="form-group f_product_form-group addProduct_form">
+                <div class="form-group">
+                    {!! Form::select('invoice_scheme_id', $invoice_schemes, $invoice_scheme_id,
+                        ['class' => 'form-control', 'placeholder' => __('lang_v1.select_invoice_scheme'),
+                        'id' => 'invoice_scheme_id']); !!}
+                </div>
             </div>
         </div>
     @endif
     @if(in_array('subscription', $enabled_modules))
         <div class="col-md-4 col-sm-6">
-            <label>
-                {!! Form::checkbox('is_recurring', 1, false, ['class' => 'input-icheck', 'id' => 'is_recurring']); !!} @lang('lang_v1.subscribe')?
-            </label><button type="button" data-toggle="modal" data-target="#recurringInvoiceModal" class="btn btn-link"><i class="fa fa-external-link-square-alt"></i></button>{{--@show_tooltip(__('lang_v1.recurring_invoice_help'))--}}
+            <div class="form-group f_product_form-group addProduct_form">
+                <label>
+                    {!! Form::checkbox('is_recurring', 1, false, ['class' => 'input-icheck', 'id' => 'is_recurring']); !!} @lang('lang_v1.subscribe')?
+                </label>
+                <button type="button" data-toggle="modal" data-target="#recurringInvoiceModal" class="btn btn-link"><i class="fa fa-external-link-square-alt"></i></button>{{--@show_tooltip(__('lang_v1.recurring_invoice_help'))--}}
+            </div>
         </div>
     @endif
     <!-- Call restaurant module if defined -->
     @if(in_array('tables' ,$enabled_modules) || in_array('service_staff' ,$enabled_modules))
-        <div class="clearfix"></div>
         <span id="restaurant_module_span">
       		<div class="col-md-3"></div>
     	</span>
@@ -210,7 +210,7 @@
                 <th class="tex-center @if(!empty($pos_settings['inline_service_staff'])) col-md-3 @else col-md-4 @endif">
                     @lang('sale.product') {{--@show_tooltip(__('lang_v1.tooltip_sell_product_column'))--}}
                 </th>
-                <th class="text-center col-md-3">
+                <th class="text-center col-md-2">
                     @lang('sale.qty')
                 </th>
                 @if(!empty($pos_settings['inline_service_staff']))
@@ -218,11 +218,8 @@
                         @lang('restaurant.service_staff')
                     </th>
                 @endif
-                <th class="text-center col-md-2 {{$hide_tax}}">
+                <th class="text-center col-md-3 {{$hide_tax}}">
                     @lang('sale.price_inc_tax')
-                </th>
-                <th class="text-center col-md-2">
-                    @lang('sale.tax')
                 </th>
                 <th class="text-center col-md-2">
                     @lang('sale.subtotal')

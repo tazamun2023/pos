@@ -15,7 +15,7 @@
 						<div class="row">
 							<div id="payment_rows_div">
 								@foreach($payment_lines as $payment_line)
-
+									
 									@if($payment_line['is_return'] == 1)
 										@php
 											$change_return = $payment_line;
@@ -87,7 +87,7 @@
 							<div class="col-md-6">
 								<div class="form-group">
 									{!! Form::label('staff_note', __('sale.staff_note') . ':') !!}
-									{!! Form::textarea('staff_note',
+									{!! Form::textarea('staff_note', 
 									!empty($transaction)? $transaction->staff_note:null, ['class' => 'form-control', 'rows' => 3, 'placeholder' => __('sale.staff_note')]); !!}
 								</div>
 							</div>
@@ -133,7 +133,7 @@
 				            		{!! Form::hidden("change_return", $change_return['amount'], ['class' => 'form-control change_return input_number', 'required', 'id' => "change_return"]); !!}
 				            		<!-- <span class="lead text-bold total_quantity">0</span> -->
 				            		@if(!empty($change_return['id']))
-				                		<input type="hidden" name="change_return_id"
+				                		<input type="hidden" name="change_return_id" 
 				                		value="{{$change_return['id']}}">
 				                	@endif
 				            	</div>
@@ -149,7 +149,7 @@
 				            	</div>
 
 
-
+				            					              
 				            </div>
 				            <!-- /.box-body -->
 				          </div>

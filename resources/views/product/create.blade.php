@@ -112,7 +112,7 @@
                         </div>
 
                         <div class="product_detiles_items @if (!session('business.enable_category')) hide @endif">
-                            <div class="input-group addProduct_form">
+                            <div class="form-group addProduct_form">
                                 {!! Form::label('category_id', __('product.category') . ':') !!}
                                 {!! Form::select(
                                     'category_id',
@@ -120,15 +120,6 @@
                                     !empty($duplicate_product->category_id) ? $duplicate_product->category_id : null,
                                     ['placeholder' => __('messages.please_select'), 'class' => 'form-control select2'],
                                 ) !!}
-
-                                <span class="input-group-btn">
-                                    <button type="button" @if (!auth()->user()->can('brand.create')) disabled @endif
-                                    class="btn btn-default bg-white btn-flat btn-modal"
-                                            data-href="{{ action([\App\Http\Controllers\TaxonomyController::class, 'create'], ['quick_add' => true]) }}"
-                                            title="@lang('brand.add_brand')" data-container=".view_modal"><i
-                                                class="fa fa-plus-circle text-primary fa-lg"></i></button>
-
-                                    </span>
                             </div>
                         </div>
 

@@ -85,7 +85,6 @@ $(document).ready(function() {
     var brands_table = $('#brands_table').DataTable({
         processing: true,
         serverSide: true,
-        buttons:[],
         ajax: '/brands',
         columnDefs: [
             {
@@ -268,7 +267,6 @@ $(document).ready(function() {
     var units_table = $('#unit_table').DataTable({
         processing: true,
         serverSide: true,
-        buttons:[],
         ajax: '/units',
         columnDefs: [
             {
@@ -1676,7 +1674,6 @@ $(document).ready(function() {
     var sales_commission_agent_table = $('#sales_commission_agent_table').DataTable({
         processing: true,
         serverSide: true,
-        buttons:[],
         ajax: '/sales-commission-agents',
         columnDefs: [
             {

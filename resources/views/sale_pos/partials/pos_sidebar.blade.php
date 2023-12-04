@@ -9,7 +9,7 @@
 </div>
 <div class="row f_product_category_row">
 	@if(!empty($categories))
-		<div class="col-md-4" id="product_category_div">
+		<div class="col-md-6" id="product_category_div">
 			<select class="select2" id="product_category" style="width:100% !important">
 
 				<option value="all">@lang('lang_v1.all_category')</option>
@@ -32,7 +32,7 @@
 	@endif
 
 	@if(!empty($brands))
-		<div class="col-sm-4" id="product_brand_div">
+		<div class="col-md-6" id="product_brand_div">
 			{!! Form::select('size', $brands, null, ['id' => 'product_brand', 'class' => 'select2', 'name' => null, 'style' => 'width:100% !important']) !!}
 		</div>
 	@endif
@@ -46,8 +46,10 @@
 		<button type="button" class="btn btn-primary btn-flat" id="show_featured_products">@lang('lang_v1.featured_products')</button>
 	</div>
 </div>
-
-<div style="display: flex; align-items: center ;margin-top: 18px; gap: 10px">
+<?php
+$tree_accs = false;//checkTreeOfAccountsIsHere();
+?>
+<div style="display: @if($tree_accs == false) flex @else none @endif; align-items: center ;margin-top: 18px; gap: 10px">
 	@if(!isset($pos_settings['hide_recent_trans']) || $pos_settings['hide_recent_trans'] == 0)
 		<button type="button" class="pull-right btn   recent_transactions_btn @if($is_mobile) col-xs-6 @endif" data-toggle="modal" data-target="#recent_transactions_modal" id="recent-transactions">
 			 <i class="fas fa-clock"></i> @lang('lang_v1.recent_transactions')

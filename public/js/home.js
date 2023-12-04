@@ -190,7 +190,6 @@ function update_statistics(start, end) {
         dataType: 'json',
         data: data,
         success: function(data) {
-
             //purchase details
             $('.total_purchase').html(__currency_trans_from_en(data.total_purchase, true));
             $('.purchase_due').html(__currency_trans_from_en(data.purchase_due, true));
@@ -212,4 +211,3 @@ function update_statistics(start, end) {
         },
     });
 }
-

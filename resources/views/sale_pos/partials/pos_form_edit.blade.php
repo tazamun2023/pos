@@ -1,13 +1,13 @@
 <div class="row">
-	<div class="col-md-12">
+	<div class="col-md-12" style="text-align: center">
 		<p><strong>@lang('sale.invoice_no'):</strong> {{$transaction->invoice_no}}</p>
 	</div>
 	<div class="col-md-4">
-		<div class="form-group" style="width: 100% !important">
-			<div class="input-group">
-				<span class="input-group-addon">
-					<i class="fa fa-user"></i>
-				</span>
+		<div class="form-group f_product_form-group addProduct_form">
+			<div class="input-group w-full" style="direction: ltr;">
+{{--				<span class="input-group-addon">--}}
+{{--					<i class="fa fa-user"></i>--}}
+{{--				</span>--}}
 				<input type="hidden" id="default_customer_id" 
 				value="{{ $transaction->contact->id }}" >
 				<input type="hidden" id="default_customer_name" 
@@ -20,27 +20,28 @@
 					<button type="button" class="btn btn-default bg-white btn-flat add_new_customer" data-name=""  @if(!auth()->user()->can('customer.create')) disabled @endif><i class="fa fa-plus-circle text-primary fa-lg"></i></button>
 				</span>
 			</div>
-			<small class="text-danger @if(empty($customer_due)) hide @endif contact_due_text"><strong>@lang('account.customer_due'):</strong> <span>{{$customer_due ?? ''}}</span></small>
+			<small class="text-danger @if(empty($customer_due)) hide @endif contact_due_text"><span>@lang('account.customer_due'):</span> <span>{{$customer_due ?? ''}}</span></small>
 		</div>
 	</div>
 	<div class="col-md-8">
-		<div class="form-group">
-			<div class="input-group">
+		<div class="form-group f_product_form-group addProduct_form">
+			<div class="input-group" style="direction: ltr;">
 				<div class="input-group-btn">
-					<button type="button" class="btn btn-default bg-white btn-flat" data-toggle="modal" data-target="#configure_search_modal" title="{{__('lang_v1.configure_product_search')}}"><i class="fas fa-search-plus"></i></button>
+					<button type="button" class="btn btn-default bg-white btn-flat" style="border-bottom-right-radius: 0 !important; border-top-right-radius: 0 !important;" data-toggle="modal" data-target="#configure_search_modal" title="{{__('lang_v1.configure_product_search')}}"><i class="fas fa-search-plus"></i></button>
 				</div>
 				{!! Form::text('search_product', null, ['class' => 'form-control mousetrap', 'id' => 'search_product', 'placeholder' => __('lang_v1.search_product_placeholder'),
 				'autofocus' => true,
+				'style' => 'border-bottom-left-radius: 0 !important;border-top-left-radius: 0 !important;'
 				]); !!}
 				<span class="input-group-btn">
 
-					<!-- Show button for weighing scale modal -->
-					@if(isset($pos_settings['enable_weighing_scale']) && $pos_settings['enable_weighing_scale'] == 1)
-						<button type="button" class="btn btn-default bg-white btn-flat" id="weighing_scale_btn" data-toggle="modal" data-target="#weighing_scale_modal" 
-						title="@lang('lang_v1.weighing_scale')"><i class="fa fa-digital-tachograph text-primary fa-lg"></i></button>
-					@endif
-
 					<button type="button" class="btn btn-default bg-white btn-flat pos_add_quick_product" data-href="{{action([\App\Http\Controllers\ProductController::class, 'quickAdd'])}}" data-container=".quick_add_product_modal"><i class="fa fa-plus-circle text-primary fa-lg"></i></button>
+
+					<!-- Show button for weighing scale modal -->
+{{--					@if(isset($pos_settings['enable_weighing_scale']) && $pos_settings['enable_weighing_scale'] == 1)--}}
+{{--						<button type="button" class="btn btn-default bg-white btn-flat" id="weighing_scale_btn" data-toggle="modal" data-target="#weighing_scale_modal"--}}
+{{--								title="@lang('lang_v1.weighing_scale')"><i class="fa fa-digital-tachograph text-primary fa-lg"></i></button>--}}
+{{--					@endif--}}
 				</span>
 			</div>
 		</div>
@@ -71,7 +72,7 @@
 		@endif
 	@if(!empty($pos_settings['enable_transaction_date']))
 		<div class="col-md-4 col-sm-6">
-			<div class="form-group">
+			<div class="form-group f_product_form-group addProduct_form">
 				<div class="input-group">
 					<span class="input-group-addon">
 						<i class="fa fa-calendar"></i>
@@ -149,9 +150,12 @@
     @endif
     @if(in_array('subscription', $enabled_modules))
 		<div class="col-md-4 col-sm-6">
-			<label>
-              {!! Form::checkbox('is_recurring', 1, $transaction->is_recurring, ['class' => 'input-icheck', 'id' => 'is_recurring']); !!} @lang('lang_v1.subscribe')?
-            </label><button type="button" data-toggle="modal" data-target="#recurringInvoiceModal" class="btn btn-link"><i class="fa fa-external-link-square-alt"></i></button>@show_tooltip(__('lang_v1.recurring_invoice_help'))
+			<div class="form-group f_product_form-group addProduct_form">
+				<label>
+				  {!! Form::checkbox('is_recurring', 1, $transaction->is_recurring, ['class' => 'input-icheck', 'id' => 'is_recurring']); !!} @lang('lang_v1.subscribe')?
+				</label>
+				<button type="button" data-toggle="modal" data-target="#recurringInvoiceModal" class="btn btn-link"><i class="fa fa-external-link-square-alt"></i></button>{{--@show_tooltip(__('lang_v1.recurring_invoice_help'))--}}
+			</div>
 		</div>
 	@endif
 </div>
@@ -180,9 +184,9 @@
 			<thead>
 				<tr>
 					<th class="tex-center @if(!empty($pos_settings['inline_service_staff'])) col-md-3 @else col-md-4 @endif">	
-						@lang('sale.product') @show_tooltip(__('lang_v1.tooltip_sell_product_column'))
+						@lang('sale.product') {{--@show_tooltip(__('lang_v1.tooltip_sell_product_column'))--}}
 					</th>
-					<th class="text-center col-md-3">
+					<th class="text-center col-md-2">
 						@lang('sale.qty')
 					</th>
 					@if(!empty($pos_settings['inline_service_staff']))
@@ -190,7 +194,7 @@
 							@lang('restaurant.service_staff')
 						</th>
 					@endif
-					<th class="text-center col-md-2 {{$hide_tax}}">
+					<th class="text-center col-md-3 {{$hide_tax}}">
 						@lang('sale.price_inc_tax')
 					</th>
 					<th class="text-center col-md-2">

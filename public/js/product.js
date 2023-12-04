@@ -44,9 +44,7 @@ $(document).ready(function() {
         tax_rate = tax_rate == undefined ? 0 : tax_rate;
 
         var purchase_inc_tax = __add_percent(purchase_exc_tax, tax_rate);
-
-        /*this coments for create issue in products pages inc tax*/
-        // __write_number($('input#single_dpp_inc_tax'), purchase_inc_tax);
+        __write_number($('input#single_dpp_inc_tax'), purchase_inc_tax);
 
         var profit_percent = __read_number($('#profit_percent'));
         var selling_price = __add_percent(purchase_exc_tax, profit_percent);
@@ -78,8 +76,9 @@ $(document).ready(function() {
 
     //If purchase price inc tax is changed
     $(document).on('change', 'input#single_dpp_inc_tax', function(e) {
-        var purchase_inc_tax = __read_number($('input#single_dpp_inc_tax')); //purchase price inc tax
+        var purchase_inc_tax = __read_number($('input#single_dpp_inc_tax'));
         purchase_inc_tax = purchase_inc_tax == undefined ? 0 : purchase_inc_tax;
+
         var tax_rate = $('select#tax')
             .find(':selected')
             .data('rate');
@@ -91,18 +90,11 @@ $(document).ready(function() {
 
         var profit_percent = __read_number($('#profit_percent'));
         profit_percent = profit_percent == undefined ? 0 : profit_percent;
-
         var selling_price = __add_percent(purchase_exc_tax, profit_percent);
         __write_number($('input#single_dsp'), selling_price);
 
         var selling_price_inc_tax = __add_percent(selling_price, tax_rate);
-
         __write_number($('input#single_dsp_inc_tax'), selling_price_inc_tax);
-
-        // console.log('profit_percent', profit_percent);
-        // console.log('selling_price', selling_price);
-        // console.log('selling_price_inc_tax', selling_price_inc_tax);
-
     });
 
     $(document).on('change', 'input#profit_percent', function(e) {
