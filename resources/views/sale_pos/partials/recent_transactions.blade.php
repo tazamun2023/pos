@@ -29,10 +29,6 @@
 					{{ $transaction->final_total }}
 				</td>
 				<td>
-					<?php
-					$tree_accs = checkTreeOfAccountsIsHere();
-					?>
-					@if($tree_accs == false)
 					@if(auth()->user()->can('sell.update') || auth()->user()->can('direct_sell.update'))
 					<a href="{{action([\App\Http\Controllers\SellPosController::class, 'edit'], [$transaction->id]).$subtype}}">
 	    				<i class="fas fa-pen text-muted" aria-hidden="true" title="{{__('lang_v1.click_to_edit')}}"></i>
@@ -48,10 +44,15 @@
 						 <i class="fas fa-money-bill-alt text-muted"></i>
 						</a>
 					@endif
-					@endif
-	    			<a href="{{action([\App\Http\Controllers\SellPosController::class, 'printInvoice'], [$transaction->id])}}" class="print-invoice-link">
-	    				<i class="fa fa-print text-muted" aria-hidden="true" title="{{__('lang_v1.click_to_print')}}"></i>
-	    			</a>
+					<div style='display: inline'>
+						<a href='#' url="{{route('send.invoice.to.zatka', \Illuminate\Support\Facades\Crypt::encrypt($transaction->id))}}" class="{{$transaction->zatka_info ? ($transaction->zatka_info->status_code < 300 ? 'hide' : '') : ''  }} send-invoice-link">
+							<i class="fa fa-paper-plane text-primary" aria-hidden="true" title="{{__('lang_v1.click_to_send_invoice_to_zatka')}}"></i>
+						</a>
+
+						<a href="{{action([\App\Http\Controllers\SellPosController::class, 'printInvoice'], [$transaction->id])}}" class="{{$transaction->zatka_info ? ($transaction->zatka_info->status_code > 300 ? 'hide' : '') : 'hide'  }}  print-invoice-link">
+							<i class="fa fa-print text-muted" aria-hidden="true" title="{{__('lang_v1.click_to_print')}}"></i>
+						</a>
+					</div>
 				</td>
 			</tr>
 		@endforeach
@@ -59,3 +60,58 @@
 @else
 	<p>@lang('sale.no_recent_transactions')</p>
 @endif
+
+<script>
+	$('.send-invoice-link').on('click', function(e){
+		let recent_transaction = $('#recent_transactions_modal');
+		recent_transaction.modal('hide');
+		Swal.fire({
+			html: `<div style='padding: 20px 40px'>Sending Invoice To ZATKA...</div>`,
+			allowClickOutside: true,
+			showConfirmButton: false,
+		});
+		e.preventDefault();
+
+		let url = $(this).attr('url');
+		console.log(url);
+		axios.get(url)
+		.then(function(response){
+			Swal.close();
+			recent_transaction.modal('show');
+			switch (response.status){
+				case 200:
+
+					break;
+				case 202:
+
+					console.log('request accepted. but warning');
+					break;
+			}
+		})
+		.catch(function(error){
+			Swal.close();
+			recent_transaction.modal('show');
+			let response = error.response;
+			switch (response.status){
+				case 303:
+
+					break;
+				case 400:
+
+					break;
+				case 401:
+
+					break;
+				case 500:
+
+					break;
+				default:
+
+					break;
+			}
+			if(response.status === 400){
+				console.log()
+			}
+		})
+	})
+</script>

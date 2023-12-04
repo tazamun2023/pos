@@ -29,7 +29,7 @@
 		<div title="@lang('lang_v1.pos_edit_product_price_help')">
 		<span class="text-link text-info cursor-pointer" data-toggle="modal" data-target="#row_edit_product_price_modal_{{$row_count}}">
 			{!! $product_name !!}
-{{--			&nbsp;<i class="fa fa-info-circle"></i>--}}
+			&nbsp;<i class="fa fa-info-circle"></i>
 		</span>
 		</div>
 		@else
@@ -82,6 +82,8 @@
 			  if(!empty($so_line)){
   				$sell_line_note = $so_line->sell_line_note;
   			}
+
+              $singleTotal = App\Variation::find($product->variation_id)->sell_price_inc_tax;
   		@endphp
 
 		@if(!empty($discount))
@@ -192,7 +194,6 @@
 
 		<input type="hidden" value="{{$product->variation_id}}" 
 			name="products[{{$row_count}}][variation_id]" class="row_variation_id">
-		<input type="hidden" value="0" name="products[{{$row_count}}][row_new_new_total_tax]">
 
 		<input type="hidden" value="{{$product->enable_stock}}" 
 			name="products[{{$row_count}}][enable_stock]">
@@ -335,7 +336,8 @@
 			}
 		@endphp
 		<td class="@if(!auth()->user()->can('edit_product_price_from_sale_screen')) hide @endif">
-			<input type="text" name="products[{{$row_count}}][unit_price]" class="form-control pos_unit_price input_number mousetrap" value="{{@num_format($pos_unit_price)}}" @if(!empty($pos_settings['enable_msp'])) data-rule-min-value="{{$pos_unit_price}}" data-msg-min-value="{{__('lang_v1.minimum_selling_price_error_msg', ['price' => @num_format($pos_unit_price)])}}" @endif> 
+{{--			<input type="text" name="products[{{$row_count}}][unit_price]" class="form-control pos_unit_price input_number mousetrap" value="{{@num_format($pos_unit_price)}}" @if(!empty($pos_settings['enable_msp'])) data-rule-min-value="{{$pos_unit_price}}" data-msg-min-value="{{__('lang_v1.minimum_selling_price_error_msg', ['price' => @num_format($pos_unit_price)])}}" @endif> --}}
+			<input type="text" name="products[{{$row_count}}][unit_price]" class="form-control pos_unit_price input_number mousetrap" value="{{$pos_unit_price}}" @if(!empty($pos_settings['enable_msp'])) data-rule-min-value="{{$pos_unit_price}}" data-msg-min-value="{{__('lang_v1.minimum_selling_price_error_msg', ['price' => $pos_unit_price])}}" @endif>
 
 			@if(!empty($last_sell_line))
 				<br>
@@ -363,7 +365,7 @@
 		</td>
 		<td class="text-center {{$hide_tax}}">
 			{!! Form::hidden("products[$row_count][item_tax]", @num_format($item_tax), ['class' => 'item_tax']); !!}
-
+		
 			{!! Form::select("products[$row_count][tax_id]", $tax_dropdown['tax_rates'], $tax_id, ['placeholder' => 'Select', 'class' => 'form-control tax_id'], $tax_dropdown['attributes']); !!}
 		</td>
 
@@ -379,7 +381,8 @@
 		@endif
 	@endif
 	<td class="{{$hide_tax}}">
-		<input type="text" name="products[{{$row_count}}][unit_price_inc_tax]" class="form-control pos_unit_price_inc_tax input_number" value="{{@num_format($unit_price_inc_tax)}}" @if(!$edit_price) readonly @endif @if(!empty($pos_settings['enable_msp'])) data-rule-min-value="{{$unit_price_inc_tax}}" data-msg-min-value="{{__('lang_v1.minimum_selling_price_error_msg', ['price' => @num_format($unit_price_inc_tax)])}}" @endif>
+{{--		<input type="text" name="products[{{$row_count}}][unit_price_inc_tax]" class="form-control pos_unit_price_inc_tax input_number" value="{{@num_format($unit_price_inc_tax)}}" @if(!$edit_price) readonly @endif @if(!empty($pos_settings['enable_msp'])) data-rule-min-value="{{$unit_price_inc_tax}}" data-msg-min-value="{{__('lang_v1.minimum_selling_price_error_msg', ['price' => @num_format($unit_price_inc_tax)])}}" @endif>--}}
+		<input type="text" name="products[{{$row_count}}][unit_price_inc_tax]" class="form-control pos_unit_price_inc_tax input_number" value="{{$unit_price_inc_tax}}" @if(!$edit_price) readonly @endif @if(!empty($pos_settings['enable_msp'])) data-rule-min-value="{{$unit_price_inc_tax}}" data-msg-min-value="{{__('lang_v1.minimum_selling_price_error_msg', ['price' => $unit_price_inc_tax])}}" @endif>
 	</td>
 	@if(!empty($common_settings['enable_product_warranty']) && !empty($is_direct_sell))
 		<td>
@@ -387,11 +390,17 @@
 		</td>
 	@endif
 	<td class="text-center">
+		<input type="hidden" class="form-control pos_line_tax" value="{{($product->quantity_ordered*$unit_price_inc_tax)*0.15}}">
+		<span class="display_currency pos_line_tax_text " data-currency_symbol="true">{{($product->quantity_ordered*$unit_price_inc_tax)*0.15}}</span>
+	</td>
+	<td class="text-center">
 		@php
 			$subtotal_type = !empty($pos_settings['is_pos_subtotal_editable']) ? 'text' : 'hidden';
-
 		@endphp
-		<input type="{{$subtotal_type}}" class="form-control pos_line_total @if(!empty($pos_settings['is_pos_subtotal_editable'])) input_number @endif" value="{{@num_format($product->quantity_ordered*$unit_price_inc_tax )}}">
+		<input type="{{$subtotal_type}}" class="form-control pos_line_total @if(!empty($pos_settings['is_pos_subtotal_editable'])) input_number @endif" value="{{$product->quantity_ordered*$unit_price_inc_tax}}">
+		<input type="hidden" value="{{ $unit_price_inc_tax }}" id='pos_line_total_00'>
+		<input type="hidden" value="{{ $singleTotal }}" id='pos_line_total_item_tax'>
+{{--		<input type="hidden" value="8.695652174" id='pos_line_total_00' class='pos_line_total_00'>--}}
 		<span class="display_currency pos_line_total_text @if(!empty($pos_settings['is_pos_subtotal_editable'])) hide @endif" data-currency_symbol="true">{{$product->quantity_ordered*$unit_price_inc_tax}}</span>
 	</td>
 	<td class="text-center v-center">

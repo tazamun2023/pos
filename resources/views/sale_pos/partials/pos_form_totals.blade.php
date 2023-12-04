@@ -38,7 +38,7 @@
 							</span>
 					</b> 
 				</td>
-				<td class="hide">
+				<td class="@if($pos_settings['disable_order_tax'] != 0) hide @endif">
 					<span>
 						<b>@lang('sale.order_tax')(+): @show_tooltip(__('tooltip.sale_tax'))</b>
 						<i class="fas fa-edit cursor-pointer" title="@lang('sale.edit_order_tax')" aria-hidden="true" data-toggle="modal" data-target="#posEditOrderTaxModal" id="pos-edit-tax" ></i> 

@@ -88,153 +88,321 @@
 				</div>
 			@endif
 			<div class="border-top textbox-info">
-				<p class="f-left"><strong>{!! $receipt_details->invoice_no_prefix !!}</strong></p>
-				<p class="f-right">
-					{{$receipt_details->invoice_no}}
-				</p>
+				<table style="width: 100%">
+					<tr>
+						<td><strong>{!! $receipt_details->invoice_no_prefix !!}</strong></td>
+						<td @if ($app->getLocale() == "ar")
+							style="text-align: left;"
+							@else
+							style="text-align: right;"
+						@endif><span>{{$receipt_details->invoice_no}}</span></td>
+					</tr>
+				</table>
 			</div>
 			<div class="textbox-info">
-				<p class="f-left"><strong>{!! $receipt_details->date_label !!}</strong></p>
-				<p class="f-right">
-					{{$receipt_details->invoice_date}}
-				</p>
+				<table style="width: 100%">
+					<tr>
+						<td><strong>{!! $receipt_details->date_label !!}</strong></td>
+						<td @if ($app->getLocale() == "ar")
+							style="text-align: left;"
+							@else
+							style="text-align: right;"
+						@endif><span>{{$receipt_details->invoice_date}}</span></td>
+					</tr>
+				</table>
 			</div>
 			
 			@if(!empty($receipt_details->due_date_label))
 				<div class="textbox-info">
-					<p class="f-left"><strong>{{$receipt_details->due_date_label}}</strong></p>
-					<p class="f-right">{{$receipt_details->due_date ?? ''}}</p>
+					<table style="width: 100%">
+						<tr>
+							<td><strong>{{$receipt_details->due_date_label}}</strong></td>
+							<td @if ($app->getLocale() == "ar")
+								style="text-align: left;"
+								@else
+								style="text-align: right;"
+							@endif><span>{{$receipt_details->due_date ?? ''}}</span></td>
+						</tr>
+					</table>
 				</div>
 			@endif
 
 			@if(!empty($receipt_details->sales_person_label))
 				<div class="textbox-info">
-					<p class="f-left"><strong>{{$receipt_details->sales_person_label}}</strong></p>
-				
-					<p class="f-right">{{$receipt_details->sales_person}}</p>
+					<table style="width: 100%">
+						<tr>
+							<td><strong>{{$receipt_details->sales_person_label}}</strong></td>
+							<td @if ($app->getLocale() == "ar")
+								style="text-align: left;"
+								@else
+								style="text-align: right;"
+							@endif><span>{{$receipt_details->sales_person}}</span></td>
+						</tr>
+					</table>	
 				</div>
 			@endif
 			@if(!empty($receipt_details->commission_agent_label))
 				<div class="textbox-info">
-					<p class="f-left"><strong>{{$receipt_details->commission_agent_label}}</strong></p>
-				
-					<p class="f-right">{{$receipt_details->commission_agent}}</p>
+					<table style="width: 100%">
+						<tr>
+							<td><strong>{{$receipt_details->commission_agent_label}}</strong></td>
+							<td @if ($app->getLocale() == "ar")
+								style="text-align: left;"
+								@else
+								style="text-align: right;"
+							@endif><span>{{$receipt_details->commission_agent}}</span></td>
+						</tr>
+					</table>
 				</div>
 			@endif
 
 			@if(!empty($receipt_details->brand_label) || !empty($receipt_details->repair_brand))
 				<div class="textbox-info">
-					<p class="f-left"><strong>{{$receipt_details->brand_label}}</strong></p>
-				
-					<p class="f-right">{{$receipt_details->repair_brand}}</p>
+					<table style="width: 100%">
+						<tr>
+							<td><strong>{{$receipt_details->brand_label}}</strong></td>
+							<td @if ($app->getLocale() == "ar")
+								style="text-align: left;"
+								@else
+								style="text-align: right;"
+							@endif><span>{{$receipt_details->repair_brand}}</span></td>
+						</tr>
+					</table>
 				</div>
 			@endif
 
 			@if(!empty($receipt_details->device_label) || !empty($receipt_details->repair_device))
 				<div class="textbox-info">
-					<p class="f-left"><strong>{{$receipt_details->device_label}}</strong></p>
-				
-					<p class="f-right">{{$receipt_details->repair_device}}</p>
+					<table style="width: 100%">
+						<tr>
+							<td><strong>{{$receipt_details->device_label}}</strong></td>
+							<td @if ($app->getLocale() == "ar")
+								style="text-align: left;"
+								@else
+								style="text-align: right;"
+							@endif><span>{{$receipt_details->repair_device}}</span></td>
+						</tr>
+					</table>
 				</div>
 			@endif
 			
 			@if(!empty($receipt_details->model_no_label) || !empty($receipt_details->repair_model_no))
 				<div class="textbox-info">
-					<p class="f-left"><strong>{{$receipt_details->model_no_label}}</strong></p>
-				
-					<p class="f-right">{{$receipt_details->repair_model_no}}</p>
+					<table style="width: 100%">
+						<tr>
+							<td><strong>{{$receipt_details->model_no_label}}</strong></td>
+							<td @if ($app->getLocale() == "ar")
+								style="text-align: left;"
+								@else
+								style="text-align: right;"
+							@endif><span>{{$receipt_details->repair_model_no}}</span></td>
+						</tr>
+					</table>
 				</div>
 			@endif
 			
 			@if(!empty($receipt_details->serial_no_label) || !empty($receipt_details->repair_serial_no))
 				<div class="textbox-info">
-					<p class="f-left"><strong>{{$receipt_details->serial_no_label}}</strong></p>
-				
-					<p class="f-right">{{$receipt_details->repair_serial_no}}</p>
+					<table style="width: 100%">
+						<tr>
+							<td><strong>{{$receipt_details->serial_no_label}}</strong></td>
+							<td @if ($app->getLocale() == "ar")
+								style="text-align: left;"
+								@else
+								style="text-align: right;"
+							@endif><span>{{$receipt_details->repair_serial_no}}</span></td>
+						</tr>
+					</table>
 				</div>
 			@endif
 
 			@if(!empty($receipt_details->repair_status_label) || !empty($receipt_details->repair_status))
 				<div class="textbox-info">
-					<p class="f-left"><strong>
-						{!! $receipt_details->repair_status_label !!}
-					</strong></p>
-					<p class="f-right">
-						{{$receipt_details->repair_status}}
-					</p>
+					<table style="width: 100%">
+						<tr>
+							<td><strong>{!! $receipt_details->repair_status_label !!}</strong></td>
+							<td @if ($app->getLocale() == "ar")
+								style="text-align: left;"
+								@else
+								style="text-align: right;"
+							@endif><span>{{$receipt_details->repair_status}}</span></td>
+						</tr>
+					</table>
 				</div>
         	@endif
 
         	@if(!empty($receipt_details->repair_warranty_label) || !empty($receipt_details->repair_warranty))
 	        	<div class="textbox-info">
-	        		<p class="f-left"><strong>
-	        			{!! $receipt_details->repair_warranty_label !!}
-	        		</strong></p>
-	        		<p class="f-right">
-	        			{{$receipt_details->repair_warranty}}
-	        		</p>
+					<table style="width: 100%">
+						<tr>
+							<td><strong>{!! $receipt_details->repair_warranty_label !!}</strong></td>
+							<td @if ($app->getLocale() == "ar")
+								style="text-align: left;"
+								@else
+								style="text-align: right;"
+							@endif><span>{{$receipt_details->repair_warranty}}</span></td>
+						</tr>
+					</table>
 	        	</div>
         	@endif
 
         	<!-- Waiter info -->
 			@if(!empty($receipt_details->service_staff_label) || !empty($receipt_details->service_staff))
 	        	<div class="textbox-info">
-	        		<p class="f-left"><strong>
-	        			{!! $receipt_details->service_staff_label !!}
-	        		</strong></p>
-	        		<p class="f-right">
-	        			{{$receipt_details->service_staff}}
-					</p>
+					<table style="width: 100%">
+						<tr>
+							<td><strong>{!! $receipt_details->service_staff_label !!}</strong></td>
+							<td @if ($app->getLocale() == "ar")
+								style="text-align: left;"
+								@else
+								style="text-align: right;"
+							@endif><span>{{$receipt_details->service_staff}}</span></td>
+						</tr>
+					</table>
 	        	</div>
 	        @endif
 
 	        @if(!empty($receipt_details->table_label) || !empty($receipt_details->table))
 	        	<div class="textbox-info">
-	        		<p class="f-left"><strong>
-	        			@if(!empty($receipt_details->table_label))
-							<b>{!! $receipt_details->table_label !!}</b>
-						@endif
-	        		</strong></p>
-	        		<p class="f-right">
-	        			{{$receipt_details->table}}
-	        		</p>
+					<table style="width: 100%">
+						<tr>
+							<td><strong>@if(!empty($receipt_details->table_label))
+								<b>{!! $receipt_details->table_label !!}</b>
+							@endif</strong></td>
+							<td @if ($app->getLocale() == "ar")
+								style="text-align: left;"
+								@else
+								style="text-align: right;"
+							@endif><span>{{$receipt_details->table}}</span></td>
+						</tr>
+					</table>
 	        	</div>
 	        @endif
 
 	        <!-- customer info -->
+			@php
+			if(!empty($receipt_details->customer_info)){
+			$name = '';
+			$mobile = '';
+			$nameAndMobile = strip_tags($receipt_details->customer_info);
+		
+			// Remove HTML tags
+			$cleanedString = strip_tags($nameAndMobile);
+			$delimiter = __('contact.mobile').":";
+			// Replace specific elements
+			$replacedString = str_replace(['<br>', '<b>', '</b>', $delimiter], [' ', '', ' ', ' '.$delimiter], $cleanedString);
+			$parts = explode($delimiter, $replacedString, 2);
+			if (count($parts) === 2) {
+				$name = trim($parts[0]);
+				$mobile = trim($delimiter . $parts[1]);
+			} 
+		 }
+			@endphp
 	        <div class="textbox-info">
-	        	<p style="vertical-align: top;"><strong>
-	        		{{$receipt_details->customer_label ?? ''}}
-	        	</strong></p>
-
-	        	<p>
-	        		@if(!empty($receipt_details->customer_info))
-	        			<div class="bw">
-						{!! $receipt_details->customer_info !!}
-						</div>
-					@endif
-	        	</p>
+				<table style="width: 100%">
+					<tr>
+						<td><strong>{{$receipt_details->customer_label ?? ''}}</strong></td>
+						<td @if ($app->getLocale() == "ar")
+							style="text-align: left;"
+							@else
+							style="text-align: right;"
+						@endif <span>@if(!empty($receipt_details->customer_info))
+							{{ $name ?? ''}}
+						@endif</span></td>
+					</tr>
+					<tr>
+						<td><strong>{{$delimiter}}</td>
+						<td @if ($app->getLocale() == "ar")
+							style="text-align: left;"
+							@else
+							style="text-align: right;"
+						@endif>{{$parts[1] ?? ''}}</td>
+					</tr>
+				</table>
 	        </div>
+			{{--  @if(!empty($receipt_details->customer_name))
+			<div class="textbox-info">
+				<table style="width: 100%">
+					<tr>
+						<td><strong>@lang('invoice.customer_name')</strong></td>
+						<td @if ($app->getLocale() == "ar")
+							style="text-align: left;"
+							@else
+							style="text-align: right;"
+						@endif><span>{{$receipt_details->customer_name ?? ''}}</span></td>
+					</tr>
+				</table>
+	        </div>
+			@endif
+			<div class="textbox-info">
+				<table style="width: 100%">
+					<tr>
+						<td><strong>@lang('invoice.mobile')</strong></td>
+						<td @if ($app->getLocale() == "ar")
+							style="text-align: left;"
+							@else
+							style="text-align: right;"
+						@endif><span>{{ $receipt_details->customer_mobile ?? '' }}</span></td>
+					</tr>
+				</table>
+	        </div>  --}}
+			{{--  @if(!empty($receipt_details->customer_info_address))
+			<div class="textbox-info">
+				<table style="width: 100%">
+					<tr>
+						<td><strong>@lang('invoice.address')</strong></td>
+						<td @if ($app->getLocale() == "ar")
+							style="text-align: left;"
+							@else
+							style="text-align: right;"
+						@endif><span>{{ strip_tags($receipt_details->customer_info_address) ?? ''}}</span></td>
+					</tr>
+				</table>
+	        </div>
+			@endif  --}}
+			{{--  <div class="textbox-info">
+				<table style="width: 100%">
+					<tr>
+						<td colspan="2"><span>@if(!empty($receipt_details->customer_name))
+							<div class="bw">
+							{{ $receipt_details->customer_info }}
+							</div>
+						@endif</span></td>
+					</tr>
+				</table>
+	        </div>  --}}
 			
 			@if(!empty($receipt_details->client_id_label))
 				<div class="textbox-info">
-					<p class="f-left"><strong>
-						{{ $receipt_details->client_id_label }}
-					</strong></p>
-					<p class="f-right">
-						{{ $receipt_details->client_id }}
-					</p>
+					<table style="width: 100%">
+						<tr>
+							<td><strong>{{ $receipt_details->client_id_label }}</strong></td>
+							<td @if ($app->getLocale() == "ar")
+								style="text-align: left;"
+								@else
+								style="text-align: right;"
+							@endif><span>{{ $receipt_details->client_id }}
+								
+							</span></td>
+						</tr>
+					</table>
 				</div>
 			@endif
 			
 			@if(!empty($receipt_details->customer_tax_label))
 				<div class="textbox-info">
-					<p class="f-left"><strong>
-						{{ $receipt_details->customer_tax_label }}
-					</strong></p>
-					<p class="f-right">
-						{{ $receipt_details->customer_tax_number }}
-					</p>
+					<table style="width: 100%">
+						<tr>
+							<td><strong>{{ $receipt_details->customer_tax_label }}</strong></td>
+							<td @if ($app->getLocale() == "ar")
+								style="text-align: left;"
+								@else
+								style="text-align: right;"
+							@endif><span>{{ $receipt_details->customer_tax_number }}
+								
+							</span></td>
+						</tr>
+					</table>
 				</div>
 			@endif
 
@@ -248,90 +416,138 @@
 			
 			@if(!empty($receipt_details->customer_rp_label))
 				<div class="textbox-info">
-					<p class="f-left"><strong>
-						{{ $receipt_details->customer_rp_label }}
-					</strong></p>
-					<p class="f-right">
-						{{ $receipt_details->customer_total_rp }}
-					</p>
+					<table style="width: 100%">
+						<tr>
+							<td><strong>{{ $receipt_details->customer_rp_label }}</strong></td>
+							<td @if ($app->getLocale() == "ar")
+								style="text-align: left;"
+								@else
+								style="text-align: right;"
+							@endif><span>{{ $receipt_details->customer_total_rp }}
+								
+							</span></td>
+						</tr>
+					</table>
 				</div>
 			@endif
 			@if(!empty($receipt_details->shipping_custom_field_1_label))
 				<div class="textbox-info">
-					<p class="f-left"><strong>
-						{!!$receipt_details->shipping_custom_field_1_label!!} 
-					</strong></p>
-					<p class="f-right">
-						{!!$receipt_details->shipping_custom_field_1_value ?? ''!!}
-					</p>
+					<table style="width: 100%">
+						<tr>
+							<td><strong>{!!$receipt_details->shipping_custom_field_1_label!!} </strong></td>
+							<td @if ($app->getLocale() == "ar")
+								style="text-align: left;"
+								@else
+								style="text-align: right;"
+							@endif><span>{!!$receipt_details->shipping_custom_field_1_value ?? ''!!}
+								
+							</span></td>
+						</tr>
+					</table>
 				</div>
 			@endif
 			@if(!empty($receipt_details->shipping_custom_field_2_label))
 				<div class="textbox-info">
-					<p class="f-left"><strong>
-						{!!$receipt_details->shipping_custom_field_2_label!!} 
-					</strong></p>
-					<p class="f-right">
-						{!!$receipt_details->shipping_custom_field_2_value ?? ''!!}
-					</p>
+					<table style="width: 100%">
+						<tr>
+							<td><strong>{!!$receipt_details->shipping_custom_field_2_label!!}  </strong></td>
+							<td @if ($app->getLocale() == "ar")
+								style="text-align: left;"
+								@else
+								style="text-align: right;"
+							@endif><span>{!!$receipt_details->shipping_custom_field_2_value ?? ''!!}
+								
+							</span></td>
+						</tr>
+					</table>
 				</div>
 			@endif
 			@if(!empty($receipt_details->shipping_custom_field_3_label))
 				<div class="textbox-info">
-					<p class="f-left"><strong>
-						{!!$receipt_details->shipping_custom_field_3_label!!} 
-					</strong></p>
-					<p class="f-right">
-						{!!$receipt_details->shipping_custom_field_3_value ?? ''!!}
-					</p>
+					<table style="width: 100%">
+						<tr>
+							<td><strong>{!!$receipt_details->shipping_custom_field_3_label!!}  </strong></td>
+							<td @if ($app->getLocale() == "ar")
+								style="text-align: left;"
+								@else
+								style="text-align: right;"
+							@endif><span>{!!$receipt_details->shipping_custom_field_3_value ?? ''!!}
+								
+							</span></td>
+						</tr>
+					</table>
 				</div>
 			@endif
 			@if(!empty($receipt_details->shipping_custom_field_4_label))
 				<div class="textbox-info">
-					<p class="f-left"><strong>
-						{!!$receipt_details->shipping_custom_field_4_label!!} 
-					</strong></p>
-					<p class="f-right">
-						{!!$receipt_details->shipping_custom_field_4_value ?? ''!!}
-					</p>
+					<table style="width: 100%">
+						<tr>
+							<td><strong>{!!$receipt_details->shipping_custom_field_4_label!!}   </strong></td>
+							<td @if ($app->getLocale() == "ar")
+								style="text-align: left;"
+								@else
+								style="text-align: right;"
+							@endif><span>{!!$receipt_details->shipping_custom_field_4_value ?? ''!!}
+								
+							</span></td>
+						</tr>
+					</table>
 				</div>
 			@endif
 			@if(!empty($receipt_details->shipping_custom_field_5_label))
 				<div class="textbox-info">
-					<p class="f-left"><strong>
-						{!!$receipt_details->shipping_custom_field_5_label!!} 
-					</strong></p>
-					<p class="f-right">
-						{!!$receipt_details->shipping_custom_field_5_value ?? ''!!}
-					</p>
+					<table style="width: 100%">
+						<tr>
+							<td><strong>{!!$receipt_details->shipping_custom_field_5_label!!}    </strong></td>
+							<td @if ($app->getLocale() == "ar")
+								style="text-align: left;"
+								@else
+								style="text-align: right;"
+							@endif><span>{!!$receipt_details->shipping_custom_field_5_value ?? ''!!}
+								
+							</span></td>
+						</tr>
+					</table>
 				</div>
 			@endif
 			@if(!empty($receipt_details->sale_orders_invoice_no))
 				<div class="textbox-info">
-					<p class="f-left"><strong>
-						@lang('restaurant.order_no')
-					</strong></p>
-					<p class="f-right">
-						{!!$receipt_details->sale_orders_invoice_no ?? ''!!}
-					</p>
+					<table style="width: 100%">
+						<tr>
+							<td><strong>@lang('restaurant.order_no')    </strong></td>
+							<td @if ($app->getLocale() == "ar")
+								style="text-align: left;"
+								@else
+								style="text-align: right;"
+							@endif><span>{!!$receipt_details->sale_orders_invoice_no ?? ''!!}
+								
+							</span></td>
+						</tr>
+					</table>
 				</div>
 			@endif
 
 			@if(!empty($receipt_details->sale_orders_invoice_date))
 				<div class="textbox-info">
-					<p class="f-left"><strong>
-						@lang('lang_v1.order_dates')
-					</strong></p>
-					<p class="f-right">
-						{!!$receipt_details->sale_orders_invoice_date ?? ''!!}
-					</p>
+					<table style="width: 100%">
+						<tr>
+							<td><strong>@lang('lang_v1.order_dates')</strong></td>
+							<td @if ($app->getLocale() == "ar")
+								style="text-align: left;"
+								@else
+								style="text-align: right;"
+							@endif><span>{!!$receipt_details->sale_orders_invoice_date ?? ''!!}
+								
+							</span></td>
+						</tr>
+					</table>
 				</div>
 			@endif
             <table style="margin-top: 25px !important" class="border-bottom width-100 table-f-12 mb-10">
                 <thead class="border-bottom-dotted">
                     <tr>
-                        <th class="serial_number">#</th>
-                        <th class="description" width="30%">
+{{--                        <th class="serial_number">#</th>--}}
+                        <th class="description" width="25%">
                         	{{$receipt_details->table_product_label}}
                         </th>
                         <th class="quantity text-right">
@@ -356,12 +572,12 @@
                 <tbody>
                 	@forelse($receipt_details->lines as $line)
 	                    <tr>
-	                        <td class="serial_number" style="vertical-align: top;">
-	                        	{{$loop->iteration}}
-	                        </td>
+{{--	                        <td class="serial_number" style="vertical-align: top;">--}}
+{{--	                        	{{$loop->iteration}}--}}
+{{--	                        </td>--}}
 	                        <td class="description">
 	                        	{{$line['name']}} {{$line['product_variation']}} {{$line['variation']}} 
-	                        	@if(!empty($line['sub_sku'])), {{$line['sub_sku']}} @endif @if(!empty($line['brand'])), {{$line['brand']}} @endif @if(!empty($line['cat_code'])), {{$line['cat_code']}}@endif
+{{--	                        	@if(!empty($line['sub_sku'])), {{$line['sub_sku']}} @endif @if(!empty($line['brand'])), {{$line['brand']}} @endif @if(!empty($line['cat_code'])), {{$line['cat_code']}}@endif--}}
 	                        	@if(!empty($line['product_custom_fields'])), {{$line['product_custom_fields']}} @endif
 	                        	@if(!empty($line['product_description']))
 	                            	<div class="f-8">
@@ -460,7 +676,7 @@
 			@if(!empty($receipt_details->total_quantity_label))
 				<div class="flex-box">
 					<p class="left text-right">
-						{!! $receipt_details->total_quantity_label !!}
+						{!! $receipt_details->total_quantity_label !!} 
 					</p>
 					<p class="width-50 text-right">
 						{{$receipt_details->total_quantity}}
@@ -746,15 +962,15 @@ th.quantity {
     word-break: break-all;
 }
 td.unit_price, th.unit_price{
-	width: 25%;
-    max-width: 25%;
+	width: 22%;
+    max-width: 22%;
     word-break: break-all;
 }
 
 td.price,
 th.price {
-    width: 20%;
-    max-width: 20%;
+    width: 25%;
+    max-width: 25%;
     word-break: break-all;
 }
 
