@@ -44,7 +44,7 @@ class CashRegisterUtil extends Util
             $payment_amount = (isset($payment['is_return']) && $payment['is_return'] == 1) ? (-1 * $this->num_uf($payment['amount'])) : $this->num_uf($payment['amount']);
             if ($payment_amount != 0) {
                 $type = 'credit';
-                
+
                 if ($transaction->type == 'expense' || $transaction->type =='sell') {
                     $type = 'debit';
                 }
@@ -260,7 +260,7 @@ class CashRegisterUtil extends Util
             'cash_registers.location_id',
             'cash_registers.denominations',
             DB::raw("SUM(IF(transaction_type='initial', amount, 0)) as cash_in_hand"),
-            DB::raw("SUM(IF(transaction_type='sell', amount, IF(transaction_type='refund', -1 * amount, 0))) as total_sale"),
+//            DB::raw("SUM(IF(transaction_type='sell', amount, IF(transaction_type='refund', -1 * amount, 0))) as total_sale"),
             DB::raw("SUM(IF(transaction_type='sell_return', amount, IF(transaction_type='sell_return', -1 * amount, 0))) as total_refund"),
 //            DB::raw("SUM(IF(type='credit', amount, IF(transaction_type='sell', -1 * amount, 0))) as total_credit_sell"),
 //            DB::raw("SUM(IF(type='credit', amount, IF(transaction_type='suspend', -1 * amount, 0))) as total_credit_sell"),
@@ -268,8 +268,18 @@ class CashRegisterUtil extends Util
             DB::raw("
     SUM(
         CASE
+            WHEN type = 'debit' AND transaction_type = 'sell' THEN amount
+            WHEN type = 'credit' AND transaction_type = 'partial' THEN amount
+            ELSE 0
+        END
+    ) as total_sale
+"),
+
+            DB::raw("
+    SUM(
+        CASE
             WHEN type = 'credit' AND transaction_type = 'suspend' THEN amount
-            WHEN type = 'credit' AND transaction_type = 'sell' THEN amount
+            WHEN type = 'credit' AND transaction_type = 'partial' THEN amount
             ELSE 0
         END
     ) as total_credit_sell

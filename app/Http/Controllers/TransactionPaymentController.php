@@ -133,22 +133,33 @@ class TransactionPaymentController extends Controller
                 if ($inputs['method'] == 'advance' && $inputs['amount'] > $contact_balance) {
                     throw new AdvanceBalanceNotAvailable(__('lang_v1.required_advance_balance_not_available'));
                 }
-
+                $paid_amount = $this->transactionUtil->getTotalPaid($transaction_id);
+                $amount = $transaction->final_total - $paid_amount;
+                if ($amount < 0) {
+                    $amount = 0;
+                }
                 if (! empty($inputs['amount'])) {
                     $tp = TransactionPayment::create($inputs);
-                    $paid_amount = $this->transactionUtil->getTotalPaid($transaction_id);
-                    $amount = $transaction->final_total - $paid_amount;
-                    if ($amount < 0) {
-                        $amount = 0;
-                    }
+
                     if ($amount-$inputs['amount'] > 0){
                         $cash_register_transactions = CashRegisterTransaction::where('transaction_id', $transaction->id)->first();
+//                        dd($transaction->final_total == $cash_register_transactions->amount);
+                        if ($transaction->final_total == $cash_register_transactions->amount){
+                            $this->transactionUtil->UpdateCashTransactionData($inputs['amount'],$inputs['method'],'credit',$transaction->id,"partial");
+                        }else{
+                            $this->transactionUtil->UpdateCashTransactionData($cash_register_transactions->amount+$inputs['amount'],$inputs['method'],'credit',$transaction->id,"partial");
+                        }
 
-                        $this->transactionUtil->UpdateCashTransactionData(($amount-$inputs['amount'])+$inputs['amount'],$inputs['method'],'credit',$transaction->id,"$transaction->type");
                     }else{
-//                        dd('debit');
-                        $this->transactionUtil->UpdateCashTransactionData($payment_amount,$inputs['method'],'debit',$transaction->id,$transaction->type);
+                        $cash_register_transactions = CashRegisterTransaction::where('transaction_id', $transaction->id)->first();
+
+                        if ($transaction->final_total == $cash_register_transactions->amount){
+                            $this->transactionUtil->UpdateCashTransactionData($payment_amount,$inputs['method'],'credit',$transaction->id,"sell");
+                        }else{
+                            $this->transactionUtil->UpdateCashTransactionData($cash_register_transactions->amount+$payment_amount,$inputs['method'],'credit',$transaction->id,"sell");
+                        }
                     }
+
                     if (! empty($request->input('denominations'))) {
                         $this->transactionUtil->addCashDenominations($tp, $request->input('denominations'));
                     }
