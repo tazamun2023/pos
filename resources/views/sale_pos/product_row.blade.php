@@ -401,6 +401,8 @@
 		<input type="hidden" value="{{ $unit_price_inc_tax }}" id='pos_line_total_00'>
 		<input type="hidden" value="{{ $singleTotal }}" id='pos_line_total_item_tax'>
 {{--		<input type="hidden" value="8.695652174" id='pos_line_total_00' class='pos_line_total_00'>--}}
+		<input type="hidden" class="form-control pos_line_dsp" value="{{$product->sell_price_inc_tax}}">
+		<input type="hidden" class="form-control pos_line_dsp_1" value="{{ ( $product->sell_price_inc_tax)-(($product->sell_price_inc_tax*$product->quantity_ordered)/1.15)}}">
 		<span class="display_currency pos_line_total_text @if(!empty($pos_settings['is_pos_subtotal_editable'])) hide @endif" data-currency_symbol="true">{{$product->quantity_ordered*$unit_price_inc_tax}}</span>
 	</td>
 	<td class="text-center v-center">

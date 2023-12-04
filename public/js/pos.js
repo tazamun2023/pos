@@ -302,8 +302,21 @@ $(document).ready(function() {
         var unit_price_inc_tax = __read_number(tr.find('input.pos_unit_price_inc_tax'));
         var line_total = entered_qty * unit_price_inc_tax;
 
+
         __write_number(tr.find('input.pos_line_total'), line_total, false, 2);
         tr.find('span.pos_line_total_text').text(__currency_trans_from_en(line_total, true));
+
+        var pos_line_dsp = __read_number(tr.find('input.pos_line_dsp'));
+        // var dspintax = (entered_qty * pos_line_dsp)/1.15;
+        // var dspintax = pos_order_tax(entered_qty * pos_line_dsp, 0);
+
+        var pos_line_dsp_total = entered_qty * pos_line_dsp;
+
+        var line_total_tax = pos_line_dsp_total-line_total;
+
+        // tr.find('span.pos_line_tax_text').text(line_total_tax);
+        __write_number(tr.find('input.pos_line_dsp_1'), line_total_tax, false, 2);
+        tr.find('span.pos_line_tax_text').text(__currency_trans_from_en(line_total_tax, true));
 
         //Change modifier quantity
         tr.find('.modifier_qty_text').each( function(){
@@ -1734,7 +1747,13 @@ function calculate_billing_details(price_total) {
             $('span#total_discount').text(__currency_trans_from_en(discount, false));
         }
     }
+    var tr = $(this).parents('tr');
+    var pos_line_dsp_1 = __read_number(tr.find('input.pos_line_dsp_1'));
 
+    $('table#pos_table tbody tr').each(function() {
+        pos_line_dsp_1 = pos_line_dsp_1 + __read_number($(this).find('input.pos_line_dsp_1'));
+    });
+    // console.log('price pos_line_dsp_1 '+ pos_line_dsp_1);
     var order_tax = pos_order_tax(price_total, discount);
 
     //Add shipping charges.
@@ -1822,7 +1841,17 @@ function pos_order_tax(price_total, discount) {
         var order_tax = 0;
     }
 
+
+    var tr = $(this).parents('tr');
+    var pos_line_dsp_1 = __read_number(tr.find('input.pos_line_dsp_1'));
+
+    $('table#pos_table tbody tr').each(function() {
+        pos_line_dsp_1 = pos_line_dsp_1 + __read_number($(this).find('input.pos_line_dsp_1'));
+    });
+    order_tax=pos_line_dsp_1;
     $('span#order_tax').text(__currency_trans_from_en(order_tax, false));
+    $('input#order_tax_input').val(__currency_trans_from_en(order_tax, false));
+    // __write_number(tr.find('input.pos_line_dsp_1'), line_total_tax, false, 2);
 
     return order_tax;
 }

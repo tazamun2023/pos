@@ -49,6 +49,7 @@
 								{{$transaction->tax_amount}}
 							@endif
 						</span>
+<input id="order_tax_input" name='order_tax_input' type='hidden' value="@if(empty($edit)) 0 @else {{$transaction->tax_amount}} @endif">
 
 						<input type="hidden" name="tax_rate_id" 
 							id="tax_rate_id" 
