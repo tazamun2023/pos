@@ -609,8 +609,7 @@ class ProductUtil extends Util
      * @param  array  $discount['discount_type', 'discount_amount']
      * @return mixed (false, array)
      */
-//    public function calculateInvoiceTotal($products, $tax_id, $discount = null, $uf_number = true)
-    public function calculateInvoiceTotal($products, $tax_id, $discount = null, $uf_number = true, $order_tax_input=0)
+    public function calculateInvoiceTotal($products, $tax_id, $discount = null, $uf_number = true)
     {
         if (empty($products)) {
             return false;
@@ -653,9 +652,7 @@ class ProductUtil extends Util
             $tax_details = TaxRate::find($tax_id);
             if (! empty($tax_details)) {
                 $output['tax_id'] = $tax_id;
-//                dd($output['total_before_tax']);
-//                $output['tax'] = ($tax_details->amount / 100) * ($output['total_before_tax'] - $output['discount']);
-                $output['tax'] = $order_tax_input - $output['discount'];
+                $output['tax'] = ($tax_details->amount / 100) * ($output['total_before_tax'] - $output['discount']);
             }
         }
 
