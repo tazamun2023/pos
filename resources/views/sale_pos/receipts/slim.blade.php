@@ -10,7 +10,7 @@
     </head>
     <body>
         <div class="ticket">
-        	
+
 			@if(empty($receipt_details->letter_head))
 				@if(!empty($receipt_details->logo))
 					<div class="text-box centered">
@@ -33,7 +33,7 @@
 						</span>
 						<br/>
 					@endif
-					
+
 					@if(!empty($receipt_details->address))
 						{!! $receipt_details->address !!}
 						<br/>
@@ -43,7 +43,7 @@
 						{!! $receipt_details->contact !!}
 					@endif
 					@if(!empty($receipt_details->contact) && !empty($receipt_details->website))
-						, 
+						,
 					@endif
 					@if(!empty($receipt_details->website))
 						{{ $receipt_details->website }}
@@ -63,7 +63,7 @@
 					@endif
 					@if(!empty($receipt_details->sub_heading_line4))
 						{{ $receipt_details->sub_heading_line4 }}<br/>
-					@endif		
+					@endif
 					@if(!empty($receipt_details->sub_heading_line5))
 						{{ $receipt_details->sub_heading_line5 }}<br/>
 					@endif
@@ -111,7 +111,7 @@
 					</tr>
 				</table>
 			</div>
-			
+
 			@if(!empty($receipt_details->due_date_label))
 				<div class="textbox-info">
 					<table style="width: 100%">
@@ -138,7 +138,7 @@
 								style="text-align: right;"
 							@endif><span>{{$receipt_details->sales_person}}</span></td>
 						</tr>
-					</table>	
+					</table>
 				</div>
 			@endif
 			@if(!empty($receipt_details->commission_agent_label))
@@ -185,7 +185,7 @@
 					</table>
 				</div>
 			@endif
-			
+
 			@if(!empty($receipt_details->model_no_label) || !empty($receipt_details->repair_model_no))
 				<div class="textbox-info">
 					<table style="width: 100%">
@@ -200,7 +200,7 @@
 					</table>
 				</div>
 			@endif
-			
+
 			@if(!empty($receipt_details->serial_no_label) || !empty($receipt_details->repair_serial_no))
 				<div class="textbox-info">
 					<table style="width: 100%">
@@ -285,7 +285,7 @@
 			$name = '';
 			$mobile = '';
 			$nameAndMobile = strip_tags($receipt_details->customer_info);
-		
+
 			// Remove HTML tags
 			$cleanedString = strip_tags($nameAndMobile);
 			$delimiter = __('contact.mobile').":";
@@ -295,7 +295,7 @@
 			if (count($parts) === 2) {
 				$name = trim($parts[0]);
 				$mobile = trim($delimiter . $parts[1]);
-			} 
+			}
 		 }
 			@endphp
 	        <div class="textbox-info">
@@ -371,7 +371,7 @@
 					</tr>
 				</table>
 	        </div>  --}}
-			
+
 			@if(!empty($receipt_details->client_id_label))
 				<div class="textbox-info">
 					<table style="width: 100%">
@@ -382,13 +382,13 @@
 								@else
 								style="text-align: right;"
 							@endif><span>{{ $receipt_details->client_id }}
-								
+
 							</span></td>
 						</tr>
 					</table>
 				</div>
 			@endif
-			
+
 			@if(!empty($receipt_details->customer_tax_label))
 				<div class="textbox-info">
 					<table style="width: 100%">
@@ -399,7 +399,7 @@
 								@else
 								style="text-align: right;"
 							@endif><span>{{ $receipt_details->customer_tax_number }}
-								
+
 							</span></td>
 						</tr>
 					</table>
@@ -413,7 +413,7 @@
 					</p>
 				</div>
 			@endif
-			
+
 			@if(!empty($receipt_details->customer_rp_label))
 				<div class="textbox-info">
 					<table style="width: 100%">
@@ -424,7 +424,7 @@
 								@else
 								style="text-align: right;"
 							@endif><span>{{ $receipt_details->customer_total_rp }}
-								
+
 							</span></td>
 						</tr>
 					</table>
@@ -440,7 +440,7 @@
 								@else
 								style="text-align: right;"
 							@endif><span>{!!$receipt_details->shipping_custom_field_1_value ?? ''!!}
-								
+
 							</span></td>
 						</tr>
 					</table>
@@ -456,7 +456,7 @@
 								@else
 								style="text-align: right;"
 							@endif><span>{!!$receipt_details->shipping_custom_field_2_value ?? ''!!}
-								
+
 							</span></td>
 						</tr>
 					</table>
@@ -472,7 +472,7 @@
 								@else
 								style="text-align: right;"
 							@endif><span>{!!$receipt_details->shipping_custom_field_3_value ?? ''!!}
-								
+
 							</span></td>
 						</tr>
 					</table>
@@ -488,7 +488,7 @@
 								@else
 								style="text-align: right;"
 							@endif><span>{!!$receipt_details->shipping_custom_field_4_value ?? ''!!}
-								
+
 							</span></td>
 						</tr>
 					</table>
@@ -504,7 +504,7 @@
 								@else
 								style="text-align: right;"
 							@endif><span>{!!$receipt_details->shipping_custom_field_5_value ?? ''!!}
-								
+
 							</span></td>
 						</tr>
 					</table>
@@ -520,7 +520,7 @@
 								@else
 								style="text-align: right;"
 							@endif><span>{!!$receipt_details->sale_orders_invoice_no ?? ''!!}
-								
+
 							</span></td>
 						</tr>
 					</table>
@@ -537,7 +537,7 @@
 								@else
 								style="text-align: right;"
 							@endif><span>{!!$receipt_details->sale_orders_invoice_date ?? ''!!}
-								
+
 							</span></td>
 						</tr>
 					</table>
@@ -576,7 +576,7 @@
 {{--	                        	{{$loop->iteration}}--}}
 {{--	                        </td>--}}
 	                        <td class="description">
-	                        	{{$line['name']}} {{$line['product_variation']}} {{$line['variation']}} 
+	                        	{{$line['name']}} {{$line['product_variation']}} {{$line['variation']}}
 {{--	                        	@if(!empty($line['sub_sku'])), {{$line['sub_sku']}} @endif @if(!empty($line['brand'])), {{$line['brand']}} @endif @if(!empty($line['cat_code'])), {{$line['cat_code']}}@endif--}}
 	                        	@if(!empty($line['product_custom_fields'])), {{$line['product_custom_fields']}} @endif
 	                        	@if(!empty($line['product_description']))
@@ -589,8 +589,8 @@
 	                        	<span class="f-8">
 	                        	{!!$line['sell_line_note']!!}
 	                        	</span>
-	                        	@endif 
-	                        	@if(!empty($line['lot_number']))<br> {{$line['lot_number_label']}}:  {{$line['lot_number']}} @endif 
+	                        	@endif
+	                        	@if(!empty($line['lot_number']))<br> {{$line['lot_number_label']}}:  {{$line['lot_number']}} @endif
 	                        	@if(!empty($line['product_expiry'])), {{$line['product_expiry_label']}}:  {{$line['product_expiry']}} @endif
 	                        	@if(!empty($line['warranty_name']))
 	                            	<br>
@@ -624,7 +624,7 @@
 
 	                        @if(!empty($receipt_details->discounted_unit_price_label))
 								<td class="text-right">
-									{{$line['unit_price_inc_tax']}} 
+									{{$line['unit_price_inc_tax']}}
 								</td>
 							@endif
 
@@ -646,9 +646,9 @@
 										&nbsp;
 									</td>
 									<td>
-			                            {{$modifier['name']}} {{$modifier['variation']}} 
+			                            {{$modifier['name']}} {{$modifier['variation']}}
 			                            @if(!empty($modifier['sub_sku'])), {{$modifier['sub_sku']}} @endif @if(!empty($modifier['cat_code'])), {{$modifier['cat_code']}}@endif
-			                            @if(!empty($modifier['sell_line_note']))({!!$modifier['sell_line_note']!!}) @endif 
+			                            @if(!empty($modifier['sell_line_note']))({!!$modifier['sell_line_note']!!}) @endif
 			                        </td>
 									<td class="text-right">{{$modifier['quantity']}} {{$modifier['units']}} </td>
 									@if(empty($receipt_details->hide_price))
@@ -676,7 +676,7 @@
 			@if(!empty($receipt_details->total_quantity_label))
 				<div class="flex-box">
 					<p class="left text-right">
-						{!! $receipt_details->total_quantity_label !!} 
+						{!! $receipt_details->total_quantity_label !!}
 					</p>
 					<p class="width-50 text-right">
 						{{$receipt_details->total_quantity}}
@@ -791,7 +791,7 @@
 				@if( $receipt_details->round_off_amount > 0)
 					<div class="flex-box">
 						<p class="width-50 text-right">
-							{!! $receipt_details->round_off_label !!} 
+							{!! $receipt_details->round_off_label !!}
 						</p>
 						<p class="width-50 text-right">
 							{{$receipt_details->round_off}}
@@ -891,13 +891,13 @@
 			@if($receipt_details->show_qr_code && !empty($receipt_details->qr_code_text))
 				<img class="center-block mt-5" src="data:image/png;base64,{{DNS2D::getBarcodePNG($receipt_details->qr_code_text, 'QRCODE')}}">
 			@endif
-			
+
 			@if(!empty($receipt_details->footer_text))
 				<p class="centered">
 					{!! $receipt_details->footer_text !!}
 				</p>
 			@endif
-			
+
         </div>
         <!-- <button id="btnPrint" class="hidden-print">Print</button>
         <script src="script.js"></script> -->
@@ -920,7 +920,7 @@ body {
 	.f-8 {
 		font-size: 8px !important;
 	}
-	
+
 .headings{
 	font-size: 16px;
 	font-weight: 700;

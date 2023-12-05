@@ -2248,4 +2248,8 @@ class ProductUtil extends Util
             $vld->save();
         }
     }
+
+    function systemDoubleValue($value, $digits = 4){
+        return sprintf('%.'.$digits.'f', floor($value*10000*($value>0?1:-1))/10000*($value>0?1:-1));
+    }
 }

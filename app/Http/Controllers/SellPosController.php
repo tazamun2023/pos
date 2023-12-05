@@ -826,7 +826,7 @@ class SellPosController extends Controller
 
         try {
             $input = $request->except('_token');
-
+//dd($input);
             $input['is_quotation'] = 0;
             //status is send as quotation from Add sales screen.
             if ($input['status'] == 'quotation') {
@@ -865,6 +865,18 @@ class SellPosController extends Controller
             if (! empty($input['products'])) {
                 $business_id = $request->session()->get('user.business_id');
 
+                foreach ($input['products'] as $key=>$product_line) {
+
+                    //update unit price ...
+                    $isVariation = Variation::find($product_line['variation_id'])->sell_price_inc_tax / 1.15;
+                    $double_unit = $this->productUtil->systemDoubleValue($isVariation);
+//                    $product_line['unit_price'] = $double_unit;
+//                    $product_line['unit_price_inc_tax'] = $double_unit;
+
+                    $input['products'][$key]['unit_price'] = $double_unit;
+                    $input['products'][$key]['unit_price_inc_tax'] = $double_unit;
+                }
+//dd($input['products']);
                 //Check if subscribed or not, then check for users quota
                 if (! $this->moduleUtil->isSubscribed($business_id)) {
                     return $this->moduleUtil->expiredResponse();
@@ -879,7 +891,7 @@ class SellPosController extends Controller
                 ];
 
                 $invoice_total = $this->productUtil->calculateInvoiceTotal($input['products'], $input['tax_rate_id'], $discount, true, $input);
-//dd($invoice_total);
+
                 DB::beginTransaction();
 
                 if (empty($request->input('transaction_date'))) {
@@ -1005,6 +1017,7 @@ class SellPosController extends Controller
                     if (! $is_direct_sale) {
                         //set service staff timer
                         foreach ($input['products'] as $product_line) {
+                            
                             if (! empty($product_line['res_service_staff_id'])) {
                                 $product = Product::find($product_line['product_id']);
 

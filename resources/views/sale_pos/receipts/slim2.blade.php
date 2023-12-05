@@ -40,12 +40,12 @@
 						<p>@if(!empty($receipt_details->address))
 							{!! $receipt_details->address !!}
 						@endif
-	
+
 						@if(!empty($receipt_details->contact))
 							<br/>{!! $receipt_details->contact !!}
 						@endif
 						@if(!empty($receipt_details->contact) && !empty($receipt_details->website))
-							, 
+							,
 						@endif
 						@if(!empty($receipt_details->website))
 							{{ $receipt_details->website }}
@@ -53,7 +53,7 @@
 						@if(!empty($receipt_details->location_custom_fields))
 							<br>{{ $receipt_details->location_custom_fields }}
 						@endif
-	
+
 						@if(!empty($receipt_details->sub_heading_line1))
 							{{ $receipt_details->sub_heading_line1 }}<br/>
 						@endif
@@ -65,7 +65,7 @@
 						@endif
 						@if(!empty($receipt_details->sub_heading_line4))
 							{{ $receipt_details->sub_heading_line4 }}<br/>
-						@endif		
+						@endif
 						@if(!empty($receipt_details->sub_heading_line5))
 							{{ $receipt_details->sub_heading_line5 }}<br/>
 						@endif</p>
@@ -77,7 +77,7 @@
 						<p>@if(!empty($receipt_details->tax_info1))
 							{{ $receipt_details->tax_label1 }} {{ $receipt_details->tax_info1 }}
 						@endif
-	
+
 						@if(!empty($receipt_details->tax_info2))
 							{{ $receipt_details->tax_label2 }} {{ $receipt_details->tax_info2 }}
 						@endif</p>
@@ -88,9 +88,9 @@
 					<img style="width: 100%;margin-bottom: 10px;" src="{{$receipt_details->letter_head}}">
 				</div>
 			@endif
-			
 
-			
+
+
 			<div class="bb-lg mt-15 mb-10"></div>
             <table style="padding-top: 5px !important" class="border-bottom width-100 table-f-12 mb-10">
                 <tbody>
@@ -99,7 +99,7 @@
 	                        <td class="description">
 	                        	<div style="display:flex; width: 100%;">
 	                        		<p class="m-0 mt-5" style="white-space: nowrap;">#{{$loop->iteration}}.&nbsp;</p>
-	                        		<p class="text-left m-0 mt-5 pull-left">{{$line['name']}}  
+	                        		<p class="text-left m-0 mt-5 pull-left">{{$line['name']}}
 			                        	@if(!empty($line['sub_sku'])), {{$line['sub_sku']}} @endif @if(!empty($line['brand'])), {{$line['brand']}} @endif @if(!empty($line['cat_code'])), {{$line['cat_code']}}@endif
 			                        	@if(!empty($line['product_custom_fields'])), {{$line['product_custom_fields']}} @endif
 			                        	@if(!empty($line['product_description']))
@@ -113,8 +113,8 @@
 	                        			<span class="f-8">
 			                        	{!!$line['sell_line_note']!!}
 			                        	</span>
-			                        	@endif 
-			                        	@if(!empty($line['lot_number']))<br> {{$line['lot_number_label']}}:  {{$line['lot_number']}} @endif 
+			                        	@endif
+			                        	@if(!empty($line['lot_number']))<br> {{$line['lot_number_label']}}:  {{$line['lot_number']}} @endif
 			                        	@if(!empty($line['product_expiry'])), {{$line['product_expiry_label']}}:  {{$line['product_expiry']}} @endif
 
 			                        	@if(!empty($line['variation']))
@@ -122,7 +122,7 @@
 			                        		{{$line['product_variation']}} {{$line['variation']}}
 			                        	@endif
 			                        	@if(!empty($line['warranty_name']))
-			                            	, 
+			                            	,
 			                            	<small>
 			                            		{{$line['warranty_name']}}
 			                            	</small>
@@ -146,10 +146,10 @@
 	                        	</div>
 	                        	<div style="display:flex; width: 100%;">
 	                        		<p class="text-left width-60 quantity m-0 bw" style="direction: ltr;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-	                        			{{$line['quantity']}} 
+	                        			{{$line['quantity']}}
 	                        			@if(empty($receipt_details->hide_price))
 	                        			x {{$line['unit_price_before_discount']}}
-	                        			
+
 	                        			@if(!empty($line['total_line_discount']) && $line['total_line_discount'] != 0)
 	                        				- {{$line['total_line_discount']}}
 	                        			@endif
@@ -169,14 +169,14 @@
 	                        				<p style="width: 28px;" class="m-0">
 	                        				</p>
 	                        				<p class="text-left width-60 m-0" style="margin:0;">
-	                        					{{$modifier['name']}} 
+	                        					{{$modifier['name']}}
 	                        					@if(!empty($modifier['sub_sku'])), {{$modifier['sub_sku']}} @endif @if(!empty($modifier['cat_code'])), {{$modifier['cat_code']}}@endif
 			                            		@if(!empty($modifier['sell_line_note']))({!!$modifier['sell_line_note']!!}) @endif
 	                        				</p>
 	                        				<p class="text-right width-40 m-0">
 	                        					{{$modifier['variation']}}
 	                        				</p>
-	                        			</div>	
+	                        			</div>
 	                        			<div style="display:flex;">
 	                        				<p style="width: 28px;"></p>
 	                        				<p class="text-left width-50 quantity">
@@ -188,7 +188,7 @@
 	                        				<p class="text-right width-50 price">
 	                        					{{$modifier['line_total']}}
 	                        				</p>
-	                        			</div>		                             
+	                        			</div>
 			                        </td>
 			                    </tr>
 							@endforeach
@@ -261,7 +261,7 @@
 					</p>
 				</div>
 			@endif
-			
+
 			@if( !empty($receipt_details->total_line_discount) )
 				<div class="flex-box">
 					<p class="width-50 text-right">
@@ -314,7 +314,7 @@
 			@if( $receipt_details->round_off_amount > 0)
 				<div class="flex-box">
 					<p class="width-50 text-left">
-						{!! $receipt_details->round_off_label !!} 
+						{!! $receipt_details->round_off_label !!}
 					</p>
 					<p class="width-50 text-right">
 						{{$receipt_details->round_off}}
