@@ -1,4 +1,29 @@
 <?php
+/* LICENSE: This source file belongs to The Web Fosters. The customer
+ * is provided a licence to use it.
+ * Permission is hereby granted, to any person obtaining the licence of this
+ * software and associated documentation files (the "Software"), to use the
+ * Software for personal or business purpose ONLY. The Software cannot be
+ * copied, published, distribute, sublicense, and/or sell copies of the
+ * Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. THE AUTHOR CAN FIX
+ * ISSUES ON INTIMATION. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+ * BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
+ * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * @author     The Web Fosters <thewebfosters@gmail.com>
+ * @owner      The Web Fosters <thewebfosters@gmail.com>
+ * @copyright  2018 The Web Fosters
+ * @license    As attached in zip file.
+ */
 
 namespace App\Http\Controllers;
 
@@ -29,8 +54,11 @@ use App\Utils\ProductUtil;
 use App\Utils\TransactionUtil;
 use App\Variation;
 use App\Warranty;
+use App\ZatkaInfo;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Razorpay\Api\Api;
@@ -120,10 +148,513 @@ class SellPosController extends Controller
         $is_types_service_enabled = $this->moduleUtil->isModuleEnabled('types_of_service');
 
         $shipping_statuses = $this->transactionUtil->shipping_statuses();
-
-        return view('sale_pos.index')->with(compact('business_locations', 'customers', 'sales_representative', 'is_cmsn_agent_enabled', 'commission_agents', 'service_staffs', 'is_tables_enabled', 'is_service_staff_enabled', 'is_types_service_enabled', 'shipping_statuses'));
+        $payment_types = $this->transactionUtil->payment_types(null, true, $business_id);
+        return view('sale_pos.index')->with(compact('business_locations', 'payment_types', 'customers', 'sales_representative', 'is_cmsn_agent_enabled', 'commission_agents', 'service_staffs', 'is_tables_enabled', 'is_service_staff_enabled', 'is_types_service_enabled', 'shipping_statuses'));
     }
+//     public function showAllZatca()
+//     {
+//         $is_admin = $this->businessUtil->is_admin(auth()->user());
 
+//         if (! $is_admin && ! auth()->user()->hasAnyPermission(['sell.view', 'sell.create', 'direct_sell.access', 'direct_sell.view', 'view_own_sell_only', 'view_commission_agent_sell', 'access_shipping', 'access_own_shipping', 'access_commission_agent_shipping', 'so.view_all', 'so.view_own'])) {
+//             abort(403, 'Unauthorized action.');
+//         }
+
+//         if (request()->ajax()) {
+// //            $transactions = Transaction::all();
+
+//             $datatable = Datatables::of($transactions)
+//                 ->removeColumn('id')
+//                 ->addColumn('action', function ($row){
+
+//                 })
+//                 ->editColumn('transaction_date', '{{@format_datetime($transaction_date)}}')
+//             ;
+//             $rawColumns = ['final_total', 'action'];
+//             return $datatable->rawColumns($rawColumns)
+//                 ->make(true);
+//         }
+
+//         return view('sale_pos.zatca_show_all_invoice');
+//     }
+
+    public function showAllZatca(){
+        $is_admin = $this->businessUtil->is_admin(auth()->user());
+
+        if (! $is_admin && ! auth()->user()->hasAnyPermission(['sell.view', 'sell.create', 'direct_sell.access', 'direct_sell.view', 'view_own_sell_only', 'view_commission_agent_sell', 'access_shipping', 'access_own_shipping', 'access_commission_agent_shipping', 'so.view_all', 'so.view_own'])) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $business_id = request()->session()->get('user.business_id');
+        $is_woocommerce = $this->moduleUtil->isModuleInstalled('Woocommerce');
+        $is_crm = $this->moduleUtil->isModuleInstalled('Crm');
+        $is_tables_enabled = $this->transactionUtil->isModuleEnabled('tables');
+        $is_service_staff_enabled = $this->transactionUtil->isModuleEnabled('service_staff');
+        $is_types_service_enabled = $this->moduleUtil->isModuleEnabled('types_of_service');
+
+        if (request()->ajax()) {
+            $payment_types = $this->transactionUtil->payment_types(null, true, $business_id);
+            $with = [];
+            $shipping_statuses = $this->transactionUtil->shipping_statuses();
+
+            $sale_type = ! empty(request()->input('sale_type')) ? request()->input('sale_type') : 'sell';
+
+            $sells = $this->transactionUtil->getListSells($business_id, $sale_type);
+
+            $permitted_locations = auth()->user()->permitted_locations();
+            if ($permitted_locations != 'all') {
+                $sells->whereIn('transactions.location_id', $permitted_locations);
+            }
+
+            //Add condition for created_by,used in sales representative sales report
+            if (request()->has('created_by')) {
+                $created_by = request()->get('created_by');
+                if (! empty($created_by)) {
+                    $sells->where('transactions.created_by', $created_by);
+                }
+            }
+
+            $partial_permissions = ['view_own_sell_only', 'view_commission_agent_sell', 'access_own_shipping', 'access_commission_agent_shipping'];
+            if (! auth()->user()->can('direct_sell.view')) {
+                $sells->where(function ($q) {
+                    if (auth()->user()->hasAnyPermission(['view_own_sell_only', 'access_own_shipping'])) {
+                        $q->where('transactions.created_by', request()->session()->get('user.id'));
+                    }
+
+                    //if user is commission agent display only assigned sells
+                    if (auth()->user()->hasAnyPermission(['view_commission_agent_sell', 'access_commission_agent_shipping'])) {
+                        $q->orWhere('transactions.commission_agent', request()->session()->get('user.id'));
+                    }
+                });
+            }
+
+            $only_shipments = request()->only_shipments == 'true' ? true : false;
+            if ($only_shipments) {
+                $sells->whereNotNull('transactions.shipping_status');
+
+                if (auth()->user()->hasAnyPermission(['access_pending_shipments_only'])) {
+                    $sells->where('transactions.shipping_status', '!=', 'delivered');
+                }
+            }
+
+            if (! $is_admin && ! $only_shipments && $sale_type != 'sales_order') {
+                $payment_status_arr = [];
+                if (auth()->user()->can('view_paid_sells_only')) {
+                    $payment_status_arr[] = 'paid';
+                }
+
+                if (auth()->user()->can('view_due_sells_only')) {
+                    $payment_status_arr[] = 'due';
+                }
+
+                if (auth()->user()->can('view_partial_sells_only')) {
+                    $payment_status_arr[] = 'partial';
+                }
+
+                if (empty($payment_status_arr)) {
+                    if (auth()->user()->can('view_overdue_sells_only')) {
+                        $sells->OverDue();
+                    }
+                } else {
+                    if (auth()->user()->can('view_overdue_sells_only')) {
+                        $sells->where(function ($q) use ($payment_status_arr) {
+                            $q->whereIn('transactions.payment_status', $payment_status_arr)
+                                ->orWhere(function ($qr) {
+                                    $qr->OverDue();
+                                });
+                        });
+                    } else {
+                        $sells->whereIn('transactions.payment_status', $payment_status_arr);
+                    }
+                }
+            }
+
+            if (! empty(request()->input('payment_status')) && request()->input('payment_status') != 'overdue') {
+                $sells->where('transactions.payment_status', request()->input('payment_status'));
+            } elseif (request()->input('payment_status') == 'overdue') {
+                $sells->whereIn('transactions.payment_status', ['due', 'partial'])
+                    ->whereNotNull('transactions.pay_term_number')
+                    ->whereNotNull('transactions.pay_term_type')
+                    ->whereRaw("IF(transactions.pay_term_type='days', DATE_ADD(transactions.transaction_date, INTERVAL transactions.pay_term_number DAY) < CURDATE(), DATE_ADD(transactions.transaction_date, INTERVAL transactions.pay_term_number MONTH) < CURDATE())");
+            }
+
+            //Add condition for location,used in sales representative expense report
+            if (request()->has('location_id')) {
+                $location_id = request()->get('location_id');
+                if (! empty($location_id)) {
+                    $sells->where('transactions.location_id', $location_id);
+                }
+            }
+
+            if (! empty(request()->input('rewards_only')) && request()->input('rewards_only') == true) {
+                $sells->where(function ($q) {
+                    $q->whereNotNull('transactions.rp_earned')
+                        ->orWhere('transactions.rp_redeemed', '>', 0);
+                });
+            }
+
+            if (! empty(request()->customer_id)) {
+                $customer_id = request()->customer_id;
+                $sells->where('contacts.id', $customer_id);
+            }
+            if (! empty(request()->start_date) && ! empty(request()->end_date)) {
+                $start = request()->start_date;
+                $end = request()->end_date;
+                $sells->whereDate('transactions.transaction_date', '>=', $start)
+                    ->whereDate('transactions.transaction_date', '<=', $end);
+            }
+
+            //Check is_direct sell
+            if (request()->has('is_direct_sale')) {
+                $is_direct_sale = request()->is_direct_sale;
+                if ($is_direct_sale == 0) {
+                    $sells->where('transactions.is_direct_sale', 0);
+                    $sells->whereNull('transactions.sub_type');
+                }
+            }
+
+            //Add condition for commission_agent,used in sales representative sales with commission report
+            if (request()->has('commission_agent')) {
+                $commission_agent = request()->get('commission_agent');
+                if (! empty($commission_agent)) {
+                    $sells->where('transactions.commission_agent', $commission_agent);
+                }
+            }
+
+            if (! empty(request()->input('source'))) {
+                //only exception for woocommerce
+                if (request()->input('source') == 'woocommerce') {
+                    $sells->whereNotNull('transactions.woocommerce_order_id');
+                } else {
+                    $sells->where('transactions.source', request()->input('source'));
+                }
+            }
+
+            if ($is_crm) {
+                $sells->addSelect('transactions.crm_is_order_request');
+
+                if (request()->has('crm_is_order_request')) {
+                    $sells->where('transactions.crm_is_order_request', 1);
+                }
+            }
+
+            if (request()->only_subscriptions) {
+                $sells->where(function ($q) {
+                    $q->whereNotNull('transactions.recur_parent_id')
+                        ->orWhere('transactions.is_recurring', 1);
+                });
+            }
+
+            if (! empty(request()->list_for) && request()->list_for == 'service_staff_report') {
+                $sells->whereNotNull('transactions.res_waiter_id');
+            }
+
+            if (! empty(request()->res_waiter_id)) {
+                $sells->where('transactions.res_waiter_id', request()->res_waiter_id);
+            }
+
+            if (! empty(request()->input('sub_type'))) {
+                $sells->where('transactions.sub_type', request()->input('sub_type'));
+            }
+
+            if (! empty(request()->input('created_by'))) {
+                $sells->where('transactions.created_by', request()->input('created_by'));
+            }
+
+            if (! empty(request()->input('status'))) {
+                $sells->where('transactions.status', request()->input('status'));
+            }
+
+            if (! empty(request()->input('sales_cmsn_agnt'))) {
+                $sells->where('transactions.commission_agent', request()->input('sales_cmsn_agnt'));
+            }
+
+            if (! empty(request()->input('service_staffs'))) {
+                $sells->where('transactions.res_waiter_id', request()->input('service_staffs'));
+            }
+
+            $only_pending_shipments = request()->only_pending_shipments == 'true' ? true : false;
+            if ($only_pending_shipments) {
+                $sells->where('transactions.shipping_status', '!=', 'delivered')
+                    ->whereNotNull('transactions.shipping_status');
+                $only_shipments = true;
+            }
+
+            if (! empty(request()->input('shipping_status'))) {
+                $sells->where('transactions.shipping_status', request()->input('shipping_status'));
+            }
+
+            if (! empty(request()->input('for_dashboard_sales_order'))) {
+                $sells->whereIn('transactions.status', ['partial', 'ordered'])
+                    ->orHavingRaw('so_qty_remaining > 0');
+            }
+
+            if ($sale_type == 'sales_order') {
+                if (! auth()->user()->can('so.view_all') && auth()->user()->can('so.view_own')) {
+                    $sells->where('transactions.created_by', request()->session()->get('user.id'));
+                }
+            }
+
+            $sells->groupBy('transactions.id');
+
+            if (! empty(request()->suspended)) {
+                $transaction_sub_type = request()->get('transaction_sub_type');
+                if (! empty($transaction_sub_type)) {
+                    $sells->where('transactions.sub_type', $transaction_sub_type);
+                } else {
+                    $sells->where('transactions.sub_type', null);
+                }
+
+                $with = ['sell_lines'];
+
+                if ($is_tables_enabled) {
+                    $with[] = 'table';
+                }
+
+                if ($is_service_staff_enabled) {
+                    $with[] = 'service_staff';
+                }
+
+                $sales = $sells->where('transactions.is_suspend', 1)
+                    ->with($with)
+                    ->addSelect('transactions.is_suspend', 'transactions.res_table_id', 'transactions.res_waiter_id', 'transactions.additional_notes')
+                    ->get();
+
+                return view('sale_pos.partials.suspended_sales_modal')->with(compact('sales', 'is_tables_enabled', 'is_service_staff_enabled', 'transaction_sub_type'));
+            }
+
+            $with[] = 'payment_lines';
+            if (! empty($with)) {
+                $sells->with($with);
+            }
+
+            //$business_details = $this->businessUtil->getDetails($business_id);
+            if ($this->businessUtil->isModuleEnabled('subscription')) {
+                $sells->addSelect('transactions.is_recurring', 'transactions.recur_parent_id');
+            }
+            $sales_order_statuses = Transaction::sales_order_statuses();
+//            dd($sales_order_statuses);
+            $datatable = Datatables::of($sells)
+                ->addColumn(
+                    'action',
+                    function ($row) use ($only_shipments, $is_admin, $sale_type) {
+                        $html = '<div class="btn-group">
+                                <button type="button" class="btn btn-info dropdown-toggle btn-xs" 
+                                    data-toggle="dropdown" aria-expanded="false">'.
+                            __('messages.actions').
+                            '<span class="caret"></span><span class="sr-only">Toggle Dropdown
+                                    </span>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-left" role="menu">';
+
+                        if (auth()->user()->can('sell.view') || auth()->user()->can('direct_sell.view') || auth()->user()->can('view_own_sell_only')) {
+                            $html .= '<li>
+                                    <a href="#" data-href="'.route('send.invoice.to.zatka', \Illuminate\Support\Facades\Crypt::encrypt($row->id)).'" class="btn-modal send-invoice-link " data-container=".send-invoice-link"><i class="fa fa-paper-plane text-primary" aria-hidden="true"></i> '.__('sale.zatca_invoice').'</a>
+                                    </li>';
+                        }
+                        if (auth()->user()->can('sell.view') || auth()->user()->can('direct_sell.view') || auth()->user()->can('view_own_sell_only')) {
+                            $html .= '<li><a href="#" data-href="'.action([\App\Http\Controllers\SellController::class, 'show'], [$row->id]).'" class="btn-modal" data-container=".view_modal"><i class="fas fa-eye" aria-hidden="true"></i> '.__('messages.view').'</a></li>';
+                        }
+                        if (! $only_shipments) {
+                            if ($row->is_direct_sale == 0) {
+                                if (auth()->user()->can('sell.update')) {
+                                    $html .= '<li><a target="_blank" href="'.action([\App\Http\Controllers\SellPosController::class, 'edit'], [$row->id]).'"><i class="fas fa-edit"></i> '.__('messages.edit').'</a></li>';
+                                }
+                            } elseif ($row->type == 'sales_order') {
+                                if (auth()->user()->can('so.update')) {
+                                    $html .= '<li><a target="_blank" href="'.action([\App\Http\Controllers\SellController::class, 'edit'], [$row->id]).'"><i class="fas fa-edit"></i> '.__('messages.edit').'</a></li>';
+                                }
+                            } else {
+                                if (auth()->user()->can('direct_sell.update')) {
+                                    $html .= '<li><a target="_blank" href="'.action([\App\Http\Controllers\SellController::class, 'edit'], [$row->id]).'"><i class="fas fa-edit"></i> '.__('messages.edit').'</a></li>';
+                                }
+                            }
+
+                            $delete_link = '<li><a href="'.action([\App\Http\Controllers\SellPosController::class, 'destroy'], [$row->id]).'" class="delete-sale"><i class="fas fa-trash"></i> '.__('messages.delete').'</a></li>';
+                            if ($row->is_direct_sale == 0) {
+                                if (auth()->user()->can('sell.delete')) {
+                                    $html .= $delete_link;
+                                }
+                            } elseif ($row->type == 'sales_order') {
+                                if (auth()->user()->can('so.delete')) {
+                                    $html .= $delete_link;
+                                }
+                            } else {
+                                if (auth()->user()->can('direct_sell.delete')) {
+                                    $html .= $delete_link;
+                                }
+                            }
+                        }
+
+                        if (config('constants.enable_download_pdf') && auth()->user()->can('print_invoice') && $sale_type != 'sales_order') {
+                            $html .= '<li><a href="'.route('sell.downloadPdf', [$row->id]).'" target="_blank"><i class="fas fa-print" aria-hidden="true"></i> '.__('lang_v1.download_pdf').'</a></li>';
+
+                            if (! empty($row->shipping_status)) {
+                                $html .= '<li><a href="'.route('packing.downloadPdf', [$row->id]).'" target="_blank"><i class="fas fa-print" aria-hidden="true"></i> '.__('lang_v1.download_paking_pdf').'</a></li>';
+                            }
+                        }
+
+                        if (auth()->user()->can('sell.view') || auth()->user()->can('direct_sell.access')) {
+                            if (! empty($row->document)) {
+                                $document_name = ! empty(explode('_', $row->document, 2)[1]) ? explode('_', $row->document, 2)[1] : $row->document;
+                                $html .= '<li><a href="'.url('uploads/documents/'.$row->document).'" download="'.$document_name.'"><i class="fas fa-download" aria-hidden="true"></i>'.__('purchase.download_document').'</a></li>';
+                                if (isFileImage($document_name)) {
+                                    $html .= '<li><a href="#" data-href="'.url('uploads/documents/'.$row->document).'" class="view_uploaded_document"><i class="fas fa-image" aria-hidden="true"></i>'.__('lang_v1.view_document').'</a></li>';
+                                }
+                            }
+                        }
+
+                        if ($is_admin || auth()->user()->hasAnyPermission(['access_shipping', 'access_own_shipping', 'access_commission_agent_shipping'])) {
+                            $html .= '<li><a href="#" data-href="'.action([\App\Http\Controllers\SellController::class, 'editShipping'], [$row->id]).'" class="btn-modal" data-container=".view_modal"><i class="fas fa-truck" aria-hidden="true"></i>'.__('lang_v1.edit_shipping').'</a></li>';
+                        }
+
+                        if ($row->type == 'sell') {
+                            if (auth()->user()->can('print_invoice')) {
+                                $html .= '<li><a href="#" class="print-invoice" data-href="'.route('sell.printInvoice', [$row->id]).'"><i class="fas fa-print" aria-hidden="true"></i> '.__('lang_v1.print_invoice').'</a></li>
+                                <li><a href="#" class="print-invoice" data-href="'.route('sell.printInvoice', [$row->id]).'?package_slip=true"><i class="fas fa-file-alt" aria-hidden="true"></i> '.__('lang_v1.packing_slip').'</a></li>';
+
+                                $html .= '<li><a href="#" class="print-invoice" data-href="'.route('sell.printInvoice', [$row->id]).'?delivery_note=true"><i class="fas fa-file-alt" aria-hidden="true"></i> '.__('lang_v1.delivery_note').'</a></li>';
+                            }
+                            $html .= '<li class="divider"></li>';
+                            if (! $only_shipments) {
+                                if ($row->is_direct_sale == 0 && ! auth()->user()->can('sell.update') &&
+                                    auth()->user()->can('edit_pos_payment')) {
+                                    $html .= '<li><a href="'.route('edit-pos-payment', [$row->id]).'" 
+                                ><i class="fas fa-money-bill-alt"></i> '.__('lang_v1.add_edit_payment').
+                                        '</a></li>';
+                                }
+
+                                if (auth()->user()->can('sell.payments') ||
+                                    auth()->user()->can('edit_sell_payment') ||
+                                    auth()->user()->can('delete_sell_payment')) {
+                                    if ($row->payment_status != 'paid') {
+                                        $html .= '<li><a href="'.action([\App\Http\Controllers\TransactionPaymentController::class, 'addPayment'], [$row->id]).'" class="add_payment_modal"><i class="fas fa-money-bill-alt"></i> '.__('purchase.add_payment').'</a></li>';
+                                    }
+
+                                    $html .= '<li><a href="'.action([\App\Http\Controllers\TransactionPaymentController::class, 'show'], [$row->id]).'" class="view_payment_modal"><i class="fas fa-money-bill-alt"></i> '.__('purchase.view_payments').'</a></li>';
+                                }
+
+                                if (auth()->user()->can('sell.create') || auth()->user()->can('direct_sell.access')) {
+                                    // $html .= '<li><a href="' . action([\App\Http\Controllers\SellController::class, 'duplicateSell'], [$row->id]) . '"><i class="fas fa-copy"></i> ' . __("lang_v1.duplicate_sell") . '</a></li>';
+
+                                    $html .= '<li><a href="'.action([\App\Http\Controllers\SellReturnController::class, 'add'], [$row->id]).'"><i class="fas fa-undo"></i> '.__('lang_v1.sell_return').'</a></li>
+
+                                <li><a href="'.action([\App\Http\Controllers\SellPosController::class, 'showInvoiceUrl'], [$row->id]).'" class="view_invoice_url"><i class="fas fa-eye"></i> '.__('lang_v1.view_invoice_url').'</a></li>';
+                                }
+                            }
+
+                            $html .= '<li><a href="#" data-href="'.action([\App\Http\Controllers\NotificationController::class, 'getTemplate'], ['transaction_id' => $row->id, 'template_for' => 'new_sale']).'" class="btn-modal" data-container=".view_modal"><i class="fa fa-envelope" aria-hidden="true"></i>'.__('lang_v1.new_sale_notification').'</a></li>';
+                        } else {
+                            $html .= '<li><a href="#" data-href="'.action([\App\Http\Controllers\SellController::class, 'viewMedia'], ['model_id' => $row->id, 'model_type' => \App\Transaction::class, 'model_media_type' => 'shipping_document']).'" class="btn-modal" data-container=".view_modal"><i class="fas fa-paperclip" aria-hidden="true"></i>'.__('lang_v1.shipping_documents').'</a></li>';
+                        }
+
+                        $html .= '</ul></div>';
+
+                        return $html;
+                    }
+                )
+                ->removeColumn('id')
+                ->editColumn('transaction_date', '{{@format_datetime($transaction_date)}}')
+                ->editColumn(
+                    'payment_status',
+                    function ($row) {
+                        $payment_status = Transaction::getPaymentStatus($row);
+
+                        return (string) view('sell.partials.payment_status', ['payment_status' => $payment_status, 'id' => $row->id]);
+                    }
+                )
+                ->editColumn('invoice_no', function ($row) use ($is_crm) {
+                    $invoice_no = $row->invoice_no;
+                    if (! empty($row->woocommerce_order_id)) {
+                        $invoice_no .= ' <i class="fab fa-wordpress text-primary no-print" title="'.__('lang_v1.synced_from_woocommerce').'"></i>';
+                    }
+                    if (! empty($row->return_exists)) {
+                        $invoice_no .= ' &nbsp;<small class="label bg-red label-round no-print" title="'.__('lang_v1.some_qty_returned_from_sell').'"><i class="fas fa-undo"></i></small>';
+                    }
+                    if (! empty($row->is_recurring)) {
+                        $invoice_no .= ' &nbsp;<small class="label bg-red label-round no-print" title="'.__('lang_v1.subscribed_invoice').'"><i class="fas fa-recycle"></i></small>';
+                    }
+
+                    if (! empty($row->recur_parent_id)) {
+                        $invoice_no .= ' &nbsp;<small class="label bg-info label-round no-print" title="'.__('lang_v1.subscription_invoice').'"><i class="fas fa-recycle"></i></small>';
+                    }
+
+                    if (! empty($row->is_export)) {
+                        $invoice_no .= '</br><small class="label label-default no-print" title="'.__('lang_v1.export').'">'.__('lang_v1.export').'</small>';
+                    }
+
+                    if ($is_crm && ! empty($row->crm_is_order_request)) {
+                        $invoice_no .= ' &nbsp;<small class="label bg-yellow label-round no-print" title="'.__('crm::lang.order_request').'"><i class="fas fa-tasks"></i></small>';
+                    }
+
+                    return $invoice_no;
+                })
+
+                ->addColumn('conatct_name', '@if(!empty($supplier_business_name)) {{$supplier_business_name}}, <br> @endif {{$name}}')
+                ->filterColumn('conatct_name', function ($query, $keyword) {
+                    $query->where(function ($q) use ($keyword) {
+                        $q->where('contacts.name', 'like', "%{$keyword}%")
+                            ->orWhere('contacts.supplier_business_name', 'like', "%{$keyword}%");
+                    });
+                })
+                ->addColumn('payment_methods', function ($row) use ($payment_types) {
+                    $methods = array_unique($row->payment_lines->pluck('method')->toArray());
+                    $count = count($methods);
+                    $payment_method = '';
+                    if ($count == 1) {
+                        $payment_method = $payment_types[$methods[0]] ?? '';
+                    } elseif ($count > 1) {
+                        $payment_method = __('lang_v1.checkout_multi_pay');
+                    }
+
+                    $html = ! empty($payment_method) ? '<span class="payment-method" data-orig-value="'.$payment_method.'" data-status-name="'.$payment_method.'">'.$payment_method.'</span>' : '';
+
+                    return $html;
+                })
+                ->addColumn('zatka_status', function ($row) {
+                    return $row->zatka_info ? ($row->zatka_info->status_code < 300 ? '<span class="label bg-light-green">Accept</span>' : '<span class="label bg-light-gray">Not Accept</span>') : '<span class="label bg-warning text-black">Not Accept</span>';
+                })
+                ->setRowAttr([
+                    'data-href' => function ($row) {
+                        if (auth()->user()->can('sell.view') || auth()->user()->can('view_own_sell_only')) {
+                            return  action([\App\Http\Controllers\SellController::class, 'show'], [$row->id]);
+                        } else {
+                            return '';
+                        }
+                    }, ]);
+
+            $rawColumns = ['zatka_status','final_total', 'action', 'total_paid', 'total_remaining', 'payment_status', 'invoice_no', 'discount_amount', 'tax_amount', 'total_before_tax', 'shipping_status', 'types_of_service_name', 'payment_methods', 'return_due', 'conatct_name', 'status'];
+
+            return $datatable->rawColumns($rawColumns)
+                ->make(true);
+        }
+
+        $business_locations = BusinessLocation::forDropdown($business_id, false);
+        $customers = Contact::customersDropdown($business_id, false);
+        $sales_representative = User::forDropdown($business_id, false, false, true);
+
+        //Commission agent filter
+        $is_cmsn_agent_enabled = request()->session()->get('business.sales_cmsn_agnt');
+        $commission_agents = [];
+        if (! empty($is_cmsn_agent_enabled)) {
+            $commission_agents = User::forDropdown($business_id, false, true, true);
+        }
+
+        //Service staff filter
+        $service_staffs = null;
+        if ($this->productUtil->isModuleEnabled('service_staff')) {
+            $service_staffs = $this->productUtil->serviceStaffDropdown($business_id);
+        }
+
+        $shipping_statuses = $this->transactionUtil->shipping_statuses();
+
+        $sources = $this->transactionUtil->getSources($business_id);
+        if ($is_woocommerce) {
+            $sources['woocommerce'] = 'Woocommerce';
+        }
+
+        return view('sale_pos.zatca_show_all_invoice')
+            ->with(compact('business_locations', 'customers', 'is_woocommerce', 'sales_representative', 'is_cmsn_agent_enabled', 'commission_agents', 'service_staffs', 'is_tables_enabled', 'is_service_staff_enabled', 'is_types_service_enabled', 'shipping_statuses', 'sources'));
+    }
     /**
      * Show the form for creating a new resource.
      *
@@ -346,6 +877,7 @@ class SellPosController extends Controller
                 $discount = ['discount_type' => $input['discount_type'],
                     'discount_amount' => $input['discount_amount'],
                 ];
+
                 $invoice_total = $this->productUtil->calculateInvoiceTotal($input['products'], $input['tax_rate_id'], $discount);
 
                 DB::beginTransaction();
@@ -454,7 +986,7 @@ class SellPosController extends Controller
 
                 //Upload Shipping documents
                 Media::uploadMedia($business_id, $transaction, $request, 'shipping_documents', false, 'shipping_document');
-
+//dd($input['products']);
                 $this->transactionUtil->createOrUpdateSellLines($transaction, $input['products'], $input['location_id']);
 
                 $change_return['amount'] = $input['change_return'] ?? 0;
@@ -561,6 +1093,13 @@ class SellPosController extends Controller
 
                 Media::uploadMedia($business_id, $transaction, $request, 'documents');
 
+                //cash register log
+
+//                dd($payment_status);
+                if ($payment_status=='due'){
+                    $this->transactionUtil->insertCashTransactionData($transaction->final_total, null,'credit', $transaction->id,'suspend');
+                }
+
                 $this->transactionUtil->activityLog($transaction, 'added');
 
                 DB::commit();
@@ -597,6 +1136,21 @@ class SellPosController extends Controller
                 }
 
                 if ($print_invoice) {
+//                    dd($request->contact_id);
+                    $contacts = Contact::where('id', $request->contact_id)->first();
+                    $number = $contacts->mobile;
+                    $is_valid_num = validate_mobile($number);;
+                    $is_admin = $this->isAdmin();
+//                    if ($request->contact_id != 1 && $is_valid_num && $is_admin){
+////                        $transaction = Transaction::where('business_id', $business_id)
+////                            ->findorfail($transaction->id);
+//                        $url = $this->transactionUtil->getInvoiceUrl($transaction->id, $business_id);
+////                        $new_url = is_short_url($url);
+//                        $body = $contacts->name.' '.'فاتورتك جاهزة. على الرابط'.' '.$url;
+////                        dd($number);
+//                        OurSMS($number, $body);
+//                    }
+
                     $receipt = $this->receiptContent($business_id, $input['location_id'], $transaction->id, null, false, true, $invoice_layout_id);
                 }
 
@@ -663,6 +1217,29 @@ class SellPosController extends Controller
         }
     }
 
+    function sendSMS($mobileNumber, $messageContent)
+    {
+//        info('sms'. $mobileNumber .' '. $messageContent);
+        $user = 'eis1980';
+        $password = 'Mhamcloud@1980';
+        $sendername = 'Mhamcloud';
+        $text = urlencode( $messageContent);
+        $to = $mobileNumber;
+// auth call
+        $url = "http://www.oursms.net/api/sendsms.php?username=$user&password=$password&numbers=$to&message=$text&sender=$sendername&unicode=E&return=full";
+
+//لارجاع القيمه json
+//$url = "http://www.oursms.net/api/sendsms.php?username=$user&password=$password&numbers=$to&message=$text&sender=$sendername&unicode=E&return=json";
+// لارجاع القيمه xml
+//$url = "http://www.oursms.net/api/sendsms.php?username=$user&password=$password&numbers=$to&message=$text&sender=$sendername&unicode=E&return=xml";
+// لارجاع القيمه string
+//$url = "http://www.oursms.net/api/sendsms.php?username=$user&password=$password&numbers=$to&message=$text&sender=$sendername&unicode=E";
+// Call API and get return message
+//fopen($url,"r");
+        $ret = file_get_contents($url);
+        echo nl2br($ret);
+    }
+
     /**
      * Returns the content for the receipt
      *
@@ -706,7 +1283,7 @@ class SellPosController extends Controller
         $receipt_printer_type = is_null($printer_type) ? $location_details->receipt_printer_type : $printer_type;
 
         $receipt_details = $this->transactionUtil->getReceiptDetails($transaction_id, $location_id, $invoice_layout, $business_details, $location_details, $receipt_printer_type);
-//dd($receipt_details);
+// dd($receipt_details->tax);
         $currency_details = [
             'symbol' => $business_details->currency_symbol,
             'thousand_separator' => $business_details->thousand_separator,
@@ -737,6 +1314,7 @@ class SellPosController extends Controller
 
             $output['html_content'] = view($layout, compact('receipt_details'))->render();
         }
+// dd($receipt_details->design);
 
         return $output;
     }
@@ -1715,7 +2293,7 @@ class SellPosController extends Controller
             }
 
             $output = $this->getSellLineRow($variation_id, $location_id, $quantity, $row_count, $is_direct_sell);
-
+//dd($output);
             if ($this->transactionUtil->isModuleEnabled('modifiers') && ! $is_direct_sell) {
                 $variation = Variation::find($variation_id);
                 $business_id = request()->session()->get('user.business_id');
@@ -1779,7 +2357,7 @@ class SellPosController extends Controller
 
         $register = $this->cashRegisterUtil->getCurrentCashRegister($user_id);
 
-        $query = Transaction::where('business_id', $business_id)
+        $query = Transaction::with('zatka_info')->where('business_id', $business_id)
             ->where('transactions.created_by', $user_id)
             ->where('transactions.type', 'sell')
             ->where('is_direct_sale', 0);
@@ -1820,6 +2398,17 @@ class SellPosController extends Controller
             ->with(compact('transactions', 'transaction_sub_type'));
     }
 
+    public function isAdmin()
+    {
+        $administrator_list = config('constants.administrator_usernames');
+        $is_admin = false;
+        $is_user = auth()->user()->username;
+        if (in_array($is_user, explode(',', $administrator_list))) {
+            $is_admin = true;
+        }
+        return $is_admin;
+    }
+
     /**
      * Prints invoice for sell
      *
@@ -1835,6 +2424,7 @@ class SellPosController extends Controller
                 ];
 
                 $business_id = $request->session()->get('user.business_id');
+
 
                 $transaction = Transaction::where('business_id', $business_id)
                     ->where('id', $transaction_id)
@@ -1866,9 +2456,61 @@ class SellPosController extends Controller
                     'msg' => trans('messages.something_went_wrong'),
                 ];
             }
-
             return $output;
         }
+    }
+
+
+
+
+    function SendInvoiceToZatka($trx_id){
+        $trx_id = Crypt::decrypt($trx_id);
+        $transaction = Transaction::find($trx_id);
+//        dd($transaction);
+        $location_details = BusinessLocation::find($transaction->location_id);
+        $invoice_layout_id = ! empty($invoice_layout_id) ? $invoice_layout_id : $location_details->invoice_layout_id;
+        $invoice_layout = $this->businessUtil->invoiceLayout($transaction->business_id, $invoice_layout_id);
+        $business_details = $this->businessUtil->getDetails($transaction->business_id);
+
+        $printer_type = null;
+        $receipt_printer_type = is_null($printer_type) ? $location_details->receipt_printer_type : $printer_type;
+
+        $receipt_details = $this->transactionUtil->getReceiptDetails($transaction->id, $transaction->location_id, $invoice_layout, $business_details, $location_details, $receipt_printer_type);
+//        dd($receipt_details);
+        $invoice_xml =  view('invoice', compact('transaction', 'receipt_details'));
+
+
+        $header = [
+            'accept' => 'application/json',
+            'accept-language' => 'en',
+            'Clearance-Status' => '0',
+            'Accept-Version' => 'V2',
+            'Authorization' => 'Basic VFVsSlJERkVRME5CTTIxblFYZEpRa0ZuU1ZSaWQwRkJaVE5WUVZsV1ZUTTBTUzhyTlZGQlFrRkJRamRrVkVGTFFtZG5jV2hyYWs5UVVWRkVRV3BDYWsxU1ZYZEZkMWxMUTFwSmJXbGFVSGxNUjFGQ1IxSlpSbUpIT1dwWlYzZDRSWHBCVWtKbmIwcHJhV0ZLYXk5SmMxcEJSVnBHWjA1dVlqTlplRVo2UVZaQ1oyOUthMmxoU21zdlNYTmFRVVZhUm1ka2JHVklVbTVaV0hBd1RWSjNkMGRuV1VSV1VWRkVSWGhPVlZVeGNFWlRWVFZYVkRCc1JGSlRNVlJrVjBwRVVWTXdlRTFDTkZoRVZFbDVUVVJaZUUxcVJUTk9SRUV4VFd4dldFUlVTVEJOUkZsNFRWUkZNMDVFUVRGTmJHOTNVMVJGVEUxQmEwZEJNVlZGUW1oTlExVXdSWGhFYWtGTlFtZE9Wa0pCYjFSQ1YwWnVZVmQ0YkUxU1dYZEdRVmxFVmxGUlRFVjNNVzlaV0d4b1NVaHNhRm95YUhSaU0xWjVUVkpKZDBWQldVUldVVkZFUlhkcmVFMXFZM1ZOUXpSM1RHcEZkMVpxUVZGQ1oyTnhhR3RxVDFCUlNVSkNaMVZ5WjFGUlFVTm5Ua05CUVZSVVFVczViSEpVVm10dk9YSnJjVFphV1dOak9VaEVVbHBRTkdJNVV6UjZRVFJMYlRkWldFb3JjMjVVVm1oTWEzcFZNRWh6YlZOWU9WVnVPR3BFYUZKVVQwaEVTMkZtZERoREwzVjFWVms1TXpSMmRVMU9ielJKUTBwNlEwTkJhVTEzWjFsblIwRXhWV1JGVVZOQ1owUkNLM0JJZDNkbGFrVmlUVUpyUjBFeFZVVkNRWGRUVFZNeGIxbFliR2htUkVsMFRXcE5NR1pFVFhSTlZFVjVUVkk0ZDBoUldVdERXa2x0YVZwUWVVeEhVVUpCVVhkUVRYcEJkMDFFWXpGT1ZHYzBUbnBCZDAxRVFYcE5VVEIzUTNkWlJGWlJVVTFFUVZGNFRWUkJkMDFTUlhkRWQxbEVWbEZSWVVSQmFHRlpXRkpxV1ZOQmVFMXFSVmxOUWxsSFFURlZSVVIzZDFCU2JUbDJXa05DUTJSWVRucGhWelZzWXpOTmVrMUNNRWRCTVZWa1JHZFJWMEpDVTJkdFNWZEVObUpRWm1KaVMydHRWSGRQU2xKWWRrbGlTRGxJYWtGbVFtZE9Wa2hUVFVWSFJFRlhaMEpTTWxsSmVqZENjVU56V2pGak1XNWpLMkZ5UzJOeWJWUlhNVXg2UWs5Q1owNVdTRkk0UlZKNlFrWk5SVTluVVdGQkwyaHFNVzlrU0ZKM1QyazRkbVJJVGpCWk0wcHpURzV3YUdSSFRtaE1iV1IyWkdrMWVsbFRPVVJhV0Vvd1VsYzFlV0l5ZUhOTU1WSlVWMnRXU2xSc1dsQlRWVTVHVEZaT01WbHJUa0pNVkVWMVdUTktjMDFKUjNSQ1oyZHlRbWRGUmtKUlkwSkJVVk5DYjBSRFFtNVVRblZDWjJkeVFtZEZSa0pSWTNkQldWcHBZVWhTTUdORWIzWk1NMUo2WkVkT2VXSkROVFpaV0ZKcVdWTTFibUl6V1hWak1rVjJVVEpXZVdSRlZuVmpiVGx6WWtNNVZWVXhjRVpoVnpVeVlqSnNhbHBXVGtSUlZFVjFXbGhvTUZveVJqWmtRelZ1WWpOWmRXSkhPV3BaVjNobVZrWk9ZVkpWYkU5V2F6bEtVVEJWZEZVelZtbFJNRVYwVFZObmVFdFROV3BqYmxGM1MzZFpTVXQzV1VKQ1VWVklUVUZIUjBneWFEQmtTRUUyVEhrNU1HTXpVbXBqYlhkMVpXMUdNRmt5UlhWYU1qa3lURzVPYUV3eU9XcGpNMEYzUkdkWlJGWlNNRkJCVVVndlFrRlJSRUZuWlVGTlFqQkhRVEZWWkVwUlVWZE5RbEZIUTBOelIwRlJWVVpDZDAxRFFtZG5ja0puUlVaQ1VXTkVRWHBCYmtKbmEzSkNaMFZGUVZsSk0wWlJiMFZIYWtGWlRVRnZSME5EYzBkQlVWVkdRbmROUTAxQmIwZERRM05IUVZGVlJrSjNUVVJOUVc5SFEwTnhSMU5OTkRsQ1FVMURRVEJyUVUxRldVTkpVVU5XZDBSTlkzRTJVRThyVFdOdGMwSllWWG92ZGpGSFpHaEhjRGR5Y1ZOaE1rRjRWRXRUZGpnek9FbEJTV2hCVDBKT1JFSjBPU3N6UkZOc2FXcHZWbVo0ZW5Ka1JHZzFNamhYUXpNM2MyMUZaRzlIVjFaeVUzQkhNUT09OlhsajE1THlNQ2dTQzY2T2JuRU8vcVZQZmhTYnMza0RUalduR2hlWWhmU3M9',
+            'Content-Type' => 'application/json',
+        ];
+
+
+        $encoded_invoice = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPEludm9pY2UgeG1sbnM9InVybjpvYXNpczpuYW1lczpzcGVjaWZpY2F0aW9uOnVibDpzY2hlbWE6eHNkOkludm9pY2UtMiIgeG1sbnM6Y2FjPSJ1cm46b2FzaXM6bmFtZXM6c3BlY2lmaWNhdGlvbjp1Ymw6c2NoZW1hOnhzZDpDb21tb25BZ2dyZWdhdGVDb21wb25lbnRzLTIiIHhtbG5zOmNiYz0idXJuOm9hc2lzOm5hbWVzOnNwZWNpZmljYXRpb246dWJsOnNjaGVtYTp4c2Q6Q29tbW9uQmFzaWNDb21wb25lbnRzLTIiIHhtbG5zOmV4dD0idXJuOm9hc2lzOm5hbWVzOnNwZWNpZmljYXRpb246dWJsOnNjaGVtYTp4c2Q6Q29tbW9uRXh0ZW5zaW9uQ29tcG9uZW50cy0yIj48ZXh0OlVCTEV4dGVuc2lvbnM+CiAgICA8ZXh0OlVCTEV4dGVuc2lvbj4KICAgICAgICA8ZXh0OkV4dGVuc2lvblVSST51cm46b2FzaXM6bmFtZXM6c3BlY2lmaWNhdGlvbjp1Ymw6ZHNpZzplbnZlbG9wZWQ6eGFkZXM8L2V4dDpFeHRlbnNpb25VUkk+CiAgICAgICAgPGV4dDpFeHRlbnNpb25Db250ZW50PgogICAgICAgICAgICA8IS0tIFBsZWFzZSBub3RlIHRoYXQgdGhlIHNpZ25hdHVyZSB2YWx1ZXMgYXJlIHNhbXBsZSB2YWx1ZXMgb25seSAtLT4KICAgICAgICAgICAgPHNpZzpVQkxEb2N1bWVudFNpZ25hdHVyZXMgeG1sbnM6c2lnPSJ1cm46b2FzaXM6bmFtZXM6c3BlY2lmaWNhdGlvbjp1Ymw6c2NoZW1hOnhzZDpDb21tb25TaWduYXR1cmVDb21wb25lbnRzLTIiIHhtbG5zOnNhYz0idXJuOm9hc2lzOm5hbWVzOnNwZWNpZmljYXRpb246dWJsOnNjaGVtYTp4c2Q6U2lnbmF0dXJlQWdncmVnYXRlQ29tcG9uZW50cy0yIiB4bWxuczpzYmM9InVybjpvYXNpczpuYW1lczpzcGVjaWZpY2F0aW9uOnVibDpzY2hlbWE6eHNkOlNpZ25hdHVyZUJhc2ljQ29tcG9uZW50cy0yIj4KICAgICAgICAgICAgICAgIDxzYWM6U2lnbmF0dXJlSW5mb3JtYXRpb24+CiAgICAgICAgICAgICAgICAgICAgPGNiYzpJRD51cm46b2FzaXM6bmFtZXM6c3BlY2lmaWNhdGlvbjp1Ymw6c2lnbmF0dXJlOjE8L2NiYzpJRD4KICAgICAgICAgICAgICAgICAgICA8c2JjOlJlZmVyZW5jZWRTaWduYXR1cmVJRD51cm46b2FzaXM6bmFtZXM6c3BlY2lmaWNhdGlvbjp1Ymw6c2lnbmF0dXJlOkludm9pY2U8L3NiYzpSZWZlcmVuY2VkU2lnbmF0dXJlSUQ+CiAgICAgICAgICAgICAgICAgICAgPGRzOlNpZ25hdHVyZSB4bWxuczpkcz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC8wOS94bWxkc2lnIyIgSWQ9InNpZ25hdHVyZSI+CiAgICAgICAgICAgICAgICAgICAgICAgIDxkczpTaWduZWRJbmZvPgogICAgICAgICAgICAgICAgICAgICAgICAgICAgPGRzOkNhbm9uaWNhbGl6YXRpb25NZXRob2QgQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDA2LzEyL3htbC1jMTRuMTEiLz4KICAgICAgICAgICAgICAgICAgICAgICAgICAgIDxkczpTaWduYXR1cmVNZXRob2QgQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGRzaWctbW9yZSNlY2RzYS1zaGEyNTYiLz4KICAgICAgICAgICAgICAgICAgICAgICAgICAgIDxkczpSZWZlcmVuY2UgSWQ9Imludm9pY2VTaWduZWREYXRhIiBVUkk9IiI+CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPGRzOlRyYW5zZm9ybXM+CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDxkczpUcmFuc2Zvcm0gQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy9UUi8xOTk5L1JFQy14cGF0aC0xOTk5MTExNiI+CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8ZHM6WFBhdGg+bm90KC8vYW5jZXN0b3Itb3Itc2VsZjo6ZXh0OlVCTEV4dGVuc2lvbnMpPC9kczpYUGF0aD4KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPC9kczpUcmFuc2Zvcm0+CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDxkczpUcmFuc2Zvcm0gQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy9UUi8xOTk5L1JFQy14cGF0aC0xOTk5MTExNiI+CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8ZHM6WFBhdGg+bm90KC8vYW5jZXN0b3Itb3Itc2VsZjo6Y2FjOlNpZ25hdHVyZSk8L2RzOlhQYXRoPgogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8L2RzOlRyYW5zZm9ybT4KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPGRzOlRyYW5zZm9ybSBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnL1RSLzE5OTkvUkVDLXhwYXRoLTE5OTkxMTE2Ij4KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDxkczpYUGF0aD5ub3QoLy9hbmNlc3Rvci1vci1zZWxmOjpjYWM6QWRkaXRpb25hbERvY3VtZW50UmVmZXJlbmNlW2NiYzpJRD0nUVInXSk8L2RzOlhQYXRoPgogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8L2RzOlRyYW5zZm9ybT4KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPGRzOlRyYW5zZm9ybSBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDYvMTIveG1sLWMxNG4xMSIvPgogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDwvZHM6VHJhbnNmb3Jtcz4KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8ZHM6RGlnZXN0TWV0aG9kIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS8wNC94bWxlbmMjc2hhMjU2Ii8+CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPGRzOkRpZ2VzdFZhbHVlPlBFeDhiTkZjRU1FcEh6VVZ2UW50UUk2b3Q4ZUZxVFQvbDU5YitIMUhxWDQ9PC9kczpEaWdlc3RWYWx1ZT4KICAgICAgICAgICAgICAgICAgICAgICAgICAgIDwvZHM6UmVmZXJlbmNlPgogICAgICAgICAgICAgICAgICAgICAgICAgICAgPGRzOlJlZmVyZW5jZSBUeXBlPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjU2lnbmF0dXJlUHJvcGVydGllcyIgVVJJPSIjeGFkZXNTaWduZWRQcm9wZXJ0aWVzIj4KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8ZHM6RGlnZXN0TWV0aG9kIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS8wNC94bWxlbmMjc2hhMjU2Ii8+CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPGRzOkRpZ2VzdFZhbHVlPlpERXlNRFV5T0RKall6azRNR1ZpTlRKaE5tWXpNR0l5WlRneE9EaGtZMkpsT1dFek5tUmlNVEZsWlRWaE1EQXhOams1T1RSa1lUZzNPRGhsWTJaaU13PT08L2RzOkRpZ2VzdFZhbHVlPgogICAgICAgICAgICAgICAgICAgICAgICAgICAgPC9kczpSZWZlcmVuY2U+CiAgICAgICAgICAgICAgICAgICAgICAgIDwvZHM6U2lnbmVkSW5mbz4KICAgICAgICAgICAgICAgICAgICAgICAgPGRzOlNpZ25hdHVyZVZhbHVlPk1FVUNJUUM5MGZGWU9xVGltSHZZUDFmOWJiVDVzdEFmUjhiSTJmQUFGQXpZQXZNQ1BRSWdjR3BHaE1Tb2N4ZndkdmNTVzFCMTUyM2c1bkQ4YkNlOFNDV05lY3Q1cktNPTwvZHM6U2lnbmF0dXJlVmFsdWU+CiAgICAgICAgICAgICAgICAgICAgICAgIDxkczpLZXlJbmZvPgogICAgICAgICAgICAgICAgICAgICAgICAgICAgPGRzOlg1MDlEYXRhPgogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDxkczpYNTA5Q2VydGlmaWNhdGU+TUlJRDZUQ0NBNUNnQXdJQkFnSVRid0FBZjh0ZW02am5ncjE2RHdBQkFBQi95ekFLQmdncWhrak9QUVFEQWpCak1SVXdFd1lLQ1pJbWlaUHlMR1FCR1JZRmJHOWpZV3d4RXpBUkJnb0praWFKay9Jc1pBRVpGZ05uYjNZeEZ6QVZCZ29Ka2lhSmsvSXNaQUVaRmdkbGVIUm5ZWHAwTVJ3d0dnWURWUVFERXhOVVUxcEZTVTVXVDBsRFJTMVRkV0pEUVMweE1CNFhEVEl5TURreE5ERXpNall3TkZvWERUSTBNRGt4TXpFek1qWXdORm93VGpFTE1Ba0dBMVVFQmhNQ1UwRXhFekFSQmdOVkJBb1RDak14TVRFeE1URXhNVEV4RERBS0JnTlZCQXNUQTFSVFZERWNNQm9HQTFVRUF4TVRWRk5VTFRNeE1URXhNVEV4TVRFd01URXhNekJXTUJBR0J5cUdTTTQ5QWdFR0JTdUJCQUFLQTBJQUJHR0RES0RtaFdBSVREdjdMWHFMWDJjbXI2K3FkZFVrcGNMQ3ZXczVyQzJPMjlXL2hTNGFqQUs0UWRuYWh5bTZNYWlqWDc1Q2czajRhYW83b3VZWEo5R2pnZ0k1TUlJQ05UQ0JtZ1lEVlIwUkJJR1NNSUdQcElHTU1JR0pNVHN3T1FZRFZRUUVEREl4TFZSVFZId3lMVlJUVkh3ekxXRTROalppTVRReUxXRmpPV010TkRJME1TMWlaamhsTFRkbU56ZzNZVEkyTW1ObE1qRWZNQjBHQ2dtU0pvbVQ4aXhrQVFFTUR6TXhNVEV4TVRFeE1URXdNVEV4TXpFTk1Bc0dBMVVFREF3RU1URXdNREVNTUFvR0ExVUVHZ3dEVkZOVU1Rd3dDZ1lEVlFRUERBTlVVMVF3SFFZRFZSME9CQllFRkR1V1lsT3pXcEZOM25vMVd0eU5rdFFkckE4Sk1COEdBMVVkSXdRWU1CYUFGSFpnalBzR29LeG5WeldkejVxc3B5dVpOYlV2TUU0R0ExVWRId1JITUVVd1E2QkJvRCtHUFdoMGRIQTZMeTkwYzNSamNtd3VlbUYwWTJFdVoyOTJMbk5oTDBObGNuUkZibkp2Ykd3dlZGTmFSVWxPVms5SlEwVXRVM1ZpUTBFdE1TNWpjbXd3Z2EwR0NDc0dBUVVGQndFQkJJR2dNSUdkTUc0R0NDc0dBUVVGQnpBQmhtSm9kSFJ3T2k4dmRITjBZM0pzTG5waGRHTmhMbWR2ZGk1ellTOURaWEowUlc1eWIyeHNMMVJUV2tWcGJuWnZhV05sVTBOQk1TNWxlSFJuWVhwMExtZHZkaTVzYjJOaGJGOVVVMXBGU1U1V1QwbERSUzFUZFdKRFFTMHhLREVwTG1OeWREQXJCZ2dyQmdFRkJRY3dBWVlmYUhSMGNEb3ZMM1J6ZEdOeWJDNTZZWFJqWVM1bmIzWXVjMkV2YjJOemNEQU9CZ05WSFE4QkFmOEVCQU1DQjRBd0hRWURWUjBsQkJZd0ZBWUlLd1lCQlFVSEF3SUdDQ3NHQVFVRkJ3TURNQ2NHQ1NzR0FRUUJnamNWQ2dRYU1CZ3dDZ1lJS3dZQkJRVUhBd0l3Q2dZSUt3WUJCUVVIQXdNd0NnWUlLb1pJemowRUF3SURSd0F3UkFJZ09nak5QSlcwMTdsc0lpam1WUVZrUDdHekZPMktRS2Q5R0hhdWtMZ0lXRnNDSUZKRjl1d0toVE14RGpXYk4rMWF3c25GSTdSTEJSeEEvNmhaK0Yxd3RhcVU8L2RzOlg1MDlDZXJ0aWZpY2F0ZT4KICAgICAgICAgICAgICAgICAgICAgICAgICAgIDwvZHM6WDUwOURhdGE+CiAgICAgICAgICAgICAgICAgICAgICAgIDwvZHM6S2V5SW5mbz4KICAgICAgICAgICAgICAgICAgICAgICAgPGRzOk9iamVjdD4KICAgICAgICAgICAgICAgICAgICAgICAgICAgIDx4YWRlczpRdWFsaWZ5aW5nUHJvcGVydGllcyB4bWxuczp4YWRlcz0iaHR0cDovL3VyaS5ldHNpLm9yZy8wMTkwMy92MS4zLjIjIiBUYXJnZXQ9InNpZ25hdHVyZSI+CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPHhhZGVzOlNpZ25lZFByb3BlcnRpZXMgSWQ9InhhZGVzU2lnbmVkUHJvcGVydGllcyI+CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDx4YWRlczpTaWduZWRTaWduYXR1cmVQcm9wZXJ0aWVzPgogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPHhhZGVzOlNpZ25pbmdUaW1lPjIwMjMtMDEtMTFUMTM6MDg6MTBaPC94YWRlczpTaWduaW5nVGltZT4KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDx4YWRlczpTaWduaW5nQ2VydGlmaWNhdGU+CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPHhhZGVzOkNlcnQ+CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDx4YWRlczpDZXJ0RGlnZXN0PgogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPGRzOkRpZ2VzdE1ldGhvZCBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMDQveG1sZW5jI3NoYTI1NiIvPgogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPGRzOkRpZ2VzdFZhbHVlPllUSmtNMkpoWVRjd1pUQmhaVEF4T0dZd09ETXlOelkzTlRka1pETTNZemhqWTJJeE9USXlaRFpoTTJSbFpHSmlNR1kwTkRVelpXSmhZV0k0TURobVlnPT08L2RzOkRpZ2VzdFZhbHVlPgogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8L3hhZGVzOkNlcnREaWdlc3Q+CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDx4YWRlczpJc3N1ZXJTZXJpYWw+CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8ZHM6WDUwOUlzc3Vlck5hbWU+Q049VFNaRUlOVk9JQ0UtU3ViQ0EtMSwgREM9ZXh0Z2F6dCwgREM9Z292LCBEQz1sb2NhbDwvZHM6WDUwOUlzc3Vlck5hbWU+CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8ZHM6WDUwOVNlcmlhbE51bWJlcj4yNDc1MzgyODg2OTA0ODA5Nzc0ODE4NjQ0NDgwODIwOTM2MDUwMjA4NzAyNDExPC9kczpYNTA5U2VyaWFsTnVtYmVyPgogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8L3hhZGVzOklzc3VlclNlcmlhbD4KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8L3hhZGVzOkNlcnQ+CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8L3hhZGVzOlNpZ25pbmdDZXJ0aWZpY2F0ZT4KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPC94YWRlczpTaWduZWRTaWduYXR1cmVQcm9wZXJ0aWVzPgogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDwveGFkZXM6U2lnbmVkUHJvcGVydGllcz4KICAgICAgICAgICAgICAgICAgICAgICAgICAgIDwveGFkZXM6UXVhbGlmeWluZ1Byb3BlcnRpZXM+CiAgICAgICAgICAgICAgICAgICAgICAgIDwvZHM6T2JqZWN0PgogICAgICAgICAgICAgICAgICAgIDwvZHM6U2lnbmF0dXJlPgogICAgICAgICAgICAgICAgPC9zYWM6U2lnbmF0dXJlSW5mb3JtYXRpb24+CiAgICAgICAgICAgIDwvc2lnOlVCTERvY3VtZW50U2lnbmF0dXJlcz4KICAgICAgICA8L2V4dDpFeHRlbnNpb25Db250ZW50PgogICAgPC9leHQ6VUJMRXh0ZW5zaW9uPgo8L2V4dDpVQkxFeHRlbnNpb25zPgogICAgCiAgICA8Y2JjOlByb2ZpbGVJRD5yZXBvcnRpbmc6MS4wPC9jYmM6UHJvZmlsZUlEPgogICAgPGNiYzpJRD5TTUUwMDA2MjwvY2JjOklEPgogICAgPGNiYzpVVUlEPjE2ZTc4NDY5LTY0YWYtNDA2ZC05Y2ZkLTg5NWU3MjQxOThmMDwvY2JjOlVVSUQ+CiAgICA8Y2JjOklzc3VlRGF0ZT4yMDIyLTAzLTEzPC9jYmM6SXNzdWVEYXRlPgogICAgPGNiYzpJc3N1ZVRpbWU+MTQ6NDA6NDA8L2NiYzpJc3N1ZVRpbWU+CiAgICA8Y2JjOkludm9pY2VUeXBlQ29kZSBuYW1lPSIwMTExMDEwIj4zODg8L2NiYzpJbnZvaWNlVHlwZUNvZGU+CiAgICA8Y2JjOkRvY3VtZW50Q3VycmVuY3lDb2RlPlNBUjwvY2JjOkRvY3VtZW50Q3VycmVuY3lDb2RlPgogICAgPGNiYzpUYXhDdXJyZW5jeUNvZGU+U0FSPC9jYmM6VGF4Q3VycmVuY3lDb2RlPgogICAgPGNhYzpBZGRpdGlvbmFsRG9jdW1lbnRSZWZlcmVuY2U+CiAgICAgICAgPGNiYzpJRD5JQ1Y8L2NiYzpJRD4KICAgICAgICA8Y2JjOlVVSUQ+NjI8L2NiYzpVVUlEPgogICAgPC9jYWM6QWRkaXRpb25hbERvY3VtZW50UmVmZXJlbmNlPgogICAgPGNhYzpBZGRpdGlvbmFsRG9jdW1lbnRSZWZlcmVuY2U+CiAgICAgICAgPGNiYzpJRD5QSUg8L2NiYzpJRD4KICAgICAgICA8Y2FjOkF0dGFjaG1lbnQ+CiAgICAgICAgICAgIDxjYmM6RW1iZWRkZWREb2N1bWVudEJpbmFyeU9iamVjdCBtaW1lQ29kZT0idGV4dC9wbGFpbiI+TldabFkyVmlOalptWm1NNE5tWXpPR1E1TlRJM09EWmpObVEyT1Raak56bGpNbVJpWXpJek9XUmtOR1U1TVdJME5qY3lPV1EzTTJFeU4yWmlOVGRsT1E9PTwvY2JjOkVtYmVkZGVkRG9jdW1lbnRCaW5hcnlPYmplY3Q+CiAgICAgICAgPC9jYWM6QXR0YWNobWVudD4KICAgIDwvY2FjOkFkZGl0aW9uYWxEb2N1bWVudFJlZmVyZW5jZT4KICAgIAogICAgPGNhYzpBZGRpdGlvbmFsRG9jdW1lbnRSZWZlcmVuY2U+CiAgICAgICAgPGNiYzpJRD5RUjwvY2JjOklEPgogICAgICAgIDxjYWM6QXR0YWNobWVudD4KICAgICAgICAgICAgPGNiYzpFbWJlZGRlZERvY3VtZW50QmluYXJ5T2JqZWN0IG1pbWVDb2RlPSJ0ZXh0L3BsYWluIj5BUmRCYUcxbFpDQk5iMmhoYldWa0lFRk1JRUZvYldGa2VRSVBNekF3TURjMU5UZzROekF3TURBekF4UXlNREl5TFRBekxURXpWREUwT2pRd09qUXdXZ1FITVRFeE1DNDVNQVVGTVRRMExqa0dMRkJGZURoaVRrWmpSVTFGY0VoNlZWWjJVVzUwVVVrMmIzUTRaVVp4VkZRdmJEVTVZaXRJTVVoeFdEUTlCMkJOUlZWRFNWRkRPVEJtUmxsUGNWUnBiVWgyV1ZBeFpqbGlZbFExYzNSQlpsSTRZa2t5WmtGQlJrRjZXVUYyVFVOUVVVbG5ZMGR3UjJoTlUyOWplR1ozWkhaalUxY3hRakUxTWpObk5XNUVPR0pEWlRoVFExZE9aV04wTlhKTFRUMElXREJXTUJBR0J5cUdTTTQ5QWdFR0JTdUJCQUFLQTBJQUJHR0RES0RtaFdBSVREdjdMWHFMWDJjbXI2K3FkZFVrcGNMQ3ZXczVyQzJPMjlXL2hTNGFqQUs0UWRuYWh5bTZNYWlqWDc1Q2czajRhYW83b3VZWEo5RT08L2NiYzpFbWJlZGRlZERvY3VtZW50QmluYXJ5T2JqZWN0PgogICAgICAgIDwvY2FjOkF0dGFjaG1lbnQ+CjwvY2FjOkFkZGl0aW9uYWxEb2N1bWVudFJlZmVyZW5jZT48Y2FjOlNpZ25hdHVyZT4KICAgICAgPGNiYzpJRD51cm46b2FzaXM6bmFtZXM6c3BlY2lmaWNhdGlvbjp1Ymw6c2lnbmF0dXJlOkludm9pY2U8L2NiYzpJRD4KICAgICAgPGNiYzpTaWduYXR1cmVNZXRob2Q+dXJuOm9hc2lzOm5hbWVzOnNwZWNpZmljYXRpb246dWJsOmRzaWc6ZW52ZWxvcGVkOnhhZGVzPC9jYmM6U2lnbmF0dXJlTWV0aG9kPgo8L2NhYzpTaWduYXR1cmU+PGNhYzpBY2NvdW50aW5nU3VwcGxpZXJQYXJ0eT4KICAgICAgICA8Y2FjOlBhcnR5PgogICAgICAgICAgICA8Y2FjOlBhcnR5SWRlbnRpZmljYXRpb24+CiAgICAgICAgICAgICAgICA8Y2JjOklEIHNjaGVtZUlEPSJDUk4iPjQ1NDYzNDY0NTY0NTY1NDwvY2JjOklEPgogICAgICAgICAgICA8L2NhYzpQYXJ0eUlkZW50aWZpY2F0aW9uPgogICAgICAgICAgICA8Y2FjOlBvc3RhbEFkZHJlc3M+CiAgICAgICAgICAgICAgICA8Y2JjOlN0cmVldE5hbWU+dGVzdDwvY2JjOlN0cmVldE5hbWU+CiAgICAgICAgICAgICAgICA8Y2JjOkJ1aWxkaW5nTnVtYmVyPjM0NTQ8L2NiYzpCdWlsZGluZ051bWJlcj4KICAgICAgICAgICAgICAgIDxjYmM6UGxvdElkZW50aWZpY2F0aW9uPjEyMzQ8L2NiYzpQbG90SWRlbnRpZmljYXRpb24+CiAgICAgICAgICAgICAgICA8Y2JjOkNpdHlTdWJkaXZpc2lvbk5hbWU+dGVzdDwvY2JjOkNpdHlTdWJkaXZpc2lvbk5hbWU+CiAgICAgICAgICAgICAgICA8Y2JjOkNpdHlOYW1lPlJpeWFkaDwvY2JjOkNpdHlOYW1lPgogICAgICAgICAgICAgICAgPGNiYzpQb3N0YWxab25lPjEyMzQ1PC9jYmM6UG9zdGFsWm9uZT4KICAgICAgICAgICAgICAgIDxjYmM6Q291bnRyeVN1YmVudGl0eT50ZXN0PC9jYmM6Q291bnRyeVN1YmVudGl0eT4KICAgICAgICAgICAgICAgIDxjYWM6Q291bnRyeT4KICAgICAgICAgICAgICAgICAgICA8Y2JjOklkZW50aWZpY2F0aW9uQ29kZT5TQTwvY2JjOklkZW50aWZpY2F0aW9uQ29kZT4KICAgICAgICAgICAgICAgIDwvY2FjOkNvdW50cnk+CiAgICAgICAgICAgIDwvY2FjOlBvc3RhbEFkZHJlc3M+CiAgICAgICAgICAgIDxjYWM6UGFydHlUYXhTY2hlbWU+CiAgICAgICAgICAgICAgICA8Y2JjOkNvbXBhbnlJRD4zMDAwNzU1ODg3MDAwMDM8L2NiYzpDb21wYW55SUQ+CiAgICAgICAgICAgICAgICA8Y2FjOlRheFNjaGVtZT4KICAgICAgICAgICAgICAgICAgICA8Y2JjOklEPlZBVDwvY2JjOklEPgogICAgICAgICAgICAgICAgPC9jYWM6VGF4U2NoZW1lPgogICAgICAgICAgICA8L2NhYzpQYXJ0eVRheFNjaGVtZT4KICAgICAgICAgICAgPGNhYzpQYXJ0eUxlZ2FsRW50aXR5PgogICAgICAgICAgICAgICAgPGNiYzpSZWdpc3RyYXRpb25OYW1lPkFobWVkIE1vaGFtZWQgQUwgQWhtYWR5PC9jYmM6UmVnaXN0cmF0aW9uTmFtZT4KICAgICAgICAgICAgPC9jYWM6UGFydHlMZWdhbEVudGl0eT4KICAgICAgICA8L2NhYzpQYXJ0eT4KICAgIDwvY2FjOkFjY291bnRpbmdTdXBwbGllclBhcnR5PgogICAgPGNhYzpBY2NvdW50aW5nQ3VzdG9tZXJQYXJ0eT4KICAgICAgICA8Y2FjOlBhcnR5PgogICAgICAgICAgICA8Y2FjOlBhcnR5SWRlbnRpZmljYXRpb24+CiAgICAgICAgICAgICAgICA8Y2JjOklEIHNjaGVtZUlEPSJOQVQiPjIzNDU8L2NiYzpJRD4KICAgICAgICAgICAgPC9jYWM6UGFydHlJZGVudGlmaWNhdGlvbj4KICAgICAgICAgICAgPGNhYzpQb3N0YWxBZGRyZXNzPgogICAgICAgICAgICAgICAgPGNiYzpTdHJlZXROYW1lPmJhYW91bjwvY2JjOlN0cmVldE5hbWU+CiAgICAgICAgICAgICAgICA8Y2JjOkFkZGl0aW9uYWxTdHJlZXROYW1lPnNkc2Q8L2NiYzpBZGRpdGlvbmFsU3RyZWV0TmFtZT4KICAgICAgICAgICAgICAgIDxjYmM6QnVpbGRpbmdOdW1iZXI+MzM1MzwvY2JjOkJ1aWxkaW5nTnVtYmVyPgogICAgICAgICAgICAgICAgPGNiYzpQbG90SWRlbnRpZmljYXRpb24+MzQzNDwvY2JjOlBsb3RJZGVudGlmaWNhdGlvbj4KICAgICAgICAgICAgICAgIDxjYmM6Q2l0eVN1YmRpdmlzaW9uTmFtZT5mZ2ZmPC9jYmM6Q2l0eVN1YmRpdmlzaW9uTmFtZT4KICAgICAgICAgICAgICAgIDxjYmM6Q2l0eU5hbWU+RGh1cm1hPC9jYmM6Q2l0eU5hbWU+CiAgICAgICAgICAgICAgICA8Y2JjOlBvc3RhbFpvbmU+MzQ1MzQ8L2NiYzpQb3N0YWxab25lPgogICAgICAgICAgICAgICAgPGNiYzpDb3VudHJ5U3ViZW50aXR5PnVsaGs8L2NiYzpDb3VudHJ5U3ViZW50aXR5PgogICAgICAgICAgICAgICAgPGNhYzpDb3VudHJ5PgogICAgICAgICAgICAgICAgICAgIDxjYmM6SWRlbnRpZmljYXRpb25Db2RlPlNBPC9jYmM6SWRlbnRpZmljYXRpb25Db2RlPgogICAgICAgICAgICAgICAgPC9jYWM6Q291bnRyeT4KICAgICAgICAgICAgPC9jYWM6UG9zdGFsQWRkcmVzcz4KICAgICAgICAgICAgPGNhYzpQYXJ0eVRheFNjaGVtZT4KICAgICAgICAgICAgICAgIDxjYWM6VGF4U2NoZW1lPgogICAgICAgICAgICAgICAgICAgIDxjYmM6SUQ+VkFUPC9jYmM6SUQ+CiAgICAgICAgICAgICAgICA8L2NhYzpUYXhTY2hlbWU+CiAgICAgICAgICAgIDwvY2FjOlBhcnR5VGF4U2NoZW1lPgogICAgICAgICAgICA8Y2FjOlBhcnR5TGVnYWxFbnRpdHk+CiAgICAgICAgICAgICAgICA8Y2JjOlJlZ2lzdHJhdGlvbk5hbWU+c2RzYTwvY2JjOlJlZ2lzdHJhdGlvbk5hbWU+CiAgICAgICAgICAgIDwvY2FjOlBhcnR5TGVnYWxFbnRpdHk+CiAgICAgICAgPC9jYWM6UGFydHk+CiAgICA8L2NhYzpBY2NvdW50aW5nQ3VzdG9tZXJQYXJ0eT4KICAgIDxjYWM6RGVsaXZlcnk+CiAgICAgICAgPGNiYzpBY3R1YWxEZWxpdmVyeURhdGU+MjAyMi0wMy0xMzwvY2JjOkFjdHVhbERlbGl2ZXJ5RGF0ZT4KICAgICAgICA8Y2JjOkxhdGVzdERlbGl2ZXJ5RGF0ZT4yMDIyLTAzLTE1PC9jYmM6TGF0ZXN0RGVsaXZlcnlEYXRlPgogICAgPC9jYWM6RGVsaXZlcnk+CiAgICA8Y2FjOlBheW1lbnRNZWFucz4KICAgICAgICA8Y2JjOlBheW1lbnRNZWFuc0NvZGU+MTA8L2NiYzpQYXltZW50TWVhbnNDb2RlPgogICAgPC9jYWM6UGF5bWVudE1lYW5zPgogICAgPGNhYzpBbGxvd2FuY2VDaGFyZ2U+CiAgICAgICAgPGNiYzpJRD4xPC9jYmM6SUQ+CiAgICAgICAgPGNiYzpDaGFyZ2VJbmRpY2F0b3I+ZmFsc2U8L2NiYzpDaGFyZ2VJbmRpY2F0b3I+CiAgICAgICAgPGNiYzpBbGxvd2FuY2VDaGFyZ2VSZWFzb24+ZGlzY291bnQ8L2NiYzpBbGxvd2FuY2VDaGFyZ2VSZWFzb24+CiAgICAgICAgPGNiYzpBbW91bnQgY3VycmVuY3lJRD0iU0FSIj4yPC9jYmM6QW1vdW50PgogICAgICAgIDxjYWM6VGF4Q2F0ZWdvcnk+CiAgICAgICAgICAgIDxjYmM6SUQgc2NoZW1lQWdlbmN5SUQ9IjYiIHNjaGVtZUlEPSJVTi9FQ0UgNTMwNSI+UzwvY2JjOklEPgogICAgICAgICAgICA8Y2JjOlBlcmNlbnQ+MTU8L2NiYzpQZXJjZW50PgogICAgICAgICAgICA8Y2FjOlRheFNjaGVtZT4KICAgICAgICAgICAgICAgIDxjYmM6SUQgc2NoZW1lQWdlbmN5SUQ9IjYiIHNjaGVtZUlEPSJVTi9FQ0UgNTE1MyI+VkFUPC9jYmM6SUQ+CiAgICAgICAgICAgIDwvY2FjOlRheFNjaGVtZT4KICAgICAgICA8L2NhYzpUYXhDYXRlZ29yeT4KICAgIDwvY2FjOkFsbG93YW5jZUNoYXJnZT4KICAgIDxjYWM6VGF4VG90YWw+CiAgICAgICAgPGNiYzpUYXhBbW91bnQgY3VycmVuY3lJRD0iU0FSIj4xNDQuOTwvY2JjOlRheEFtb3VudD4KICAgICAgICA8Y2FjOlRheFN1YnRvdGFsPgogICAgICAgICAgICA8Y2JjOlRheGFibGVBbW91bnQgY3VycmVuY3lJRD0iU0FSIj45NjYuMDA8L2NiYzpUYXhhYmxlQW1vdW50PgogICAgICAgICAgICA8Y2JjOlRheEFtb3VudCBjdXJyZW5jeUlEPSJTQVIiPjE0NC45MDwvY2JjOlRheEFtb3VudD4KICAgICAgICAgICAgPGNhYzpUYXhDYXRlZ29yeT4KICAgICAgICAgICAgICAgIDxjYmM6SUQgc2NoZW1lQWdlbmN5SUQ9IjYiIHNjaGVtZUlEPSJVTi9FQ0UgNTMwNSI+UzwvY2JjOklEPgogICAgICAgICAgICAgICAgPGNiYzpQZXJjZW50PjE1LjAwPC9jYmM6UGVyY2VudD4KICAgICAgICAgICAgICAgIDxjYWM6VGF4U2NoZW1lPgogICAgICAgICAgICAgICAgICAgIDxjYmM6SUQgc2NoZW1lQWdlbmN5SUQ9IjYiIHNjaGVtZUlEPSJVTi9FQ0UgNTE1MyI+VkFUPC9jYmM6SUQ+CiAgICAgICAgICAgICAgICA8L2NhYzpUYXhTY2hlbWU+CiAgICAgICAgICAgIDwvY2FjOlRheENhdGVnb3J5PgogICAgICAgIDwvY2FjOlRheFN1YnRvdGFsPgogICAgPC9jYWM6VGF4VG90YWw+CiAgICA8Y2FjOlRheFRvdGFsPgogICAgICAgIDxjYmM6VGF4QW1vdW50IGN1cnJlbmN5SUQ9IlNBUiI+MTQ0Ljk8L2NiYzpUYXhBbW91bnQ+CgogICAgPC9jYWM6VGF4VG90YWw+CiAgICA8Y2FjOkxlZ2FsTW9uZXRhcnlUb3RhbD4KICAgICAgICA8Y2JjOkxpbmVFeHRlbnNpb25BbW91bnQgY3VycmVuY3lJRD0iU0FSIj45NjguMDA8L2NiYzpMaW5lRXh0ZW5zaW9uQW1vdW50PgogICAgICAgIDxjYmM6VGF4RXhjbHVzaXZlQW1vdW50IGN1cnJlbmN5SUQ9IlNBUiI+OTY2LjAwPC9jYmM6VGF4RXhjbHVzaXZlQW1vdW50PgogICAgICAgIDxjYmM6VGF4SW5jbHVzaXZlQW1vdW50IGN1cnJlbmN5SUQ9IlNBUiI+MTExMC45MDwvY2JjOlRheEluY2x1c2l2ZUFtb3VudD4KICAgICAgICA8Y2JjOkFsbG93YW5jZVRvdGFsQW1vdW50IGN1cnJlbmN5SUQ9IlNBUiI+Mi4wMDwvY2JjOkFsbG93YW5jZVRvdGFsQW1vdW50PgogICAgICAgIDxjYmM6UHJlcGFpZEFtb3VudCBjdXJyZW5jeUlEPSJTQVIiPjAuMDA8L2NiYzpQcmVwYWlkQW1vdW50PgogICAgICAgIDxjYmM6UGF5YWJsZUFtb3VudCBjdXJyZW5jeUlEPSJTQVIiPjExMTAuOTA8L2NiYzpQYXlhYmxlQW1vdW50PgogICAgPC9jYWM6TGVnYWxNb25ldGFyeVRvdGFsPgogICAgPGNhYzpJbnZvaWNlTGluZT4KICAgICAgICA8Y2JjOklEPjE8L2NiYzpJRD4KICAgICAgICA8Y2JjOkludm9pY2VkUXVhbnRpdHkgdW5pdENvZGU9IlBDRSI+NDQuMDAwMDAwPC9jYmM6SW52b2ljZWRRdWFudGl0eT4KICAgICAgICA8Y2JjOkxpbmVFeHRlbnNpb25BbW91bnQgY3VycmVuY3lJRD0iU0FSIj45NjguMDA8L2NiYzpMaW5lRXh0ZW5zaW9uQW1vdW50PgogICAgICAgIDxjYWM6VGF4VG90YWw+CiAgICAgICAgICAgIDxjYmM6VGF4QW1vdW50IGN1cnJlbmN5SUQ9IlNBUiI+MTQ1LjIwPC9jYmM6VGF4QW1vdW50PgogICAgICAgICAgICA8Y2JjOlJvdW5kaW5nQW1vdW50IGN1cnJlbmN5SUQ9IlNBUiI+MTExMy4yMDwvY2JjOlJvdW5kaW5nQW1vdW50PgoKICAgICAgICA8L2NhYzpUYXhUb3RhbD4KICAgICAgICA8Y2FjOkl0ZW0+CiAgICAgICAgICAgIDxjYmM6TmFtZT5kc2Q8L2NiYzpOYW1lPgogICAgICAgICAgICA8Y2FjOkNsYXNzaWZpZWRUYXhDYXRlZ29yeT4KICAgICAgICAgICAgICAgIDxjYmM6SUQ+UzwvY2JjOklEPgogICAgICAgICAgICAgICAgPGNiYzpQZXJjZW50PjE1LjAwPC9jYmM6UGVyY2VudD4KICAgICAgICAgICAgICAgIDxjYWM6VGF4U2NoZW1lPgogICAgICAgICAgICAgICAgICAgIDxjYmM6SUQ+VkFUPC9jYmM6SUQ+CiAgICAgICAgICAgICAgICA8L2NhYzpUYXhTY2hlbWU+CiAgICAgICAgICAgIDwvY2FjOkNsYXNzaWZpZWRUYXhDYXRlZ29yeT4KICAgICAgICA8L2NhYzpJdGVtPgogICAgICAgIDxjYWM6UHJpY2U+CiAgICAgICAgICAgIDxjYmM6UHJpY2VBbW91bnQgY3VycmVuY3lJRD0iU0FSIj4yMi4wMDwvY2JjOlByaWNlQW1vdW50PgogICAgICAgICAgICA8Y2FjOkFsbG93YW5jZUNoYXJnZT4KICAgICAgICAgICAgICAgIDxjYmM6Q2hhcmdlSW5kaWNhdG9yPmZhbHNlPC9jYmM6Q2hhcmdlSW5kaWNhdG9yPgogICAgICAgICAgICAgICAgPGNiYzpBbGxvd2FuY2VDaGFyZ2VSZWFzb24+ZGlzY291bnQ8L2NiYzpBbGxvd2FuY2VDaGFyZ2VSZWFzb24+CiAgICAgICAgICAgICAgICA8Y2JjOkFtb3VudCBjdXJyZW5jeUlEPSJTQVIiPjIuMDA8L2NiYzpBbW91bnQ+CiAgICAgICAgICAgIDwvY2FjOkFsbG93YW5jZUNoYXJnZT4KICAgICAgICA8L2NhYzpQcmljZT4KICAgIDwvY2FjOkludm9pY2VMaW5lPgo8L0ludm9pY2U+";
+        $error_invoice = "CiAgICAgICAgPGV4dDpFeHRlbnNpb25VUkk+dXJuOm9hc2lzOm5hbWVzOnNwZWNpZmljYXRpb246dWJsOmRzaWc6ZW52ZWxvcGVkOnhhZGVzPC9leHQ6RXh0ZW5zaW9uVVJJPgogICAgICAgIDxleHQ6RXh0ZW5zaW9uQ29udGVudD4KICAgICAgICAgICAgPCEtLSBQbGVhc2Ugbm90ZSB0aGF0IHRoZSBzaWduYXR1cmUgdmFsdWVzIGFyZSBzYW1wbGUgdmFsdWVzIG9ubHkgLS0+CiAgICAgICAgICAgIDxzaWc6VUJMRG9jdW1lbnRTaWduYXR1cmVzIHhtbG5zOnNpZz0idXJuOm9hc2lzOm5hbWVzOnNwZWNpZmljYXRpb246dWJsOnNjaGVtYTp4c2Q6Q29tbW9uU2lnbmF0dXJlQ29tcG9uZW50cy0yIiB4bWxuczpzYWM9InVybjpvYXNpczpuYW1lczpzcGVjaWZpY2F0aW9uOnVibDpzY2hlbWE6eHNkOlNpZ25hdHVyZUFnZ3JlZ2F0ZUNvbXBvbmVudHMtMiIgeG1sbnM6c2JjPSJ1cm46b2FzaXM6bmFtZXM6c3BlY2lmaWNhdGlvbjp1Ymw6c2NoZW1hOnhzZDpTaWduYXR1cmVCYXNpY0NvbXBvbmVudHMtMiI+CiAgICAgICAgICAgICAgICA8c2FjOlNpZ25hdHVyZUluZm9ybWF0aW9uPgogICAgICAgICAgICAgICAgICAgIDxjYmM6SUQ+dXJuOm9hc2lzOm5hbWVzOnNwZWNpZmljYXRpb246dWJsOnNpZ25hdHVyZToxPC9jYmM6SUQ+CiAgICAgICAgICAgICAgICAgICAgPHNiYzpSZWZlcmVuY2VkU2lnbmF0dXJlSUQ+dXJuOm9hc2lzOm5hbWVzOnNwZWNpZmljYXRpb246dWJsOnNpZ25hdHVyZTpJbnZvaWNlPC9zYmM6UmVmZXJlbmNlZFNpZ25hdHVyZUlEPgogICAgICAgICAgICAgICAgICAgIDxkczpTaWduYXR1cmUgeG1sbnM6ZHM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvMDkveG1sZHNpZyMiIElkPSJzaWduYXR1cmUiPgogICAgICAgICAgICAgICAgICAgICAgICA8ZHM6U2lnbmVkSW5mbz4KICAgICAgICAgICAgICAgICAgICAgICAgICAgIDxkczpDYW5vbmljYWxpemF0aW9uTWV0aG9kIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwNi8xMi94bWwtYzE0bjExIi8+CiAgICAgICAgICAgICAgICAgICAgICAgICAgICA8ZHM6U2lnbmF0dXJlTWV0aG9kIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS8wNC94bWxkc2lnLW1vcmUjZWNkc2Etc2hhMjU2Ii8+CiAgICAgICAgICAgICAgICAgICAgICAgICAgICA8ZHM6UmVmZXJlbmNlIElkPSJpbnZvaWNlU2lnbmVkRGF0YSIgVVJJPSIiPgogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDxkczpUcmFuc2Zvcm1zPgogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8ZHM6VHJhbnNmb3JtIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvVFIvMTk5OS9SRUMteHBhdGgtMTk5OTExMTYiPgogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPGRzOlhQYXRoPm5vdCgvL2FuY2VzdG9yLW9yLXNlbGY6OmV4dDpVQkxFeHRlbnNpb25zKTwvZHM6WFBhdGg+CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDwvZHM6VHJhbnNmb3JtPgogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8ZHM6VHJhbnNmb3JtIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvVFIvMTk5OS9SRUMteHBhdGgtMTk5OTExMTYiPgogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPGRzOlhQYXRoPm5vdCgvL2FuY2VzdG9yLW9yLXNlbGY6OmNhYzpTaWduYXR1cmUpPC9kczpYUGF0aD4KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPC9kczpUcmFuc2Zvcm0+CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDxkczpUcmFuc2Zvcm0gQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy9UUi8xOTk5L1JFQy14cGF0aC0xOTk5MTExNiI+CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8ZHM6WFBhdGg+bm90KC8vYW5jZXN0b3Itb3Itc2VsZjo6Y2FjOkFkZGl0aW9uYWxEb2N1bWVudFJlZmVyZW5jZVtjYmM6SUQ9J1FSJ10pPC9kczpYUGF0aD4KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPC9kczpUcmFuc2Zvcm0+CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDxkczpUcmFuc2Zvcm0gQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDA2LzEyL3htbC1jMTRuMTEiLz4KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8L2RzOlRyYW5zZm9ybXM+CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPGRzOkRpZ2VzdE1ldGhvZCBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMDQveG1sZW5jI3NoYTI1NiIvPgogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDxkczpEaWdlc3RWYWx1ZT5QRXg4Yk5GY0VNRXBIelVWdlFudFFJNm90OGVGcVRUL2w1OWIrSDFIcVg0PTwvZHM6RGlnZXN0VmFsdWU+CiAgICAgICAgICAgICAgICAgICAgICAgICAgICA8L2RzOlJlZmVyZW5jZT4KICAgICAgICAgICAgICAgICAgICAgICAgICAgIDxkczpSZWZlcmVuY2UgVHlwZT0iaHR0cDovL3d3dy53My5vcmcvMjAwMC8wOS94bWxkc2lnI1NpZ25hdHVyZVByb3BlcnRpZXMiIFVSST0iI3hhZGVzU2lnbmVkUHJvcGVydGllcyI+CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPGRzOkRpZ2VzdE1ldGhvZCBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMDQveG1sZW5jI3NoYTI1NiIvPgogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDxkczpEaWdlc3RWYWx1ZT5aREV5TURVeU9ESmpZems0TUdWaU5USmhObVl6TUdJeVpUZ3hPRGhrWTJKbE9XRXpObVJpTVRGbFpUVmhNREF4TmprNU9UUmtZVGczT0RobFkyWmlNdz09PC9kczpEaWdlc3RWYWx1ZT4KICAgICAgICAgICAgICAgICAgICAgICAgICAgIDwvZHM6UmVmZXJlbmNlPgogICAgICAgICAgICAgICAgICAgICAgICA8L2RzOlNpZ25lZEluZm8+CiAgICAgICAgICAgICAgICAgICAgICAgIDxkczpTaWduYXR1cmVWYWx1ZT5NRVVDSVFDOTBmRllPcVRpbUh2WVAxZjliYlQ1c3RBZlI4YkkyZkFBRkF6WUF2TUNQUUlnY0dwR2hNU29jeGZ3ZHZjU1cxQjE1MjNnNW5EOGJDZThTQ1dOZWN0NXJLTT08L2RzOlNpZ25hdHVyZVZhbHVlPgogICAgICAgICAgICAgICAgICAgICAgICA8ZHM6S2V5SW5mbz4KICAgICAgICAgICAgICAgICAgICAgICAgICAgIDxkczpYNTA5RGF0YT4KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8ZHM6WDUwOUNlcnRpZmljYXRlPk1JSUQ2VENDQTVDZ0F3SUJBZ0lUYndBQWY4dGVtNmpuZ3IxNkR3QUJBQUIveXpBS0JnZ3Foa2pPUFFRREFqQmpNUlV3RXdZS0NaSW1pWlB5TEdRQkdSWUZiRzlqWVd3eEV6QVJCZ29Ka2lhSmsvSXNaQUVaRmdObmIzWXhGekFWQmdvSmtpYUprL0lzWkFFWkZnZGxlSFJuWVhwME1Sd3dHZ1lEVlFRREV4TlVVMXBGU1U1V1QwbERSUzFUZFdKRFFTMHhNQjRYRFRJeU1Ea3hOREV6TWpZd05Gb1hEVEkwTURreE16RXpNall3TkZvd1RqRUxNQWtHQTFVRUJoTUNVMEV4RXpBUkJnTlZCQW9UQ2pNeE1URXhNVEV4TVRFeEREQUtCZ05WQkFzVEExUlRWREVjTUJvR0ExVUVBeE1UVkZOVUxUTXhNVEV4TVRFeE1URXdNVEV4TXpCV01CQUdCeXFHU000OUFnRUdCU3VCQkFBS0EwSUFCR0dEREtEbWhXQUlURHY3TFhxTFgyY21yNitxZGRVa3BjTEN2V3M1ckMyTzI5Vy9oUzRhakFLNFFkbmFoeW02TWFpalg3NUNnM2o0YWFvN291WVhKOUdqZ2dJNU1JSUNOVENCbWdZRFZSMFJCSUdTTUlHUHBJR01NSUdKTVRzd09RWURWUVFFRERJeExWUlRWSHd5TFZSVFZId3pMV0U0TmpaaU1UUXlMV0ZqT1dNdE5ESTBNUzFpWmpobExUZG1OemczWVRJMk1tTmxNakVmTUIwR0NnbVNKb21UOGl4a0FRRU1Eek14TVRFeE1URXhNVEV3TVRFeE16RU5NQXNHQTFVRURBd0VNVEV3TURFTU1Bb0dBMVVFR2d3RFZGTlVNUXd3Q2dZRFZRUVBEQU5VVTFRd0hRWURWUjBPQkJZRUZEdVdZbE96V3BGTjNubzFXdHlOa3RRZHJBOEpNQjhHQTFVZEl3UVlNQmFBRkhaZ2pQc0dvS3huVnpXZHo1cXNweXVaTmJVdk1FNEdBMVVkSHdSSE1FVXdRNkJCb0QrR1BXaDBkSEE2THk5MGMzUmpjbXd1ZW1GMFkyRXVaMjkyTG5OaEwwTmxjblJGYm5KdmJHd3ZWRk5hUlVsT1ZrOUpRMFV0VTNWaVEwRXRNUzVqY213d2dhMEdDQ3NHQVFVRkJ3RUJCSUdnTUlHZE1HNEdDQ3NHQVFVRkJ6QUJobUpvZEhSd09pOHZkSE4wWTNKc0xucGhkR05oTG1kdmRpNXpZUzlEWlhKMFJXNXliMnhzTDFSVFdrVnBiblp2YVdObFUwTkJNUzVsZUhSbllYcDBMbWR2ZGk1c2IyTmhiRjlVVTFwRlNVNVdUMGxEUlMxVGRXSkRRUzB4S0RFcExtTnlkREFyQmdnckJnRUZCUWN3QVlZZmFIUjBjRG92TDNSemRHTnliQzU2WVhSallTNW5iM1l1YzJFdmIyTnpjREFPQmdOVkhROEJBZjhFQkFNQ0I0QXdIUVlEVlIwbEJCWXdGQVlJS3dZQkJRVUhBd0lHQ0NzR0FRVUZCd01ETUNjR0NTc0dBUVFCZ2pjVkNnUWFNQmd3Q2dZSUt3WUJCUVVIQXdJd0NnWUlLd1lCQlFVSEF3TXdDZ1lJS29aSXpqMEVBd0lEUndBd1JBSWdPZ2pOUEpXMDE3bHNJaWptVlFWa1A3R3pGTzJLUUtkOUdIYXVrTGdJV0ZzQ0lGSkY5dXdLaFRNeERqV2JOKzFhd3NuRkk3UkxCUnhBLzZoWitGMXd0YXFVPC9kczpYNTA5Q2VydGlmaWNhdGU+CiAgICAgICAgICAgICAgICAgICAgICAgICAgICA8L2RzOlg1MDlEYXRhPgogICAgICAgICAgICAgICAgICAgICAgICA8L2RzOktleUluZm8+CiAgICAgICAgICAgICAgICAgICAgICAgIDxkczpPYmplY3Q+CiAgICAgICAgICAgICAgICAgICAgICAgICAgICA8eGFkZXM6UXVhbGlmeWluZ1Byb3BlcnRpZXMgeG1sbnM6eGFkZXM9Imh0dHA6Ly91cmkuZXRzaS5vcmcvMDE5MDMvdjEuMy4yIyIgVGFyZ2V0PSJzaWduYXR1cmUiPgogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDx4YWRlczpTaWduZWRQcm9wZXJ0aWVzIElkPSJ4YWRlc1NpZ25lZFByb3BlcnRpZXMiPgogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8eGFkZXM6U2lnbmVkU2lnbmF0dXJlUHJvcGVydGllcz4KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDx4YWRlczpTaWduaW5nVGltZT4yMDIzLTAxLTExVDEzOjA4OjEwWjwveGFkZXM6U2lnbmluZ1RpbWU+CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8eGFkZXM6U2lnbmluZ0NlcnRpZmljYXRlPgogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDx4YWRlczpDZXJ0PgogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8eGFkZXM6Q2VydERpZ2VzdD4KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDxkczpEaWdlc3RNZXRob2QgQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGVuYyNzaGEyNTYiLz4KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDxkczpEaWdlc3RWYWx1ZT5ZVEprTTJKaFlUY3daVEJoWlRBeE9HWXdPRE15TnpZM05UZGtaRE0zWXpoalkySXhPVEl5WkRaaE0yUmxaR0ppTUdZME5EVXpaV0poWVdJNE1EaG1ZZz09PC9kczpEaWdlc3RWYWx1ZT4KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPC94YWRlczpDZXJ0RGlnZXN0PgogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8eGFkZXM6SXNzdWVyU2VyaWFsPgogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPGRzOlg1MDlJc3N1ZXJOYW1lPkNOPVRTWkVJTlZPSUNFLVN1YkNBLTEsIERDPWV4dGdhenQsIERDPWdvdiwgREM9bG9jYWw8L2RzOlg1MDlJc3N1ZXJOYW1lPgogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPGRzOlg1MDlTZXJpYWxOdW1iZXI+MjQ3NTM4Mjg4NjkwNDgwOTc3NDgxODY0NDQ4MDgyMDkzNjA1MDIwODcwMjQxMTwvZHM6WDUwOVNlcmlhbE51bWJlcj4KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPC94YWRlczpJc3N1ZXJTZXJpYWw+CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPC94YWRlczpDZXJ0PgogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPC94YWRlczpTaWduaW5nQ2VydGlmaWNhdGU+CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDwveGFkZXM6U2lnbmVkU2lnbmF0dXJlUHJvcGVydGllcz4KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8L3hhZGVzOlNpZ25lZFByb3BlcnRpZXM+CiAgICAgICAgICAgICAgICAgICAgICAgICAgICA8L3hhZGVzOlF1YWxpZnlpbmdQcm9wZXJ0aWVzPgogICAgICAgICAgICAgICAgICAgICAgICA8L2RzOk9iamVjdD4KICAgICAgICAgICAgICAgICAgICA8L2RzOlNpZ25hdHVyZT4KICAgICAgICAgICAgICAgIDwvc2FjOlNpZ25hdHVyZUluZm9ybWF0aW9uPgogICAgICAgICAgICA8L3NpZzpVQkxEb2N1bWVudFNpZ25hdHVyZXM+CiAgICAgICAgPC9leHQ6RXh0ZW5zaW9uQ29udGVudD4KICAgIDwvZXh0OlVCTEV4dGVuc2lvbj4KPC9leHQ6VUJMRXh0ZW5zaW9ucz4KCiAgICA8Y2JjOlByb2ZpbGVJRD5yZXBvcnRpbmc6MS4wPC9jYmM6UHJvZmlsZUlEPgogICAgPGNiYzpJRD5TTUUwMDA2MjwvY2JjOklEPgogICAgPGNiYzpVVUlEPjE2ZTc4NDY5LTY0YWYtNDA2ZC05Y2ZkLTg5NWU3MjQxOThmMDwvY2JjOlVVSUQ+CiAgICA8Y2JjOklzc3VlRGF0ZT4yMDIyLTAzLTEzPC9jYmM6SXNzdWVEYXRlPgogICAgPGNiYzpJc3N1ZVRpbWU+MTQ6NDA6NDA8L2NiYzpJc3N1ZVRpbWU+CiAgICA8Y2JjOkludm9pY2VUeXBlQ29kZSBuYW1lPSIwMTExMDEwIj4zODg8L2NiYzpJbnZvaWNlVHlwZUNvZGU+CiAgICA8Y2JjOkRvY3VtZW50Q3VycmVuY3lDb2RlPlNBUjwvY2JjOkRvY3VtZW50Q3VycmVuY3lDb2RlPgogICAgPGNiYzpUYXhDdXJyZW5jeUNvZGU+U0FSPC9jYmM6VGF4Q3VycmVuY3lDb2RlPgogICAgPGNhYzpBZGRpdGlvbmFsRG9jdW1lbnRSZWZlcmVuY2U+CiAgICAgICAgPGNiYzpJRD5JQ1Y8L2NiYzpJRD4KICAgICAgICA8Y2JjOlVVSUQ+NjI8L2NiYzpVVUlEPgogICAgPC9jYWM6QWRkaXRpb25hbERvY3VtZW50UmVmZXJlbmNlPgogICAgPGNhYzpBZGRpdGlvbmFsRG9jdW1lbnRSZWZlcmVuY2U+CiAgICAgICAgPGNiYzpJRD5QSUg8L2NiYzpJRD4KICAgICAgICA8Y2FjOkF0dGFjaG1lbnQ+CiAgICAgICAgICAgIDxjYmM6RW1iZWRkZWREb2N1bWVudEJpbmFyeU9iamVjdCBtaW1lQ29kZT0idGV4dC9wbGFpbiI+TldabFkyVmlOalptWm1NNE5tWXpPR1E1TlRJM09EWmpObVEyT1Raak56bGpNbVJpWXpJek9XUmtOR1U1TVdJME5qY3lPV1EzTTJFeU4yWmlOVGRsT1E9PTwvY2JjOkVtYmVkZGVkRG9jdW1lbnRCaW5hcnlPYmplY3Q+CiAgICAgICAgPC9jYWM6QXR0YWNobWVudD4KICAgIDwvY2FjOkFkZGl0aW9uYWxEb2N1bWVudFJlZmVyZW5jZT4KCiAgICA8Y2FjOkFkZGl0aW9uYWxEb2N1bWVudFJlZmVyZW5jZT4KICAgICAgICA8Y2JjOklEPlFSPC9jYmM6SUQ+CiAgICAgICAgPGNhYzpBdHRhY2htZW50PgogICAgICAgICAgICA8Y2JjOkVtYmVkZGVkRG9jdW1lbnRCaW5hcnlPYmplY3QgbWltZUNvZGU9InRleHQvcGxhaW4iPkFSZEJhRzFsWkNCTmIyaGhiV1ZrSUVGTUlFRm9iV0ZrZVFJUE16QXdNRGMxTlRnNE56QXdNREF6QXhReU1ESXlMVEF6TFRFelZERTBPalF3T2pRd1dnUUhNVEV4TUM0NU1BVUZNVFEwTGprR0xGQkZlRGhpVGtaalJVMUZjRWg2VlZaMlVXNTBVVWsyYjNRNFpVWnhWRlF2YkRVNVlpdElNVWh4V0RROUIyQk5SVlZEU1ZGRE9UQm1SbGxQY1ZScGJVaDJXVkF4WmpsaVlsUTFjM1JCWmxJNFlra3laa0ZCUmtGNldVRjJUVU5RVVVsblkwZHdSMmhOVTI5amVHWjNaSFpqVTFjeFFqRTFNak5uTlc1RU9HSkRaVGhUUTFkT1pXTjBOWEpMVFQwSVdEQldNQkFHQnlxR1NNNDlBZ0VHQlN1QkJBQUtBMElBQkdHRERLRG1oV0FJVER2N0xYcUxYMmNtcjYrcWRkVWtwY0xDdldzNXJDMk8yOVcvaFM0YWpBSzRRZG5haHltNk1haWpYNzVDZzNqNGFhbzdvdVlYSjlFPTwvY2JjOkVtYmVkZGVkRG9jdW1lbnRCaW5hcnlPYmplY3Q+CiAgICAgICAgPC9jYWM6QXR0YWNobWVudD4KICAgIDwvY2FjOkFkZGl0aW9uYWxEb2N1bWVudFJlZmVyZW5jZT48Y2FjOlNpZ25hdHVyZT4KICAgICAgICA8Y2JjOklEPnVybjpvYXNpczpuYW1lczpzcGVjaWZpY2F0aW9uOnVibDpzaWduYXR1cmU6SW52b2ljZTwvY2JjOklEPgogICAgICAgIDxjYmM6U2lnbmF0dXJlTWV0aG9kPnVybjpvYXNpczpuYW1lczpzcGVjaWZpY2F0aW9uOnVibDpkc2lnOmVudmVsb3BlZDp4YWRlczwvY2JjOlNpZ25hdHVyZU1ldGhvZD4KICAgIDwvY2FjOlNpZ25hdHVyZT48Y2FjOkFjY291bnRpbmdTdXBwbGllclBhcnR5PgogICAgICAgIDxjYWM6UGFydHk+CiAgICAgICAgICAgIDxjYWM6UGFydHlJZGVudGlmaWNhdGlvbj4KICAgICAgICAgICAgICAgIDxjYmM6SUQgc2NoZW1lSUQ9IkNSTiI+NDU0NjM0NjQ1NjQ1NjU0PC9jYmM6SUQ+CiAgICAgICAgICAgIDwvY2FjOlBhcnR5SWRlbnRpZmljYXRpb24+CiAgICAgICAgICAgIDxjYWM6UG9zdGFsQWRkcmVzcz4KICAgICAgICAgICAgICAgIDxjYmM6U3RyZWV0TmFtZT50ZXN0PC9jYmM6U3RyZWV0TmFtZT4KICAgICAgICAgICAgICAgIDxjYmM6QnVpbGRpbmdOdW1iZXI+MzQ1NDwvY2JjOkJ1aWxkaW5nTnVtYmVyPgogICAgICAgICAgICAgICAgPGNiYzpQbG90SWRlbnRpZmljYXRpb24+MTIzNDwvY2JjOlBsb3RJZGVudGlmaWNhdGlvbj4KICAgICAgICAgICAgICAgIDxjYmM6Q2l0eVN1YmRpdmlzaW9uTmFtZT50ZXN0PC9jYmM6Q2l0eVN1YmRpdmlzaW9uTmFtZT4KICAgICAgICAgICAgICAgIDxjYmM6Q2l0eU5hbWU+Uml5YWRoPC9jYmM6Q2l0eU5hbWU+CiAgICAgICAgICAgICAgICA8Y2JjOlBvc3RhbFpvbmU+MTIzNDU8L2NiYzpQb3N0YWxab25lPgogICAgICAgICAgICAgICAgPGNiYzpDb3VudHJ5U3ViZW50aXR5PnRlc3Q8L2NiYzpDb3VudHJ5U3ViZW50aXR5PgogICAgICAgICAgICAgICAgPGNhYzpDb3VudHJ5PgogICAgICAgICAgICAgICAgICAgIDxjYmM6SWRlbnRpZmljYXRpb25Db2RlPlNBPC9jYmM6SWRlbnRpZmljYXRpb25Db2RlPgogICAgICAgICAgICAgICAgPC9jYWM6Q291bnRyeT4KICAgICAgICAgICAgPC9jYWM6UG9zdGFsQWRkcmVzcz4KICAgICAgICAgICAgPGNhYzpQYXJ0eVRheFNjaGVtZT4KICAgICAgICAgICAgICAgIDxjYmM6Q29tcGFueUlEPjMwMDA3NTU4ODcwMDAwMzwvY2JjOkNvbXBhbnlJRD4KICAgICAgICAgICAgICAgIDxjYWM6VGF4U2NoZW1lPgogICAgICAgICAgICAgICAgICAgIDxjYmM6SUQ+VkFUPC9jYmM6SUQ+CiAgICAgICAgICAgICAgICA8L2NhYzpUYXhTY2hlbWU+CiAgICAgICAgICAgIDwvY2FjOlBhcnR5VGF4U2NoZW1lPgogICAgICAgICAgICA8Y2FjOlBhcnR5TGVnYWxFbnRpdHk+CiAgICAgICAgICAgICAgICA8Y2JjOlJlZ2lzdHJhdGlvbk5hbWU+QWhtZWQgTW9oYW1lZCBBTCBBaG1hZHk8L2NiYzpSZWdpc3RyYXRpb25OYW1lPgogICAgICAgICAgICA8L2NhYzpQYXJ0eUxlZ2FsRW50aXR5PgogICAgICAgIDwvY2FjOlBhcnR5PgogICAgPC9jYWM6QWNjb3VudGluZ1N1cHBsaWVyUGFydHk+CiAgICA8Y2FjOkFjY291bnRpbmdDdXN0b21lclBhcnR5PgogICAgICAgIDxjYWM6UGFydHk+CiAgICAgICAgICAgIDxjYWM6UGFydHlJZGVudGlmaWNhdGlvbj4KICAgICAgICAgICAgICAgIDxjYmM6SUQgc2NoZW1lSUQ9Ik5BVCI+MjM0NTwvY2JjOklEPgogICAgICAgICAgICA8L2NhYzpQYXJ0eUlkZW50aWZpY2F0aW9uPgogICAgICAgICAgICA8Y2FjOlBvc3RhbEFkZHJlc3M+CiAgICAgICAgICAgICAgICA8Y2JjOlN0cmVldE5hbWU+YmFhb3VuPC9jYmM6U3RyZWV0TmFtZT4KICAgICAgICAgICAgICAgIDxjYmM6QWRkaXRpb25hbFN0cmVldE5hbWU+c2RzZDwvY2JjOkFkZGl0aW9uYWxTdHJlZXROYW1lPgogICAgICAgICAgICAgICAgPGNiYzpCdWlsZGluZ051bWJlcj4zMzUzPC9jYmM6QnVpbGRpbmdOdW1iZXI+CiAgICAgICAgICAgICAgICA8Y2JjOlBsb3RJZGVudGlmaWNhdGlvbj4zNDM0PC9jYmM6UGxvdElkZW50aWZpY2F0aW9uPgogICAgICAgICAgICAgICAgPGNiYzpDaXR5U3ViZGl2aXNpb25OYW1lPmZnZmY8L2NiYzpDaXR5U3ViZGl2aXNpb25OYW1lPgogICAgICAgICAgICAgICAgPGNiYzpDaXR5TmFtZT5EaHVybWE8L2NiYzpDaXR5TmFtZT4KICAgICAgICAgICAgICAgIDxjYmM6UG9zdGFsWm9uZT4zNDUzNDwvY2JjOlBvc3RhbFpvbmU+CiAgICAgICAgICAgICAgICA8Y2JjOkNvdW50cnlTdWJlbnRpdHk+dWxoazwvY2JjOkNvdW50cnlTdWJlbnRpdHk+CiAgICAgICAgICAgICAgICA8Y2FjOkNvdW50cnk+CiAgICAgICAgICAgICAgICAgICAgPGNiYzpJZGVudGlmaWNhdGlvbkNvZGU+U0E8L2NiYzpJZGVudGlmaWNhdGlvbkNvZGU+CiAgICAgICAgICAgICAgICA8L2NhYzpDb3VudHJ5PgogICAgICAgICAgICA8L2NhYzpQb3N0YWxBZGRyZXNzPgogICAgICAgICAgICA8Y2FjOlBhcnR5VGF4U2NoZW1lPgogICAgICAgICAgICAgICAgPGNhYzpUYXhTY2hlbWU+CiAgICAgICAgICAgICAgICAgICAgPGNiYzpJRD5WQVQ8L2NiYzpJRD4KICAgICAgICAgICAgICAgIDwvY2FjOlRheFNjaGVtZT4KICAgICAgICAgICAgPC9jYWM6UGFydHlUYXhTY2hlbWU+CiAgICAgICAgICAgIDxjYWM6UGFydHlMZWdhbEVudGl0eT4KICAgICAgICAgICAgICAgIDxjYmM6UmVnaXN0cmF0aW9uTmFtZT5zZHNhPC9jYmM6UmVnaXN0cmF0aW9uTmFtZT4KICAgICAgICAgICAgPC9jYWM6UGFydHlMZWdhbEVudGl0eT4KICAgICAgICA8L2NhYzpQYXJ0eT4KICAgIDwvY2FjOkFjY291bnRpbmdDdXN0b21lclBhcnR5PgogICAgPGNhYzpEZWxpdmVyeT4KICAgICAgICA8Y2JjOkFjdHVhbERlbGl2ZXJ5RGF0ZT4yMDIyLTAzLTEzPC9jYmM6QWN0dWFsRGVsaXZlcnlEYXRlPgogICAgICAgIDxjYmM6TGF0ZXN0RGVsaXZlcnlEYXRlPjIwMjItMDMtMTU8L2NiYzpMYXRlc3REZWxpdmVyeURhdGU+CiAgICA8L2NhYzpEZWxpdmVyeT4KICAgIDxjYWM6UGF5bWVudE1lYW5zPgogICAgICAgIDxjYmM6UGF5bWVudE1lYW5zQ29kZT4xMDwvY2JjOlBheW1lbnRNZWFuc0NvZGU+CiAgICA8L2NhYzpQYXltZW50TWVhbnM+CiAgICA8Y2FjOkFsbG93YW5jZUNoYXJnZT4KICAgICAgICA8Y2JjOklEPjE8L2NiYzpJRD4KICAgICAgICA8Y2JjOkNoYXJnZUluZGljYXRvcj5mYWxzZTwvY2JjOkNoYXJnZUluZGljYXRvcj4KICAgICAgICA8Y2JjOkFsbG93YW5jZUNoYXJnZVJlYXNvbj5kaXNjb3VudDwvY2JjOkFsbG93YW5jZUNoYXJnZVJlYXNvbj4KICAgICAgICA8Y2JjOkFtb3VudCBjdXJyZW5jeUlEPSJTQVIiPjI8L2NiYzpBbW91bnQ+CiAgICAgICAgPGNhYzpUYXhDYXRlZ29yeT4KICAgICAgICAgICAgPGNiYzpJRCBzY2hlbWVBZ2VuY3lJRD0iNiIgc2NoZW1lSUQ9IlVOL0VDRSA1MzA1Ij5TPC9jYmM6SUQ+CiAgICAgICAgICAgIDxjYmM6UGVyY2VudD4xNTwvY2JjOlBlcmNlbnQ+CiAgICAgICAgICAgIDxjYWM6VGF4U2NoZW1lPgogICAgICAgICAgICAgICAgPGNiYzpJRCBzY2hlbWVBZ2VuY3lJRD0iNiIgc2NoZW1lSUQ9IlVOL0VDRSA1MTUzIj5WQVQ8L2NiYzpJRD4KICAgICAgICAgICAgPC9jYWM6VGF4U2NoZW1lPgogICAgICAgIDwvY2FjOlRheENhdGVnb3J5PgogICAgPC9jYWM6QWxsb3dhbmNlQ2hhcmdlPgogICAgPGNhYzpUYXhUb3RhbD4KICAgICAgICA8Y2JjOlRheEFtb3VudCBjdXJyZW5jeUlEPSJTQVIiPjE0NC45PC9jYmM6VGF4QW1vdW50PgogICAgICAgIDxjYWM6VGF4U3VidG90YWw+CiAgICAgICAgICAgIDxjYmM6VGF4YWJsZUFtb3VudCBjdXJyZW5jeUlEPSJTQVIiPjk2Ni4wMDwvY2JjOlRheGFibGVBbW91bnQ+CiAgICAgICAgICAgIDxjYmM6VGF4QW1vdW50IGN1cnJlbmN5SUQ9IlNBUiI+MTQ0LjkwPC9jYmM6VGF4QW1vdW50PgogICAgICAgICAgICA8Y2FjOlRheENhdGVnb3J5PgogICAgICAgICAgICAgICAgPGNiYzpJRCBzY2hlbWVBZ2VuY3lJRD0iNiIgc2NoZW1lSUQ9IlVOL0VDRSA1MzA1Ij5TPC9jYmM6SUQ+CiAgICAgICAgICAgICAgICA8Y2JjOlBlcmNlbnQ+MTUuMDA8L2NiYzpQZXJjZW50PgogICAgICAgICAgICAgICAgPGNhYzpUYXhTY2hlbWU+CiAgICAgICAgICAgICAgICAgICAgPGNiYzpJRCBzY2hlbWVBZ2VuY3lJRD0iNiIgc2NoZW1lSUQ9IlVOL0VDRSA1MTUzIj5WQVQ8L2NiYzpJRD4KICAgICAgICAgICAgICAgIDwvY2FjOlRheFNjaGVtZT4KICAgICAgICAgICAgPC9jYWM6VGF4Q2F0ZWdvcnk+CiAgICAgICAgPC9jYWM6VGF4U3VidG90YWw+CiAgICA8L2NhYzpUYXhUb3RhbD4KICAgIDxjYWM6VGF4VG90YWw+CiAgICAgICAgPGNiYzpUYXhBbW91bnQgY3VycmVuY3lJRD0iU0FSIj4xNDQuOTwvY2JjOlRheEFtb3VudD4KCiAgICA8L2NhYzpUYXhUb3RhbD4KICAgIDxjYWM6TGVnYWxNb25ldGFyeVRvdGFsPgogICAgICAgIDxjYmM6TGluZUV4dGVuc2lvbkFtb3VudCBjdXJyZW5jeUlEPSJTQVIiPjk2OC4wMDwvY2JjOkxpbmVFeHRlbnNpb25BbW91bnQ+CiAgICAgICAgPGNiYzpUYXhFeGNsdXNpdmVBbW91bnQgY3VycmVuY3lJRD0iU0FSIj45NjYuMDA8L2NiYzpUYXhFeGNsdXNpdmVBbW91bnQ+CiAgICAgICAgPGNiYzpUYXhJbmNsdXNpdmVBbW91bnQgY3VycmVuY3lJRD0iU0FSIj4xMTEwLjkwPC9jYmM6VGF4SW5jbHVzaXZlQW1vdW50PgogICAgICAgIDxjYmM6QWxsb3dhbmNlVG90YWxBbW91bnQgY3VycmVuY3lJRD0iU0FSIj4yLjAwPC9jYmM6QWxsb3dhbmNlVG90YWxBbW91bnQ+CiAgICAgICAgPGNiYzpQcmVwYWlkQW1vdW50IGN1cnJlbmN5SUQ9IlNBUiI+MC4wMDwvY2JjOlByZXBhaWRBbW91bnQ+CiAgICAgICAgPGNiYzpQYXlhYmxlQW1vdW50IGN1cnJlbmN5SUQ9IlNBUiI+MTExMC45MDwvY2JjOlBheWFibGVBbW91bnQ+CiAgICA8L2NhYzpMZWdhbE1vbmV0YXJ5VG90YWw+CiAgICA8Y2FjOkludm9pY2VMaW5lPgogICAgICAgIDxjYmM6SUQ+MTwvY2JjOklEPgogICAgICAgIDxjYmM6SW52b2ljZWRRdWFudGl0eSB1bml0Q29kZT0iUENFIj40NC4wMDAwMDA8L2NiYzpJbnZvaWNlZFF1YW50aXR5PgogICAgICAgIDxjYmM6TGluZUV4dGVuc2lvbkFtb3VudCBjdXJyZW5jeUlEPSJTQVIiPjk2OC4wMDwvY2JjOkxpbmVFeHRlbnNpb25BbW91bnQ+CiAgICAgICAgPGNhYzpUYXhUb3RhbD4KICAgICAgICAgICAgPGNiYzpUYXhBbW91bnQgY3VycmVuY3lJRD0iU0FSIj4xNDUuMjA8L2NiYzpUYXhBbW91bnQ+CiAgICAgICAgICAgIDxjYmM6Um91bmRpbmdBbW91bnQgY3VycmVuY3lJRD0iU0FSIj4xMTEzLjIwPC9jYmM6Um91bmRpbmdBbW91bnQ+CgogICAgICAgIDwvY2FjOlRheFRvdGFsPgogICAgICAgIDxjYWM6SXRlbT4KICAgICAgICAgICAgPGNiYzpOYW1lPmRzZDwvY2JjOk5hbWU+CiAgICAgICAgICAgIDxjYWM6Q2xhc3NpZmllZFRheENhdGVnb3J5PgogICAgICAgICAgICAgICAgPGNiYzpJRD5TPC9jYmM6SUQ+CiAgICAgICAgICAgICAgICA8Y2JjOlBlcmNlbnQ+MTUuMDA8L2NiYzpQZXJjZW50PgogICAgICAgICAgICAgICAgPGNhYzpUYXhTY2hlbWU+CiAgICAgICAgICAgICAgICAgICAgPGNiYzpJRD5WQVQ8L2NiYzpJRD4KICAgICAgICAgICAgICAgIDwvY2FjOlRheFNjaGVtZT4KICAgICAgICAgICAgPC9jYWM6Q2xhc3NpZmllZFRheENhdGVnb3J5PgogICAgICAgIDwvY2FjOkl0ZW0+CiAgICAgICAgPGNhYzpQcmljZT4KICAgICAgICAgICAgPGNiYzpQcmljZUFtb3VudCBjdXJyZW5jeUlEPSJTQVIiPjIyLjAwPC9jYmM6UHJpY2VBbW91bnQ+CiAgICAgICAgICAgIDxjYWM6QWxsb3dhbmNlQ2hhcmdlPgogICAgICAgICAgICAgICAgPGNiYzpDaGFyZ2VJbmRpY2F0b3I+ZmFsc2U8L2NiYzpDaGFyZ2VJbmRpY2F0b3I+CiAgICAgICAgICAgICAgICA8Y2JjOkFsbG93YW5jZUNoYXJnZVJlYXNvbj5kaXNjb3VudDwvY2JjOkFsbG93YW5jZUNoYXJnZVJlYXNvbj4KICAgICAgICAgICAgICAgIDxjYmM6QW1vdW50IGN1cnJlbmN5SUQ9IlNBUiI+Mi4wMDwvY2JjOkFtb3VudD4KICAgICAgICAgICAgPC9jYWM6QWxsb3dhbmNlQ2hhcmdlPgogICAgICAgIDwvY2FjOlByaWNlPgogICAgPC9jYWM6SW52b2ljZUxpbmU+CjwvSW52b2ljZT4=";
+        $body = [
+            "invoiceHash" => "PEx8bNFcEMEpHzUVvQntQI6ot8eFqTT/l59b+H1HqX4=",
+            "uuid" => "16e78469-64af-406d-9cfd-895e724198f0",
+            "invoice" => base64_encode($invoice_xml)
+        ];
+
+        $url = "https://gw-fatoora.zatca.gov.sa/e-invoicing/developer-portal/invoices/reporting/single";
+
+        $response = Http::withHeaders($header)->post($url, $body);
+//        if ($response->status()==200){
+        ZatkaInfo::create([
+            'trx_id' => $trx_id,
+            'info' => 'nothing to store',
+            'status_code' => $response->status()
+        ]);
+//        }
+
+        return response($response->json(), $response->status());
+
     }
 
     /**
@@ -1997,7 +2639,6 @@ class SellPosController extends Controller
         // if (!auth()->user()->can('sell.update')) {
         //     abort(403, 'Unauthorized action.');
         // }
-
 
         if (request()->ajax()) {
             $business_id = request()->session()->get('user.business_id');
@@ -3052,5 +3693,11 @@ class SellPosController extends Controller
             ->update(['paused_at' => null, 'available_at' => null]);
 
         return ['success' => true];
+    }
+
+    public function sendZatcaInvoice()
+    {
+        dd('here');
+        return view('sale_pos.partials.zatca_invoice');
     }
 }
