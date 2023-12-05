@@ -879,7 +879,7 @@ class SellPosController extends Controller
                 ];
 
                 $invoice_total = $this->productUtil->calculateInvoiceTotal($input['products'], $input['tax_rate_id'], $discount, true, $input);
-
+//dd($invoice_total);
                 DB::beginTransaction();
 
                 if (empty($request->input('transaction_date'))) {

@@ -397,7 +397,7 @@
 		@php
 			$subtotal_type = !empty($pos_settings['is_pos_subtotal_editable']) ? 'text' : 'hidden';
 		@endphp
-		<input type="{{$subtotal_type}}" class="form-control pos_line_total @if(!empty($pos_settings['is_pos_subtotal_editable'])) input_number @endif" value="{{$product->quantity_ordered*$unit_price_inc_tax}}">
+		<input type="{{$subtotal_type}}" class="form-control pos_line_total @if(!empty($pos_settings['is_pos_subtotal_editable'])) input_number @endif" name='pos_line_total' value="{{$product->quantity_ordered*$unit_price_inc_tax}}">
 		<input type="hidden" value="{{ $unit_price_inc_tax }}" id='pos_line_total_00'>
 		<input type="hidden" value="{{ $singleTotal }}" id='pos_line_total_item_tax'>
 {{--		<input type="hidden" value="8.695652174" id='pos_line_total_00' class='pos_line_total_00'>--}}

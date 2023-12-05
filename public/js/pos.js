@@ -298,8 +298,10 @@ $(document).ready(function() {
         var entered_qty = __read_number($(this));
 
         var tr = $(this).parents('tr');
+        var pos_line_dsp = __read_number(tr.find('input.pos_line_dsp')); //10
 
-        var unit_price_inc_tax = __read_number(tr.find('input.pos_unit_price_inc_tax'));
+        // var unit_price_inc_tax = __read_number(tr.find('input.pos_unit_price_inc_tax'));
+        var unit_price_inc_tax = pos_line_dsp/1.15;
         var line_total = entered_qty * unit_price_inc_tax;
 
 
@@ -307,10 +309,10 @@ $(document).ready(function() {
         __write_number(tr.find('input.pos_line_total'), line_total, false, 2);
         tr.find('span.pos_line_total_text').text(__currency_trans_from_en(line_total, true));
 
-        var pos_line_dsp = __read_number(tr.find('input.pos_line_dsp'));
 
 
-        var pos_line_dsp_total = entered_qty * pos_line_dsp;
+
+        var pos_line_dsp_total = entered_qty * pos_line_dsp; //2*10 = 20
 
         var line_total_tax = pos_line_dsp_total-line_total;
 
