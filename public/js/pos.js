@@ -303,6 +303,7 @@ $(document).ready(function() {
         var line_total = entered_qty * unit_price_inc_tax;
 
 
+
         __write_number(tr.find('input.pos_line_total'), line_total, false, 2);
         tr.find('span.pos_line_total_text').text(__currency_trans_from_en(line_total, true));
 
@@ -349,6 +350,7 @@ $(document).ready(function() {
 
         __write_number(tr.find('input.pos_unit_price_inc_tax'), unit_price_inc_tax);
         __write_number(tr.find('input.pos_line_total'), line_total);
+
         tr.find('span.pos_line_total_text').text(__currency_trans_from_en(line_total, true));
         pos_each_row(tr);
         pos_total_row();
@@ -801,6 +803,7 @@ $(document).ready(function() {
             $('.pos_unit_price_inc_tax').each( function(){
                 if (!$(this).is(":visible") && $(this).data('rule-min-value')) {
                     var val = __read_number($(this));
+
                     var error_msg_td = $(this).closest('tr').find('.pos_line_total_text').closest('td');
                     if (val > $(this).data('rule-min-value')) {
                         is_msp_valid = false;
@@ -1622,10 +1625,15 @@ function pos_product_row(variation_id = null, purchase_line_id = null, weighing_
                         .find('tr')
                         .last();
                     pos_each_row(this_row);
-
+                    /*for tax*/
+                    // var test = $('table#pos_table tbody')
+                    //     .find('input.pos_line_dsp_1');
+                    // console.log('test', test.val());
                     //For initial discount if present
                     var line_total = __read_number(this_row.find('input.pos_line_total'));
+                    var pos_line_tax_text = __read_number(this_row.find('input.pos_line_dsp_1'));
                     this_row.find('span.pos_line_total_text').text(line_total);
+                    this_row.find('span.pos_line_tax_text').text(pos_line_tax_text);
 
                     pos_total_row();
 
