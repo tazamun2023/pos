@@ -283,7 +283,7 @@ class SellReturnController extends Controller
                 $user_id = $request->session()->get('user.id');
 
                 DB::beginTransaction();
-//dd($input);
+
                 $sell_return = $this->transactionUtil->addSellReturn($input, $business_id, $user_id);
 //dd($sell_return);
                 $receipt = $this->receiptContent($business_id, $sell_return->location_id, $sell_return->id);

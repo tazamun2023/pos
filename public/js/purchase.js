@@ -144,7 +144,7 @@ $(document).ready(function() {
                                     $('#mobile').select();
                                 }
                             });
-                            
+
                         } else {
                             submitQuickAddPurchaseContactForm(form);
                         }
@@ -574,13 +574,13 @@ $(document).ready(function() {
             var total_due = 0;
             var total_purchase_return_due = 0;
             for (var r in data){
-                total_purchase += $(data[r].final_total).data('orig-value') ? 
+                total_purchase += $(data[r].final_total).data('orig-value') ?
                 parseFloat($(data[r].final_total).data('orig-value')) : 0;
                 var payment_due_obj = $('<div>' + data[r].payment_due + '</div>');
-                total_due += payment_due_obj.find('.payment_due').data('orig-value') ? 
+                total_due += payment_due_obj.find('.payment_due').data('orig-value') ?
                 parseFloat(payment_due_obj.find('.payment_due').data('orig-value')) : 0;
 
-                total_purchase_return_due += payment_due_obj.find('.purchase_return').data('orig-value') ? 
+                total_purchase_return_due += payment_due_obj.find('.purchase_return').data('orig-value') ?
                 parseFloat(payment_due_obj.find('.purchase_return').data('orig-value')) : 0;
             }
 
@@ -731,9 +731,9 @@ function get_purchase_entry_row(product_id, variation_id) {
         var row_count = $('#row_count').val();
         var location_id = $('#location_id').val();
         var supplier_id = $('#supplier_id').val();
-        var data = { 
-            product_id: product_id, 
-            row_count: row_count, 
+        var data = {
+            product_id: product_id,
+            row_count: row_count,
             variation_id: variation_id,
             location_id: location_id,
             supplier_id: supplier_id
@@ -932,11 +932,14 @@ function update_table_total() {
     __write_number($('input#st_before_tax_input'), total_st_before_tax, true);
 
     $('#total_subtotal').text(__currency_trans_from_en(total_subtotal, true, true));
+
     __write_number($('input#total_subtotal_input'), total_subtotal, true);
+
 }
 
 function update_grand_total() {
     var st_before_tax = __read_number($('input#st_before_tax_input'), true);
+    // var total_subtotal = __read_number($('input#total_subtotal_input'), true);
     var total_subtotal = __read_number($('input#total_subtotal_input'), true);
 
     //Calculate Discount
@@ -949,6 +952,7 @@ function update_grand_total() {
     var tax_rate = parseFloat($('option:selected', $('#tax_id')).data('tax_amount'));
     var tax = __calculate_amount('percentage', tax_rate, total_subtotal - discount);
     __write_number($('input#tax_amount'), tax);
+
     $('#tax_calculated_amount').text(__currency_trans_from_en(tax, true, true));
 
     //Calculate shipping
@@ -961,7 +965,7 @@ function update_grand_total() {
     var additional_expense_4 = __read_number($('input#additional_expense_value_4'), true);
 
     //Calculate Final total
-    grand_total = total_subtotal - discount + tax + shipping_charges + 
+    grand_total = total_subtotal - discount + tax + shipping_charges +
     additional_expense_1 + additional_expense_2 + additional_expense_3 + additional_expense_4;
 
     __write_number($('input#grand_total_hidden'), grand_total, true);
@@ -1051,12 +1055,12 @@ $(document).on('click', 'button#submit_purchase_form', function(e) {
         if (account_dropdown) {
             account_dropdown.prop('disabled', true);
         }
-        
+
     } else {
         amount_element.rules("remove", "max-value");
         if (account_dropdown) {
-            account_dropdown.prop('disabled', false); 
-        }    
+            account_dropdown.prop('disabled', false);
+        }
     }
 
     if ($('.enable_cash_denomination_for_payment_methods').length) {
@@ -1184,7 +1188,7 @@ $("#purchase_order_ids").on("select2:select", function (e) {
 $("#purchase_order_ids").on("select2:unselect", function (e) {
     var purchase_order_id = e.params.data.id;
     $('#purchase_entry_table tbody').find('tr').each( function(){
-        if (typeof($(this).data('purchase_order_id')) !== 'undefined' 
+        if (typeof($(this).data('purchase_order_id')) !== 'undefined'
             && $(this).data('purchase_order_id') == purchase_order_id) {
             $(this).remove();
         }
@@ -1244,7 +1248,7 @@ if ($("div#import_product_dz").length) {
                 formData.append("location_id", $('#location_id').val());
                 formData.append("row_count", $('#row_count').val());
             });
-        },   
+        },
         acceptedFiles: '.csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel',
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -1339,7 +1343,7 @@ $("#purchase_requisition_ids").on("select2:select", function (e) {
 $("#purchase_requisition_ids").on("select2:unselect", function (e) {
     var purchase_requisition_id = e.params.data.id;
     $('#purchase_entry_table tbody').find('tr').each( function(){
-        if (typeof($(this).data('purchase_requisition_id')) !== 'undefined' 
+        if (typeof($(this).data('purchase_requisition_id')) !== 'undefined'
             && $(this).data('purchase_requisition_id') == purchase_requisition_id) {
             $(this).remove();
         }
