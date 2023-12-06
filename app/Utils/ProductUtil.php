@@ -622,9 +622,11 @@ class ProductUtil extends Util
         foreach ($products as $product) {
             $unit_price_inc_tax = $uf_number ? $this->num_uf($product['unit_price_inc_tax']) : $product['unit_price_inc_tax'];
             $quantity = $uf_number ? $this->num_uf($product['quantity']) : $product['quantity'];
-
-//            $output['total_before_tax'] += $quantity * $unit_price_inc_tax;
-            $output['total_before_tax'] = $input['pos_line_total'];
+            if ($input['type'] =='sell_return'){
+                $output['total_before_tax'] += $quantity * $unit_price_inc_tax;
+            }else{
+                $output['total_before_tax'] = $input['pos_line_total'];
+            }
 
             //Add modifier price to total if exists
             if (! empty($product['modifier_price'])) {

@@ -5888,8 +5888,8 @@ class TransactionUtil extends Util
 
         $input['tax_id'] = $input['tax_id'] ?? null;
         $input['order_tax_input'] = $input['tax_amount'] ?? null;
-        $input['type'] = $input['sell_return'];
-
+        $input['type'] = 'sell_return';
+//        dd($input);
         $invoice_total = $productUtil->calculateInvoiceTotal($input['products'], $input['tax_id'], $discount, $uf_number, $input);
 
         //Get parent sale
