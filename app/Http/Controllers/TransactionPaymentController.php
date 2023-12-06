@@ -83,7 +83,7 @@ class TransactionPaymentController extends Controller
                 $inputs['transaction_id'] = $transaction->id;
                 $checkCashRegisters = CashRegister::where('business_id', $business_id)->where('location_id', $location_id)->where('status', 'open')->first();
                 $checkCashRegisterBalnace = $this->transactionUtil->checkCashRegisterBalnace($checkCashRegisters->id);
-                dd($checkCashRegisterBalnace);
+//                dd($checkCashRegisterBalnace);
                 $netCashInHand = $checkCashRegisterBalnace->cash_in_hand+$checkCashRegisterBalnace->net_cash_bal_in_hand;
                 $netCardBal = $checkCashRegisterBalnace->net_card_bal;
 
