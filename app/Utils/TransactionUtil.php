@@ -6,6 +6,8 @@ use App\AccountTransaction;
 use App\Business;
 use App\BusinessLocation;
 use App\CashDenomination;
+use App\CashRegister;
+use App\CashRegisterTransaction;
 use App\Contact;
 use App\Currency;
 use App\Events\TransactionPaymentAdded;
@@ -6208,5 +6210,38 @@ class TransactionUtil extends Util
         $mpdf->WriteHTML($body);
 
         return $mpdf;
+    }
+
+
+    public function insertCashTransactionData($amount, $pay_method, $type, $transaction_id, $transaction_type)
+    {
+        $user_id = auth()->user()->id;
+        $register = CashRegister::where('user_id', $user_id)
+            ->where('status', 'open')
+            ->first();
+        if ($register) {
+            $data['cash_register_id'] = $register->id;
+            $data['amount'] = $amount;
+            $data['pay_method'] = $pay_method;
+            $data['type'] = $type;
+            $data['transaction_type'] = $transaction_type;
+            $data['transaction_id'] = $transaction_id;
+
+            CashRegisterTransaction::create($data);
+        }
+    }
+
+
+    public function UpdateCashTransactionData($amount, $pay_method, $type, $transaction_id, $transaction_type)
+    {
+
+        $crTransactionCheck = CashRegisterTransaction::where('transaction_id', $transaction_id)->first();
+        if ($crTransactionCheck) {
+            $crTransactionCheck->amount = $amount;
+            $crTransactionCheck->pay_method = $pay_method;
+            $crTransactionCheck->type = $type;
+            $crTransactionCheck->transaction_type = $transaction_type;
+            $crTransactionCheck->save();
+        }
     }
 }
