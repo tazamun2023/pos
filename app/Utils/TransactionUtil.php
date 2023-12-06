@@ -2313,7 +2313,8 @@ class TransactionUtil extends Util
             $count = str_pad($count, $scheme->total_digits, '0', STR_PAD_LEFT);
 
             //Prefix + count
-            $invoice_no = $prefix.$count;
+//            $invoice_no = $prefix.$count;
+            $invoice_no = $prefix . $location_id . $count;
 
             //Increment the invoice count
             $scheme->invoice_count = $scheme->invoice_count + 1;
