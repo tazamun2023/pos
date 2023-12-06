@@ -5887,8 +5887,10 @@ class TransactionUtil extends Util
         $productUtil = new \App\Utils\ProductUtil();
 
         $input['tax_id'] = $input['tax_id'] ?? null;
+        $input['order_tax_input'] = $input['tax_amount'] ?? null;
+        $input['type'] = $input['sell_return'];
 
-        $invoice_total = $productUtil->calculateInvoiceTotal($input['products'], $input['tax_id'], $discount, $uf_number);
+        $invoice_total = $productUtil->calculateInvoiceTotal($input['products'], $input['tax_id'], $discount, $uf_number, $input);
 
         //Get parent sale
         $sell = Transaction::where('business_id', $business_id)
@@ -5911,7 +5913,7 @@ class TransactionUtil extends Util
             'final_total' => $invoice_total['final_total'],
         ];
 
-        if (! empty($input['transaction_date'])) {
+        if (!empty($input['transaction_date'])) {
             $sell_return_data['transaction_date'] = $uf_number ? $this->uf_date($input['transaction_date'], true) : $input['transaction_date'];
         }
 
@@ -5944,9 +5946,9 @@ class TransactionUtil extends Util
             $this->activityLog($sell_return, 'edited', $sell_return_before);
         }
 
-        if ($business->enable_rp == 1 && ! empty($sell->rp_earned)) {
+        if ($business->enable_rp == 1 && !empty($sell->rp_earned)) {
             $is_reward_expired = $this->isRewardExpired($sell->transaction_date, $business_id);
-            if (! $is_reward_expired) {
+            if (!$is_reward_expired) {
                 $diff = $sell->final_total - $sell_return->final_total;
                 $new_reward_point = $this->calculateRewardPoints($business_id, $diff);
                 $this->updateCustomerRewardPoints($sell->contact_id, $new_reward_point, $sell->rp_earned);
@@ -5968,7 +5970,7 @@ class TransactionUtil extends Util
         foreach ($sell->sell_lines as $sell_line) {
             if (array_key_exists($sell_line->id, $returns)) {
                 $multiplier = 1;
-                if (! empty($sell_line->sub_unit)) {
+                if (!empty($sell_line->sub_unit)) {
                     $multiplier = $sell_line->sub_unit->base_unit_multiplier;
                 }
 
