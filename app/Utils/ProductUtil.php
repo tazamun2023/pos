@@ -609,7 +609,7 @@ class ProductUtil extends Util
      * @param  array  $discount['discount_type', 'discount_amount']
      * @return mixed (false, array)
      */
-    public function calculateInvoiceTotal($products, $tax_id, $discount = null, $uf_number = true, $input=null)
+    public function calculateInvoiceTotal($products, $tax_id, $discount = null, $uf_number = true, $input=null, $sell_return=false)
     {
 //        dd($input);
         if (empty($products)) {
@@ -622,7 +622,8 @@ class ProductUtil extends Util
         foreach ($products as $product) {
             $unit_price_inc_tax = $uf_number ? $this->num_uf($product['unit_price_inc_tax']) : $product['unit_price_inc_tax'];
             $quantity = $uf_number ? $this->num_uf($product['quantity']) : $product['quantity'];
-            if ($input['type'] =='sell_return'){
+
+            if ($sell_return){
                 $output['total_before_tax'] += $quantity * $unit_price_inc_tax;
             }else{
                 $output['total_before_tax'] = $input['pos_line_total'];

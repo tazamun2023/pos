@@ -5888,9 +5888,9 @@ class TransactionUtil extends Util
 
         $input['tax_id'] = $input['tax_id'] ?? null;
         $input['order_tax_input'] = $input['tax_amount'] ?? null;
-        $input['type'] = 'sell_return';
+
 //        dd($input);
-        $invoice_total = $productUtil->calculateInvoiceTotal($input['products'], $input['tax_id'], $discount, $uf_number, $input);
+        $invoice_total = $productUtil->calculateInvoiceTotal($input['products'], $input['tax_id'], $discount, $uf_number, $input, true);
 
         //Get parent sale
         $sell = Transaction::where('business_id', $business_id)
