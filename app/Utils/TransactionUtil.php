@@ -6247,4 +6247,11 @@ class TransactionUtil extends Util
             $crTransactionCheck->save();
         }
     }
+
+    public function checkCashRegisterBalnace($id)
+    {
+        $register_details = $this->cashRegisterUtil->getRegisterDetails($id);
+
+        return $register_details;
+    }
 }

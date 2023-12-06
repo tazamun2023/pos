@@ -62,6 +62,7 @@ class TransactionPaymentController extends Controller
      */
     public function store(Request $request)
     {
+
         try {
             $business_id = $request->session()->get('user.business_id');
             $transaction_id = $request->input('transaction_id');
@@ -80,9 +81,9 @@ class TransactionPaymentController extends Controller
                     'cheque_number', 'bank_account_number', ]);
                 $inputs['paid_on'] = $this->transactionUtil->uf_date($request->input('paid_on'), true);
                 $inputs['transaction_id'] = $transaction->id;
-
                 $checkCashRegisters = CashRegister::where('business_id', $business_id)->where('location_id', $location_id)->where('status', 'open')->first();
                 $checkCashRegisterBalnace = $this->transactionUtil->checkCashRegisterBalnace($checkCashRegisters->id);
+                dd($checkCashRegisterBalnace);
                 $netCashInHand = $checkCashRegisterBalnace->cash_in_hand+$checkCashRegisterBalnace->net_cash_bal_in_hand;
                 $netCardBal = $checkCashRegisterBalnace->net_card_bal;
 
@@ -138,6 +139,7 @@ class TransactionPaymentController extends Controller
                 if ($amount < 0) {
                     $amount = 0;
                 }
+
                 if (! empty($inputs['amount'])) {
                     $tp = TransactionPayment::create($inputs);
 
