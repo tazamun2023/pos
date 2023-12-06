@@ -1017,7 +1017,7 @@ class SellPosController extends Controller
                     if (! $is_direct_sale) {
                         //set service staff timer
                         foreach ($input['products'] as $product_line) {
-                            
+
                             if (! empty($product_line['res_service_staff_id'])) {
                                 $product = Product::find($product_line['product_id']);
 

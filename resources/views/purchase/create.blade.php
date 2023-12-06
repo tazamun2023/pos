@@ -69,11 +69,11 @@
 					{!! Form::label('status', __('purchase.purchase_status') . ':*') !!} @show_tooltip(__('tooltip.order_status'))
 					{!! Form::select('status', $orderStatuses, $default_purchase_status, ['class' => 'form-control select2', 'placeholder' => __('messages.please_select'), 'required']); !!}
 				</div>
-			</div>			
+			</div>
 			@if(count($business_locations) == 1)
-				@php 
+				@php
 					$default_location = current(array_keys($business_locations->toArray()));
-					$search_disable = false; 
+					$search_disable = false;
 				@endphp
 			@else
 				@php $default_location = null;
@@ -112,10 +112,10 @@
 		              <br/>
 		              {!! Form::number('pay_term_number', null, ['class' => 'form-control width-40 pull-left', 'placeholder' => __('contact.pay_term')]); !!}
 
-		              {!! Form::select('pay_term_type', 
-		              	['months' => __('lang_v1.months'), 
-		              		'days' => __('lang_v1.days')], 
-		              		null, 
+		              {!! Form::select('pay_term_type',
+		              	['months' => __('lang_v1.months'),
+		              		'days' => __('lang_v1.days')],
+		              		null,
 		              	['class' => 'form-control width-60 pull-left','placeholder' => __('messages.please_select'), 'id' => 'pay_term_type']); !!}
 		            </div>
 		        </div>
@@ -240,7 +240,7 @@
 			</div>
 			<div class="col-sm-2">
 				<div class="form-group  ">
-					<button tabindex="-1" type="button" class="btn btn-link f_add-btn btn-modal"data-href="{{action([\App\Http\Controllers\ProductController::class, 'quickAdd'])}}" 
+					<button tabindex="-1" type="button" class="btn btn-link f_add-btn btn-modal"data-href="{{action([\App\Http\Controllers\ProductController::class, 'quickAdd'])}}"
             	data-container=".quick_add_product_modal"><i class="fa fa-plus"></i> @lang( 'product.add_new_product' ) </button>
 				</div>
 			</div>
@@ -343,7 +343,7 @@
 						&nbsp;
 					</td>
 					<td class="col-md-3">
-						<b>@lang( 'purchase.discount' ):</b>(-) 
+						<b>@lang( 'purchase.discount' ):</b>(-)
 						<span id="discount_calculated_amount" class="display_currency">0</span>
 					</td>
 				</tr>
@@ -363,7 +363,7 @@
 					<td>&nbsp;</td>
 					<td>&nbsp;</td>
 					<td>
-						<b>@lang( 'purchase.purchase_tax' ):</b>(+) 
+						<b>@lang( 'purchase.purchase_tax' ):</b>(+)
 						<span id="tax_calculated_amount" class="display_currency">0</span>
 					</td>
 				</tr>
@@ -406,15 +406,15 @@
 			    $is_shipping_custom_field_2_required = !empty($custom_labels['purchase_shipping']['is_custom_field_2_required']) && $custom_labels['purchase_shipping']['is_custom_field_2_required'] == 1 ? true : false;
 
 			    $shipping_custom_label_3 = !empty($custom_labels['purchase_shipping']['custom_field_3']) ? $custom_labels['purchase_shipping']['custom_field_3'] : '';
-			    
+
 			    $is_shipping_custom_field_3_required = !empty($custom_labels['purchase_shipping']['is_custom_field_3_required']) && $custom_labels['purchase_shipping']['is_custom_field_3_required'] == 1 ? true : false;
 
 			    $shipping_custom_label_4 = !empty($custom_labels['purchase_shipping']['custom_field_4']) ? $custom_labels['purchase_shipping']['custom_field_4'] : '';
-			    
+
 			    $is_shipping_custom_field_4_required = !empty($custom_labels['purchase_shipping']['is_custom_field_4_required']) && $custom_labels['purchase_shipping']['is_custom_field_4_required'] == 1 ? true : false;
 
 			    $shipping_custom_label_5 = !empty($custom_labels['purchase_shipping']['custom_field_5']) ? $custom_labels['purchase_shipping']['custom_field_5'] : '';
-			    
+
 			    $is_shipping_custom_field_5_required = !empty($custom_labels['purchase_shipping']['is_custom_field_5_required']) && $custom_labels['purchase_shipping']['is_custom_field_5_required'] == 1 ? true : false;
 			@endphp
 
