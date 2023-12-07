@@ -5903,7 +5903,7 @@ class TransactionUtil extends Util
         $input['tax_id'] = $input['tax_id'] ?? null;
         $input['order_tax_input'] = $input['tax_amount'] ?? null;
 
-//        dd($input);
+
         $invoice_total = $productUtil->calculateInvoiceTotal($input['products'], $input['tax_id'], $discount, $uf_number, $input, true);
 
         //Get parent sale
@@ -5944,7 +5944,7 @@ class TransactionUtil extends Util
             $sell_return_data['location_id'] = $sell->location_id;
             $sell_return_data['contact_id'] = $sell->contact_id;
             $sell_return_data['customer_group_id'] = $sell->customer_group_id;
-            $sell_return_data['type'] = 'sell_return';
+            $sell_return_data['type'] = 'sell';
             $sell_return_data['status'] = 'final';
             $sell_return_data['created_by'] = $user_id;
             $sell_return_data['return_parent_id'] = $sell->id;

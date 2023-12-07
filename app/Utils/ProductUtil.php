@@ -611,7 +611,7 @@ class ProductUtil extends Util
      */
     public function calculateInvoiceTotal($products, $tax_id, $discount = null, $uf_number = true, $input=null, $sell_return=false)
     {
-//        dd($input);
+
         if (empty($products)) {
             return false;
         }
