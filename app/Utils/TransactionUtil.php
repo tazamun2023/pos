@@ -5948,6 +5948,7 @@ class TransactionUtil extends Util
             $sell_return_data['status'] = 'final';
             $sell_return_data['created_by'] = $user_id;
             $sell_return_data['return_parent_id'] = $sell->id;
+//            dd($sell_return_data);
             $sell_return = Transaction::create($sell_return_data);
 
             $this->activityLog($sell_return, 'added');
