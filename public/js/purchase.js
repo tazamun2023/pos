@@ -376,6 +376,7 @@ $(document).ready(function() {
         var quantity = __read_number(row.find('input.purchase_quantity'), true);
         var purchase_before_tax = __read_number($(this), true);
 
+
         var sub_total_before_tax = quantity * purchase_before_tax;
 
         //Update unit cost price before discount
@@ -920,27 +921,40 @@ function update_table_total() {
         .find('tr')
         .each(function() {
             total_quantity += __read_number($(this).find('.purchase_quantity'), true);
+            // console.log('ooo', $(this).find('.row_subtotal_before_tax_hidden').val());
+
             total_st_before_tax += __read_number(
-                $(this).find('.row_subtotal_before_tax_hidden'),
+                // $(this).find('.row_subtotal_before_tax_hidden'),
+                $(this).find('.purchase_unit_cost'),
                 true
             );
-            total_subtotal += __read_number($(this).find('.row_subtotal_after_tax_hidden'), true);
+            console.log('mal da'+ $(this).find('.purchase_unit_cost').val());
+            // total_subtotal += __read_number($(this).find('.row_subtotal_after_tax_hidden'), true);
+            total_subtotal += __read_number($(this).find('.purchase_unit_cost'), true);
+            // console.log('lll'+ total_subtotal);
         });
 
+
     $('#total_quantity').text(__number_f(total_quantity, false));
+
     $('#total_st_before_tax').text(__currency_trans_from_en(total_st_before_tax, true, true));
     __write_number($('input#st_before_tax_input'), total_st_before_tax, true);
 
-    $('#total_subtotal').text(__currency_trans_from_en(total_subtotal, true, true));
 
-    __write_number($('input#total_subtotal_input'), total_subtotal, true);
+    $('#total_subtotal').text(__currency_trans_from_en(total_subtotal*total_quantity, true, true));
+    console.log('total_subtotal fd '+ total_subtotal);
+    $('input#total_subtotal_input').val(total_subtotal*total_quantity)
+    // __write_number($('input#total_subtotal_input'), total_subtotal, true);
 
 }
 
 function update_grand_total() {
     var st_before_tax = __read_number($('input#st_before_tax_input'), true);
     // var total_subtotal = __read_number($('input#total_subtotal_input'), true);
-    var total_subtotal = __read_number($('input#total_subtotal_input'), true);
+
+    var total_subtotal = $('#total_subtotal_input').val();
+
+    // console.log("total_subtotal" + total_subtotal);
 
     //Calculate Discount
     var discount_type = $('select#discount_type').val();
