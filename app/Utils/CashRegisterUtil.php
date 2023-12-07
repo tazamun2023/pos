@@ -309,13 +309,12 @@ class CashRegisterUtil extends Util
             DB::raw("
     SUM(
         CASE
-            WHEN pay_method = 'cash' AND transaction_type = 'sell' THEN amount
-            WHEN pay_method = 'cash' AND transaction_type = 'sell_return' THEN -1 * amount
-            WHEN pay_method = 'cash' AND transaction_type = 'expense' THEN -1 * amount
+            WHEN pay_method = 'cash' AND type = 'debit' AND transaction_type = 'sell' THEN amount
             ELSE 0
         END
     ) as net_cash_bal_in_hand
 "),
+//            WHEN pay_method = 'cash' AND transaction_type = 'sell_return' THEN -1 * amount
             /*end for cash*/
 
             DB::raw("SUM(IF(transaction_type='expense', IF(transaction_type='refund', -1 * amount, amount), 0)) as total_expense"),

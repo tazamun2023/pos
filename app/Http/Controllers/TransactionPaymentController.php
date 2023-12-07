@@ -86,8 +86,10 @@ class TransactionPaymentController extends Controller
 //                dd($checkCashRegisterBalnace);
                 $netCashInHand = $checkCashRegisterBalnace->cash_in_hand+$checkCashRegisterBalnace->net_cash_bal_in_hand;
                 $netCardBal = $checkCashRegisterBalnace->net_card_bal;
-
-                if ($transaction->type == 'sell_return'){
+//dd($transaction->type);
+//                dd(($inputs['method'] == 'cash' && $netCashInHand < $inputs['amount']) || ($inputs['method'] == 'card' && $netCardBal < $inputs['amount']));
+//                if ($transaction->type == 'sell_return'){
+                if ($transaction->type == 'sell'){
                     if (($inputs['method'] == 'cash' && $netCashInHand < $inputs['amount']) || ($inputs['method'] == 'card' && $netCardBal < $inputs['amount'])) {
                         $output = ['success' => false, 'msg' => __('lang_v1.cash_register_out_of_balance'). $inputs['method']];
                         return redirect()->back()->with(['status' => $output]);
@@ -142,13 +144,15 @@ class TransactionPaymentController extends Controller
 
                 if (! empty($inputs['amount'])) {
                     $tp = TransactionPayment::create($inputs);
-
+//dd(0);
                     if ($amount-$inputs['amount'] > 0){
                         $cash_register_transactions = CashRegisterTransaction::where('transaction_id', $transaction->id)->first();
 //                        dd($transaction->final_total == $cash_register_transactions->amount);
                         if ($transaction->final_total == $cash_register_transactions->amount){
+
                             $this->transactionUtil->UpdateCashTransactionData($inputs['amount'],$inputs['method'],'credit',$transaction->id,"partial");
                         }else{
+
                             $this->transactionUtil->UpdateCashTransactionData($cash_register_transactions->amount+$inputs['amount'],$inputs['method'],'credit',$transaction->id,"partial");
                         }
 
@@ -156,9 +160,9 @@ class TransactionPaymentController extends Controller
                         $cash_register_transactions = CashRegisterTransaction::where('transaction_id', $transaction->id)->first();
 
                         if ($transaction->final_total == $cash_register_transactions->amount){
-                            $this->transactionUtil->UpdateCashTransactionData($payment_amount,$inputs['method'],'credit',$transaction->id,"sell");
+                            $this->transactionUtil->UpdateCashTransactionData($payment_amount,$inputs['method'],'debit',$transaction->id,"sell");
                         }else{
-                            $this->transactionUtil->UpdateCashTransactionData($cash_register_transactions->amount+$payment_amount,$inputs['method'],'credit',$transaction->id,"sell");
+                            $this->transactionUtil->UpdateCashTransactionData($cash_register_transactions->amount+$payment_amount,$inputs['method'],'debit',$transaction->id,"sell");
                         }
                     }
 
@@ -452,7 +456,7 @@ class TransactionPaymentController extends Controller
                 $payment_line->amount = $amount;
                 $payment_line->method = 'cash';
                 $payment_line->paid_on = \Carbon::now()->toDateTimeString();
-//dd($payment_line);
+
                 //Accounts
                 $accounts = $this->moduleUtil->accountsDropdown($business_id, true, false, true);
 
