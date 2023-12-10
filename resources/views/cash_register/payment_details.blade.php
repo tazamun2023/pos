@@ -181,6 +181,7 @@
         </th>
         <td>
           <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->total_credit_sell }}</span></b>
+{{--          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->adjusted_total_credit_sell }}</span></b>--}}
         </td>
       </tr>
       <tr class='success'>
@@ -197,6 +198,7 @@
         </th>
         <td>
           <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->total_refund }}</span></b><br>
+{{--          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->total_cash_refund }}</span></b><br>--}}
           <small>
             @if($register_details->total_cash_refund != 0)
               Cash: <span class="display_currency" data-currency_symbol="true">{{ $register_details->total_cash_refund }}</span><br>
@@ -240,7 +242,7 @@
         </th>
         <td>
 {{--          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->total_cash_sell - ($register_details->total_cash_sell_return + $register_details->total_cash_expense_return) }}</span></b>--}}
-          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->cash_in_hand+$register_details->net_cash_bal_in_hand }}</span></b>
+          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->cash_in_hand+$register_details->net_cash_bal_in_hand - $register_details->total_refund}}</span></b>
         </td>
       </tr>
 

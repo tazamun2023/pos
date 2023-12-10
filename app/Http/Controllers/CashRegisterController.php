@@ -115,7 +115,7 @@ class CashRegisterController extends Controller
         $business_id = request()->session()->get('user.business_id');
 
         $register_details = $this->cashRegisterUtil->getRegisterDetails($id);
-        dd($register_details->net_cash_bal_in_hand);
+//        dd($register_details);
         $user_id = $register_details->user_id;
         $open_time = $register_details['open_time'];
         $close_time = ! empty($register_details['closed_at']) ? $register_details['closed_at'] : \Carbon::now()->toDateTimeString();
