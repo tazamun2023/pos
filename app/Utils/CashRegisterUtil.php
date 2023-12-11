@@ -338,6 +338,14 @@ class CashRegisterUtil extends Util
         END
     ) as total_refund
 "),
+            DB::raw("
+    SUM(
+        CASE
+            WHEN ct.type = 'credit' AND ct.transaction_type = 'sell_return' THEN ct.amount
+            ELSE 0
+        END
+    ) as total_credit_refund
+"),
 //            WHEN pay_method = 'cash' AND ct.transaction_type = 'sell_return' THEN -1 * amount
             /*end for cash*/
 

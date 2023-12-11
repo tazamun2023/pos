@@ -197,8 +197,8 @@
           @lang('cash_register.total_refund')
         </th>
         <td>
-          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->total_refund }}</span></b><br>
-{{--          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->total_cash_refund }}</span></b><br>--}}
+{{--          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->total_refund }}</span></b><br>--}}
+          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->total_credit_refund+$register_details->total_refund }}</span></b><br>
           <small>
             @if($register_details->total_cash_refund != 0)
               Cash: <span class="display_currency" data-currency_symbol="true">{{ $register_details->total_cash_refund }}</span><br>
