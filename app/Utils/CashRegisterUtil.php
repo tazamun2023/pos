@@ -295,6 +295,14 @@ class CashRegisterUtil extends Util
             END
         ) as total_credit_sell
     "),
+            DB::raw("
+        SUM(
+            CASE
+                WHEN ct.type = 'credit' AND ct.transaction_type = 'sell_partial' THEN ct.amount
+                ELSE 0
+            END
+        ) as total_credit_sell_partial
+    "),
 
             DB::raw("
         SUM(

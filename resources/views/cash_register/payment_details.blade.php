@@ -243,7 +243,7 @@
           @lang('report.net_cash_bal_in_hand')
         </th>
         <td>
-          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->total_credit_refund==0? ($register_details->cash_in_hand+$register_details->net_cash_bal_in_hand - $register_details->total_refund) : ($register_details->cash_in_hand+$register_details->net_cash_bal_in_hand-$register_details->total_credit_refund) }}</span></b>
+          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->total_credit_refund==0? ($register_details->cash_in_hand+$register_details->net_cash_bal_in_hand+$register_details->total_credit_sell_partial - $register_details->total_refund) : ($register_details->cash_in_hand+$register_details->net_cash_bal_in_hand-$register_details->total_credit_refund) }}</span></b>
 {{--          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->total_credit_refund==0? ($register_details->cash_in_hand+$register_details->net_cash_bal_in_hand - $register_details->total_refund) : ($register_details->cash_in_hand+$register_details->net_cash_bal_in_hand-$register_details->total_credit_refund) }}</span></b>--}}
         </td>
       </tr>
