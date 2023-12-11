@@ -56,6 +56,7 @@ class CashRegisterUtil extends Util
                     'ct.transaction_type' => $transaction->type,
                     'transaction_id' => $transaction->id,
                     'transaction_type' => 'sell',
+                    'final_total' => $transaction->final_total,
                 ]);
             }
         }
@@ -279,8 +280,8 @@ class CashRegisterUtil extends Util
             DB::raw("
     SUM(
         CASE
-            WHEN ct.type = 'debit' AND ct.transaction_type = 'sell' THEN ct.amount
-            WHEN ct.type = 'credit' AND ct.transaction_type = 'partial' THEN ct.amount
+            WHEN ct.type = 'debit' AND ct.transaction_type != 'sell_return_partial' AND ct.pay_method IS NOT NULL THEN ct.final_total
+            WHEN ct.type = 'credit' AND ct.transaction_type != 'sell_return_partial' AND ct.pay_method IS NOT NULL THEN ct.final_total
             ELSE 0
         END
     ) as total_sale
@@ -289,8 +290,8 @@ class CashRegisterUtil extends Util
             DB::raw("
         SUM(
             CASE
-                WHEN ct.type = 'credit' AND ct.transaction_type = 'suspend' THEN ct.amount
-                WHEN ct.type = 'credit' AND ct.transaction_type = 'sell_partial' THEN ct.amount
+                WHEN ct.transaction_type = 'credit_sell' THEN ct.final_total
+                WHEN ct.transaction_type = 'sell_partial' THEN ct.final_total
                 ELSE 0
             END
         ) as total_credit_sell
@@ -298,10 +299,26 @@ class CashRegisterUtil extends Util
             DB::raw("
         SUM(
             CASE
-                WHEN ct.type = 'credit' AND ct.transaction_type = 'sell_partial' THEN ct.amount
+                WHEN ct.transaction_type = 'suspend' THEN ct.final_total
+                ELSE 0
+            END
+        ) as total_suspend
+    "),
+            DB::raw("
+        SUM(
+            CASE
+                WHEN ct.type= 'credit' AND ct.transaction_type = 'sell_partial' THEN ct.amount
                 ELSE 0
             END
         ) as total_credit_sell_partial
+    "),
+            DB::raw("
+        SUM(
+            CASE
+                WHEN ct.type= 'debit' AND ct.transaction_type = 'sell_partial' THEN ct.amount
+                ELSE 0
+            END
+        ) as total_debit_sell_partial
     "),
 
             DB::raw("
@@ -333,7 +350,7 @@ class CashRegisterUtil extends Util
     SUM(
         CASE
             WHEN ct.pay_method = 'cash' AND ct.type = 'debit' AND ct.transaction_type = 'sell' THEN ct.amount
-             WHEN ct.type = 'credit' AND ct.transaction_type = 'partial' THEN ct.amount
+            WHEN ct.pay_method = 'cash' AND ct.type = 'credit' AND ct.transaction_type = 'sell_partial' THEN ct.amount
             ELSE 0
         END
     ) as net_cash_bal_in_hand
@@ -341,10 +358,37 @@ class CashRegisterUtil extends Util
             DB::raw("
     SUM(
         CASE
-            WHEN ct.type = 'debit' AND ct.transaction_type = 'sell_return' THEN ct.amount
+            WHEN ct.transaction_type = 'sell_return' THEN ct.final_total
             ELSE 0
         END
     ) as total_refund
+"),
+            DB::raw("
+    SUM(
+        CASE
+            WHEN ct.transaction_type = 'sell_return' THEN ct.final_total
+            WHEN ct.transaction_type = 'sell_return_partial' THEN ct.final_total
+            ELSE 0
+        END
+    ) as total_sell_refund
+"),
+            DB::raw("
+    SUM(
+        CASE
+            WHEN ct.type = 'credit' AND ct.transaction_type = 'sell_return_partial' THEN ct.amount
+            WHEN ct.type = 'debit' AND ct.transaction_type = 'sell_return_partial' THEN ct.amount
+            ELSE 0
+        END
+    ) as total_sell_return_partial
+"),
+            DB::raw("
+    SUM(
+        CASE
+            WHEN ct.transaction_type = 'sell_return' THEN ct.amount
+            WHEN ct.transaction_type = 'sell_return_partial' THEN ct.amount
+            ELSE 0
+        END
+    ) as total_sell_paid
 "),
             DB::raw("
     SUM(

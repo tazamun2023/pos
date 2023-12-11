@@ -6244,6 +6244,7 @@ class TransactionUtil extends Util
             $data['type'] = $type;
             $data['transaction_type'] = $transaction_type;
             $data['transaction_id'] = $transaction_id;
+            $data['final_total'] = Transaction::find($transaction_id)->final_total;
 
             CashRegisterTransaction::create($data);
         }

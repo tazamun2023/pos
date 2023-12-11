@@ -89,7 +89,7 @@ class TransactionPaymentController extends Controller
 //dd($transaction->type);
 //                dd(($inputs['method'] == 'cash' && $netCashInHand < $inputs['amount']) || ($inputs['method'] == 'card' && $netCardBal < $inputs['amount']));
 //                if ($transaction->type == 'sell_return'){
-                if ($transaction->type == 'sell'){
+                if ($transaction->type == 'sell_return'){
                     if (($inputs['method'] == 'cash' && $netCashInHand < $inputs['amount']) || ($inputs['method'] == 'card' && $netCardBal < $inputs['amount'])) {
                         $output = ['success' => false, 'msg' => __('lang_v1.cash_register_out_of_balance'). $inputs['method']];
                         return redirect()->back()->with(['status' => $output]);
@@ -810,7 +810,10 @@ class TransactionPaymentController extends Controller
         //$amount, $pay_method, $type, $transaction_id, $transaction_type
         $totalAmount = ($transaction->final_total == $cash_register_transactions->amount) ?
             $amount : $cash_register_transactions->amount + $amount;
-//        dd('credit - '.$totalAmount);
+//        dd($transaction);
+        if ($transaction->payment_status =='due'){
+            $this->transactionUtil->UpdateCashTransactionData($totalAmount, $method, 'credit', $transaction->id, 'credit_'.$type);
+        }
         $this->transactionUtil->UpdateCashTransactionData($totalAmount, $method, 'credit', $transaction->id, $type.'_partial');
     }
 
@@ -818,8 +821,11 @@ class TransactionPaymentController extends Controller
         //$amount, $pay_method, $type, $transaction_id, $transaction_type
         $totalAmount = ($transaction->final_total == $cash_register_transactions->amount) ?
             $payment_amount : $cash_register_transactions->amount + $payment_amount;
-//        dd('debit - '.$totalAmount);
-        $this->transactionUtil->UpdateCashTransactionData($totalAmount, $method, 'debit', $transaction->id, $type);
+//        dd($transaction);
+        if ($transaction->payment_status =='due'){
+            $this->transactionUtil->UpdateCashTransactionData($totalAmount, $method, 'debit', $transaction->id, 'credit_'.$type);
+        }
+        $this->transactionUtil->UpdateCashTransactionData($totalAmount, $method, 'debit', $transaction->id, $type.'_partial');
     }
 
 }

@@ -180,9 +180,9 @@
           @lang('lang_v1.credit_sales'):
         </th>
         <td>
-{{--          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->total_credit_sell }}</span></b>--}}
-          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->total_credit_sell == $register_details->transaction_final_total ? $register_details->transaction_final_total: $register_details->total_credit_sell }}</span></b>
-{{--          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->adjusted_total_credit_sell }}</span></b>--}}
+          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->total_credit_sell + $register_details->total_suspend }}</span></b>
+{{--          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->transaction_final_total-$register_details->total_credit_sell==0? $register_details->total_credit_sell_partial + $register_details->total_credit_sell: $register_details->total_credit_sell_partial+$register_details->transaction_final_total }}</span></b>--}}
+{{--          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->total_credit_sell == $register_details->transaction_final_total ? $register_details->transaction_final_total: ($register_details->transaction_final_total-$register_details->total_credit_sell_partial) }}</span></b>--}}
         </td>
       </tr>
       <tr class='success'>
@@ -190,7 +190,7 @@
           @lang('cash_register.total_sales'):
         </td>
         <td>
-          <span class="display_currency" data-currency_symbol="true">{{ $register_details->total_sale+$register_details->total_credit_sell }}</span>
+            <span class="display_currency" data-currency_symbol="true">{{ $register_details->total_sale }}</span>
         </td>
       </tr>
       <tr class="danger">
@@ -198,7 +198,7 @@
           @lang('cash_register.total_refund')
         </th>
         <td>
-          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->total_refund+$register_details->total_refund_credit+$register_details->total_credit_refund }}</span></b><br>
+          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->total_sell_refund }}</span></b><br>
 {{--          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->total_credit_refund==0? $register_details->total_refund : $register_details->total_credit_refund }}</span></b><br>--}}
 {{--          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->total_refund_credit==0? $register_details->transaction_final_total : $register_details->total_refund }}</span></b><br>--}}
           <small>
@@ -243,7 +243,8 @@
           @lang('report.net_cash_bal_in_hand')
         </th>
         <td>
-          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->total_credit_refund==0? ($register_details->cash_in_hand+$register_details->net_cash_bal_in_hand+$register_details->total_credit_sell_partial - $register_details->total_refund) : ($register_details->cash_in_hand+$register_details->net_cash_bal_in_hand-$register_details->total_credit_refund) }}</span></b>
+{{--          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->total_sell_return_partial }}</span></b>--}}
+          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->cash_in_hand+$register_details->net_cash_bal_in_hand+$register_details->total_debit_sell_partial-$register_details->total_sell_return_partial }}</span></b>
 {{--          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->total_credit_refund==0? ($register_details->cash_in_hand+$register_details->net_cash_bal_in_hand - $register_details->total_refund) : ($register_details->cash_in_hand+$register_details->net_cash_bal_in_hand-$register_details->total_credit_refund) }}</span></b>--}}
         </td>
       </tr>
