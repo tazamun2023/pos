@@ -290,12 +290,12 @@ class CashRegisterUtil extends Util
         SUM(
             CASE
                 WHEN ct.type = 'credit' AND ct.transaction_type = 'suspend' THEN ct.amount
-                WHEN ct.type = 'credit' AND ct.transaction_type = 'partial' THEN ct.amount
-                WHEN ct.type = 'credit' AND ct.transaction_type = 'sell' THEN ct.amount
+                WHEN ct.type = 'credit' AND ct.transaction_type = 'sell_partial' THEN ct.amount
                 ELSE 0
             END
         ) as total_credit_sell
     "),
+
             DB::raw("
         SUM(
             CASE
@@ -342,6 +342,14 @@ class CashRegisterUtil extends Util
     SUM(
         CASE
             WHEN ct.type = 'credit' AND ct.transaction_type = 'sell_return' THEN ct.amount
+            ELSE 0
+        END
+    ) as total_refund_credit
+"),
+            DB::raw("
+    SUM(
+        CASE
+            WHEN ct.type = 'credit' AND ct.transaction_type = 'sell_return_partial' THEN ct.amount
             ELSE 0
         END
     ) as total_credit_refund

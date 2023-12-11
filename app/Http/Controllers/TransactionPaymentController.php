@@ -141,9 +141,7 @@ class TransactionPaymentController extends Controller
                 if ($amount < 0) {
                     $amount = 0;
                 }
-//                dd($amount - $inputs['amount'] > 0);
-//                dd($amount - $inputs['amount'] > 0);
-//dd($transaction);
+
                 if (! empty($inputs['amount'])) {
                     $tp = TransactionPayment::create($inputs);
 
@@ -813,7 +811,7 @@ class TransactionPaymentController extends Controller
         $totalAmount = ($transaction->final_total == $cash_register_transactions->amount) ?
             $amount : $cash_register_transactions->amount + $amount;
 //        dd('credit - '.$totalAmount);
-        $this->transactionUtil->UpdateCashTransactionData($totalAmount, $method, 'credit', $transaction->id, 'partial');
+        $this->transactionUtil->UpdateCashTransactionData($totalAmount, $method, 'credit', $transaction->id, $type.'_partial');
     }
 
     private function handleDebitTransaction($transaction, $cash_register_transactions, $payment_amount, $method, $type) {

@@ -180,7 +180,8 @@
           @lang('lang_v1.credit_sales'):
         </th>
         <td>
-          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->total_credit_sell }}</span></b>
+{{--          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->total_credit_sell }}</span></b>--}}
+          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->total_credit_sell == $register_details->transaction_final_total ? $register_details->transaction_final_total: $register_details->total_credit_sell }}</span></b>
 {{--          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->adjusted_total_credit_sell }}</span></b>--}}
         </td>
       </tr>
@@ -189,7 +190,7 @@
           @lang('cash_register.total_sales'):
         </td>
         <td>
-          <span class="display_currency" data-currency_symbol="true">{{ $register_details->total_sale }}</span>
+          <span class="display_currency" data-currency_symbol="true">{{ $register_details->total_sale+$register_details->total_credit_sell }}</span>
         </td>
       </tr>
       <tr class="danger">
@@ -197,8 +198,9 @@
           @lang('cash_register.total_refund')
         </th>
         <td>
-{{--          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->total_refund }}</span></b><br>--}}
-          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->total_credit_refund+$register_details->total_refund }}</span></b><br>
+{{--          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->total_refund_credit }}</span></b><br>--}}
+{{--          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->total_credit_refund==0? $register_details->total_refund : $register_details->total_credit_refund }}</span></b><br>--}}
+          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->total_refund_credit==0? $register_details->transaction_final_total : $register_details->total_refund }}</span></b><br>
           <small>
             @if($register_details->total_cash_refund != 0)
               Cash: <span class="display_currency" data-currency_symbol="true">{{ $register_details->total_cash_refund }}</span><br>
@@ -241,8 +243,7 @@
           @lang('report.net_cash_bal_in_hand')
         </th>
         <td>
-{{--          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->total_cash_sell - ($register_details->total_cash_sell_return + $register_details->total_cash_expense_return) }}</span></b>--}}
-          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->cash_in_hand+$register_details->net_cash_bal_in_hand - $register_details->total_refund}}</span></b>
+          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->total_credit_refund==0? ($register_details->cash_in_hand+$register_details->net_cash_bal_in_hand - $register_details->total_refund) : ($register_details->cash_in_hand+$register_details->net_cash_bal_in_hand-$register_details->total_credit_refund) }}</span></b>
         </td>
       </tr>
 
