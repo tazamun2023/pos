@@ -1748,6 +1748,8 @@ function get_subtotal() {
 
 function calculate_billing_details(price_total) {
     var discount = pos_discount(price_total);
+    // console.log('discount = '+discount);
+    // console.log('price_total = '+price_total);
     if ($('#reward_point_enabled').length) {
         total_customer_reward = $('#rp_redeemed_amount').val();
         discount = parseFloat(discount) + parseFloat(total_customer_reward);
@@ -1763,6 +1765,8 @@ function calculate_billing_details(price_total) {
         pos_line_dsp_1 = pos_line_dsp_1 + __read_number($(this).find('input.pos_line_dsp_1'));
     });
     // console.log('price pos_line_dsp_1 '+ pos_line_dsp_1);
+    // price_total = price_total-discount;
+    // console.log('here '+ price_total);
     var order_tax = pos_order_tax(price_total, discount);
 
     //Add shipping charges.
@@ -1794,6 +1798,12 @@ function calculate_billing_details(price_total) {
     }
 
     var total_payable = price_total + order_tax - discount + shipping_charges + packing_charge + additional_expense;
+
+    //after discount
+
+    // var total_payable_after_discount = total_payable.toFixed(2)/1.15
+    // console.log(total_payable_after_discount);
+
 
     var rounding_multiple = $('#amount_rounding_method').val() ? parseFloat($('#amount_rounding_method').val()) : 0;
     var round_off_data = __round(total_payable, rounding_multiple);
@@ -1843,7 +1853,6 @@ function pos_order_tax(price_total, discount) {
     var calculation_type = 'percentage';
     var calculation_amount = __read_number($('#tax_calculation_amount'));
     var total_amount = price_total - discount;
-
     if (tax_rate_id) {
         var order_tax = __calculate_amount(calculation_type, calculation_amount, total_amount);
     } else {

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Account;
 use App\AccountTransaction;
 use App\BusinessLocation;
+use App\CashRegister;
 use App\Contact;
 use App\ExpenseCategory;
 use App\TaxRate;
@@ -357,7 +358,17 @@ class ExpenseController extends Controller
             $user_id = $request->session()->get('user.id');
 
             DB::beginTransaction();
+            $payments = ! empty($request->input('payment')) ? $request->input('payment') : [];
+            $checkCashRegisters = CashRegister::where('business_id', $business_id)->where('location_id', $request->location_id)->where('status', 'open')->first();
+            $checkCashRegisterBalnace = $this->transactionUtil->checkCashRegisterBalnace($checkCashRegisters->id);
+////                dd($checkCashRegisterBalnace);
 
+            $netCardBal = $checkCashRegisterBalnace->net_card_bal;
+
+            if (($payments[0]['method'] == 'card' && $netCardBal < $payments[0]['amount'])) {
+                $output = ['success' => false, 'msg' => __('lang_v1.cash_register_out_of_balance'). $payments[0]['method']];
+                return redirect()->back()->with(['status' => $output]);
+            }
             $expense = $this->transactionUtil->createExpense($request, $business_id, $user_id);
 
             if (request()->ajax()) {

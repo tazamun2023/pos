@@ -104,8 +104,11 @@
 
                 $discount_percent = !empty($imported_data['discount_percent']) ? $imported_data['discount_percent'] : $discount_percent;
             @endphp
-            {!! Form::text('purchases[' . $row_count . '][pp_without_discount]',
+            {!! Form::hidden('purchases[' . $row_count . '][pp_without_discount]',
             number_format($pp_without_discount, 4, $currency_details->decimal_separator, $currency_details->thousand_separator), ['class' => 'form-control input-sm purchase_unit_cost_without_discount input_number', 'required']); !!}
+
+            {!! Form::text('purchases[' . $row_count . '][pp_without_discount_show]',
+            number_format($pp_without_discount, 2, $currency_details->decimal_separator, $currency_details->thousand_separator), ['class' => 'form-control input-sm purchase_unit_cost_without_discount input_number', 'required']); !!}
 
             @if(!empty($last_purchase_line))
                 <br>
@@ -113,7 +116,8 @@
             @endif
         </td>
         <td>
-            {!! Form::text('purchases[' . $row_count . '][discount_percent]', number_format($discount_percent, 4, $currency_details->decimal_separator, $currency_details->thousand_separator), ['class' => 'form-control input-sm inline_discounts input_number', 'required']); !!}
+            {!! Form::hidden('purchases[' . $row_count . '][discount_percent]', number_format($discount_percent, 4, $currency_details->decimal_separator, $currency_details->thousand_separator), ['class' => 'form-control input-sm inline_discounts input_number', 'required']); !!}
+            {!! Form::text('purchases[' . $row_count . '][discount_percent_show]', number_format($discount_percent, 2, $currency_details->decimal_separator, $currency_details->thousand_separator), ['class' => 'form-control input-sm inline_discounts input_number', 'required']); !!}
 
             @if(!empty($last_purchase_line))
                 <br>
@@ -124,8 +128,10 @@
             @endif
         </td>
         <td>
-            {!! Form::text('purchases[' . $row_count . '][purchase_price]',
+            {!! Form::hidden('purchases[' . $row_count . '][purchase_price]',
             number_format($purchase_price, 4, $currency_details->decimal_separator, $currency_details->thousand_separator), ['class' => 'form-control input-sm purchase_unit_cost input_number', 'required']); !!}
+            {!! Form::text('purchases[' . $row_count . '][purchase_price_show]',
+            number_format($purchase_price, 2, $currency_details->decimal_separator, $currency_details->thousand_separator), ['class' => 'form-control input-sm purchase_unit_cost input_number', 'required']); !!}
         </td>
         <td class="{{$hide_tax}}">
             <span class="row_subtotal_before_tax display_currency">0</span>

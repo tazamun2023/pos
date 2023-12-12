@@ -53,9 +53,9 @@ class CashRegisterUtil extends Util
                     'amount' => $payment_amount,
                     'pay_method' => $payment['method'],
                     'type' => $type,
-                    'ct.transaction_type' => $transaction->type,
+                    'transaction_type' => $transaction->type,
                     'transaction_id' => $transaction->id,
-                    'transaction_type' => 'sell',
+//                    'transaction_type' => 'sell',
                     'final_total' => $transaction->final_total,
                 ]);
             }
@@ -280,8 +280,8 @@ class CashRegisterUtil extends Util
             DB::raw("
     SUM(
         CASE
-            WHEN ct.type = 'debit' AND ct.transaction_type != 'sell_return_partial' AND ct.pay_method IS NOT NULL THEN ct.final_total
-            WHEN ct.type = 'credit' AND ct.transaction_type != 'sell_return_partial' AND ct.pay_method IS NOT NULL THEN ct.final_total
+            WHEN ct.type = 'debit' AND ct.transaction_type != 'sell_return_partial' AND ct.transaction_type != 'expense' AND ct.transaction_type != 'expense_partial' AND ct.pay_method IS NOT NULL THEN ct.final_total
+            WHEN ct.type = 'credit' AND ct.transaction_type != 'sell_return_partial' AND ct.transaction_type != 'expense' AND ct.transaction_type != 'expense_partial' AND ct.pay_method IS NOT NULL THEN ct.final_total
             ELSE 0
         END
     ) as total_sale
@@ -406,10 +406,36 @@ class CashRegisterUtil extends Util
         END
     ) as total_credit_refund
 "),
+            DB::raw("
+    SUM(
+        CASE
+            WHEN ct.type = 'credit' AND ct.transaction_type = 'expense' OR ct.transaction_type = 'expense_partial' THEN ct.final_total
+            ELSE 0
+        END
+    ) as total_expense
+"),
+            DB::raw("
+    SUM(
+        CASE
+            WHEN ct.pay_method='cash' AND ct.type = 'credit' AND ct.transaction_type = 'expense' OR ct.transaction_type = 'expense_partial' THEN ct.amount
+            ELSE 0
+        END
+    ) as total_expense_paid
+"),
+            DB::raw("
+    SUM(
+        CASE
+                WHEN ct.pay_method='expense' AND ct.transaction_type = 'expense' THEN ct.amount
+                WHEN ct.pay_method='card' AND ct.transaction_type = 'expense_partial' THEN ct.amount
+                
+            ELSE 0
+        END
+    ) as total_expense_card
+"),
 //            WHEN pay_method = 'cash' AND ct.transaction_type = 'sell_return' THEN -1 * amount
             /*end for cash*/
 
-            DB::raw("SUM(IF(ct.transaction_type='expense', IF(ct.transaction_type='refund', -1 * amount, amount), 0)) as total_expense"),
+//            DB::raw("SUM(IF(ct.transaction_type='expense', IF(ct.transaction_type='refund', -1 * amount, amount), 0)) as total_expense"),
             DB::raw("SUM(IF(ct.pay_method='cash', IF(ct.transaction_type='sell', amount, 0), 0)) as total_cash"),
             DB::raw("SUM(IF(ct.pay_method='card', IF(ct.transaction_type='sell', amount, 0), 0)) as net_card_balance"),
             DB::raw("SUM(IF(ct.pay_method='cash', IF(ct.transaction_type='expense', amount, 0), 0)) as total_cash_expense"),

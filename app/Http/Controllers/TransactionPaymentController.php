@@ -89,9 +89,22 @@ class TransactionPaymentController extends Controller
 //dd($transaction->type);
 //                dd(($inputs['method'] == 'cash' && $netCashInHand < $inputs['amount']) || ($inputs['method'] == 'card' && $netCardBal < $inputs['amount']));
 //                if ($transaction->type == 'sell_return'){
-                if ($transaction->type == 'sell_return'){
-                    if (($inputs['method'] == 'cash' && $netCashInHand < $inputs['amount']) || ($inputs['method'] == 'card' && $netCardBal < $inputs['amount'])) {
-                        $output = ['success' => false, 'msg' => __('lang_v1.cash_register_out_of_balance'). $inputs['method']];
+                if ($transaction->type == 'sell_return' || $transaction->type == 'expense'){
+//                    if (($inputs['method'] == 'cash' && $netCashInHand < $inputs['amount']) || ($inputs['method'] == 'card' && $netCardBal < $inputs['amount'])) {
+//                        $output = ['success' => false, 'msg' => __('lang_v1.cash_register_out_of_balance'). $inputs['method']];
+//                        return redirect()->back()->with(['status' => $output]);
+//                    }
+                    if (
+                        ($inputs['method'] == 'cash' && $netCashInHand < $inputs['amount']) ||
+                        ($inputs['method'] == 'card' && $netCardBal < $inputs['amount'])
+                    ) {
+                        $output = ['success' => false, 'msg' => __('lang_v1.cash_register_out_of_balance') . $inputs['method']];
+
+                        // Add a check for card balance
+//                        if ($inputs['method'] == 'card' && $netCardBal < $inputs['amount']) {
+//                            $output['msg'] .= __('lang_v1.card_balance_out_of_balance');
+//                        }
+
                         return redirect()->back()->with(['status' => $output]);
                     }
                 }
@@ -144,49 +157,12 @@ class TransactionPaymentController extends Controller
 
                 if (! empty($inputs['amount'])) {
                     $tp = TransactionPayment::create($inputs);
-
                     $cash_register_transactions = CashRegisterTransaction::where('transaction_id', $transaction->id)->first();
                     if ($amount - $inputs['amount'] > 0) {
                         $this->handleCreditTransaction($transaction, $cash_register_transactions, $inputs['amount'], $inputs['method'], $transaction->type);
                     } else {
                         $this->handleDebitTransaction($transaction, $cash_register_transactions, $payment_amount, $inputs['method'], $transaction->type);
                     }
-//                    if ($amount-$inputs['amount'] > 0){
-//                        $cash_register_transactions = CashRegisterTransaction::where('transaction_id', $transaction->id)->first();
-////                        dd($transaction->final_total == $cash_register_transactions->amount);
-//                        if ($transaction->final_total == $cash_register_transactions->amount){
-//
-//                            if ($transaction->type=='sell_return'){
-//                                $this->transactionUtil->UpdateCashTransactionData($inputs['amount'],$inputs['method'],'credit',$transaction->id,"sell_return");
-//                            }else{
-//                                $this->transactionUtil->UpdateCashTransactionData($inputs['amount'],$inputs['method'],'credit',$transaction->id,"partial");
-//                            }
-//                        }else{
-//                            if ($transaction->type=='sell_return'){
-//                                $this->transactionUtil->UpdateCashTransactionData($inputs['amount'],$inputs['method'],'credit',$transaction->id,"sell_return");
-//                            }else{
-//                                $this->transactionUtil->UpdateCashTransactionData($cash_register_transactions->amount+$inputs['amount'],$inputs['method'],'credit',$transaction->id,"partial");
-//                            }
-//                        }
-//
-//                    }else{
-//                        $cash_register_transactions = CashRegisterTransaction::where('transaction_id', $transaction->id)->first();
-//
-//                        if ($transaction->final_total == $cash_register_transactions->amount){
-//                            if ($transaction->type=='sell_return'){
-//                                $this->transactionUtil->UpdateCashTransactionData($inputs['amount'],$inputs['method'],'credit',$transaction->id,"sell_return");
-//                            }else{
-//                                $this->transactionUtil->UpdateCashTransactionData($payment_amount,$inputs['method'],'debit',$transaction->id,"sell");
-//                            }
-//                        }else{
-//                            if ($transaction->type=='sell_return'){
-//                                $this->transactionUtil->UpdateCashTransactionData($inputs['amount'],$inputs['method'],'credit',$transaction->id,"sell_return");
-//                            }else{
-//                                $this->transactionUtil->UpdateCashTransactionData($cash_register_transactions->amount+$payment_amount,$inputs['method'],'debit',$transaction->id,"sell");
-//                            }
-//                        }
-//                    }
-
                     if (! empty($request->input('denominations'))) {
                         $this->transactionUtil->addCashDenominations($tp, $request->input('denominations'));
                     }

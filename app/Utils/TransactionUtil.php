@@ -5697,6 +5697,11 @@ class TransactionUtil extends Util
         //update payment status
         $this->updatePaymentStatus($transaction->id, $transaction->final_total);
 
+        //cash register
+        if ($transaction->type = 'expense'){
+            $this->insertCashTransactionData($payments[0]['amount'], 'expense','credit', $transaction->id,'expense');
+        }
+
         return $transaction;
     }
 
