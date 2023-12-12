@@ -1086,9 +1086,9 @@ class SellPosController extends Controller
 //                dd($payment_status);
                 if ($payment_status=='due'){
                     if ($is_credit_sale){
-                        $this->transactionUtil->insertCashTransactionData($transaction->final_total, null,'credit', $transaction->id, 'credit_'.$transaction->type);
+                        $this->transactionUtil->insertCashTransactionData($transaction->final_total, 'credit_sell','credit', $transaction->id, 'credit_'.$transaction->type);
                     }else{
-                        $this->transactionUtil->insertCashTransactionData($transaction->final_total, null,'credit', $transaction->id,'suspend');
+                        $this->transactionUtil->insertCashTransactionData($transaction->final_total, 'suspend_sell','credit', $transaction->id,'suspend');
                     }
                 }
 
