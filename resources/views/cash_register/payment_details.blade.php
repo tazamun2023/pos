@@ -244,7 +244,7 @@
         </th>
         <td>
 {{--          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->total_sell_return_partial }}</span></b>--}}
-          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->cash_in_hand+$register_details->net_cash_bal_in_hand+$register_details->total_debit_sell_partial-($register_details->total_sell_return_partial+$register_details->total_expense_paid) }}</span></b>
+          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->cash_in_hand+$register_details->net_cash_bal_in_hand+$register_details->total_debit_cash_sell_partial-($register_details->total_sell_return_partial+$register_details->total_expense_paid) }}</span></b>
 {{--          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->total_credit_refund==0? ($register_details->cash_in_hand+$register_details->net_cash_bal_in_hand - $register_details->total_refund) : ($register_details->cash_in_hand+$register_details->net_cash_bal_in_hand-$register_details->total_credit_refund) }}</span></b>--}}
         </td>
       </tr>

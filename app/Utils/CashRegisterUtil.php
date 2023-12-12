@@ -320,6 +320,14 @@ class CashRegisterUtil extends Util
             END
         ) as total_debit_sell_partial
     "),
+            DB::raw("
+        SUM(
+            CASE
+                WHEN ct.pay_method='cash' AND ct.type= 'debit' AND ct.transaction_type = 'sell_partial' THEN ct.amount
+                ELSE 0
+            END
+        ) as total_debit_cash_sell_partial
+    "),
 
             DB::raw("
         SUM(
@@ -333,9 +341,7 @@ class CashRegisterUtil extends Util
             DB::raw("
     SUM(
         CASE
-            WHEN ct.pay_method = 'card' AND ct.transaction_type = 'sell' THEN ct.amount
-            WHEN ct.pay_method = 'card' AND ct.transaction_type = 'sell_return' THEN -1 * ct.amount
-            WHEN ct.pay_method = 'card' AND ct.transaction_type = 'expense' THEN -1 * ct.amount
+            WHEN ct.pay_method = 'card' AND ct.transaction_type = 'sell_partial' THEN ct.amount
             ELSE 0
         END
     ) as net_card_bal

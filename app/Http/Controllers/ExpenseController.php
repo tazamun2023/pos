@@ -363,9 +363,13 @@ class ExpenseController extends Controller
             $checkCashRegisterBalnace = $this->transactionUtil->checkCashRegisterBalnace($checkCashRegisters->id);
 ////                dd($checkCashRegisterBalnace);
 
+            $netCashInHand = $checkCashRegisterBalnace->cash_in_hand+$checkCashRegisterBalnace->net_cash_bal_in_hand;
             $netCardBal = $checkCashRegisterBalnace->net_card_bal;
-
-            if (($payments[0]['method'] == 'card' && $netCardBal < $payments[0]['amount'])) {
+//            dd($netCardBal);
+            if (
+                ($payments[0]['method'] == 'card' && $netCardBal < $payments[0]['amount']) ||
+                ($payments[0]['method'] == 'cash' && $netCashInHand < $payments[0]['amount'])
+            ) {
                 $output = ['success' => false, 'msg' => __('lang_v1.cash_register_out_of_balance'). $payments[0]['method']];
                 return redirect()->back()->with(['status' => $output]);
             }
