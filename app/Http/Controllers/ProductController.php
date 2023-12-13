@@ -778,10 +778,11 @@ class ProductController extends Controller
 
             if ($product->type == 'single') {
                 $single_data = $request->only(['single_variation_id', 'single_dpp', 'single_dpp_inc_tax', 'single_dsp_inc_tax', 'profit_percent', 'single_dsp']);
+//                dd($single_data);
                 $variation = Variation::find($single_data['single_variation_id']);
                 if ($product->tax){
                     $tax_rate = TaxRate::find($product->tax)->amount;
-                    $without_tax = $selling_price_inc_tax/(1+$tax_rate/100);
+                    $without_tax = $single_data['single_dsp_inc_tax']/(1+$tax_rate/100);
 //            dd($without_tax);
                 }
                 $variation->sub_sku = $product->sku;
