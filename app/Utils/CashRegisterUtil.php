@@ -342,6 +342,7 @@ class CashRegisterUtil extends Util
     SUM(
         CASE
             WHEN ct.pay_method = 'card' AND ct.transaction_type = 'sell_partial' THEN ct.amount
+            WHEN ct.pay_method = 'card' AND ct.transaction_type = 'sell' THEN ct.amount
             ELSE 0
         END
     ) as net_card_bal
