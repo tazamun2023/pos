@@ -1772,7 +1772,7 @@ function calculate_billing_details(price_total) {
     // price_total = price_total-discount;
     // console.log('here '+ price_total);
     var order_tax = pos_order_tax(price_total, discount);
-    console.log('order_tax - '+ order_tax);
+    // console.log('order_tax - '+ order_tax);
     //Add shipping charges.
     var shipping_charges = __read_number($('input#shipping_charges'));
 
