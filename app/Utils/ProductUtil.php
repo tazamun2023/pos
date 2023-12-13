@@ -38,6 +38,7 @@ class ProductUtil extends Util
      */
     public function createSingleProductVariation($product, $sku, $purchase_price, $dpp_inc_tax, $profit_percent, $selling_price, $selling_price_inc_tax, $combo_variations = [])
     {
+//        dd($selling_price_inc_tax);
         if (! is_object($product)) {
             $product = Product::find($product);
         }

@@ -5699,7 +5699,7 @@ class TransactionUtil extends Util
 
         //cash register
         if ($transaction->type = 'expense'){
-            $this->insertCashTransactionData($payments[0]['amount'], 'expense','credit', $transaction->id,'expense');
+            $this->insertCashTransactionData($payments[0]['amount'], $payments[0]['method'],'credit', $transaction->id,'expense');
         }
 
         return $transaction;

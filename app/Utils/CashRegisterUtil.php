@@ -442,6 +442,26 @@ class CashRegisterUtil extends Util
             DB::raw("
     SUM(
         CASE
+            WHEN ct.pay_method = 'cash' AND ct.type = 'credit' AND ct.transaction_type = 'expense' THEN ct.amount
+            WHEN ct.pay_method = 'cash' AND ct.type = 'debit' AND ct.transaction_type = 'expense_partial' THEN ct.amount
+            WHEN ct.pay_method = 'cash' AND ct.type = 'credit' AND ct.transaction_type = 'expense_partial' THEN ct.amount
+            ELSE 0
+        END
+    ) as total_cash_expense
+"),
+            DB::raw("
+    SUM(
+        CASE
+            WHEN ct.pay_method = 'card' AND ct.type = 'credit' AND ct.transaction_type = 'expense' THEN ct.amount
+            WHEN ct.pay_method = 'card' AND ct.type = 'debit' AND ct.transaction_type = 'expense_partial' THEN ct.amount
+            WHEN ct.pay_method = 'card' AND ct.type = 'credit' AND ct.transaction_type = 'expense_partial' THEN ct.amount
+            ELSE 0
+        END
+    ) as total_card_expense
+"),
+            DB::raw("
+    SUM(
+        CASE
             WHEN ct.pay_method='cash' AND ct.type = 'credit' AND ct.transaction_type = 'expense' OR ct.transaction_type = 'expense_partial' THEN ct.amount
             ELSE 0
         END
@@ -471,11 +491,11 @@ class CashRegisterUtil extends Util
 //            DB::raw("SUM(IF(ct.transaction_type='expense', IF(ct.transaction_type='refund', -1 * amount, amount), 0)) as total_expense"),
             DB::raw("SUM(IF(ct.pay_method='cash', IF(ct.transaction_type='sell', amount, 0), 0)) as total_cash"),
             DB::raw("SUM(IF(ct.pay_method='card', IF(ct.transaction_type='sell', amount, 0), 0)) as net_card_balance"),
-            DB::raw("SUM(IF(ct.pay_method='cash', IF(ct.transaction_type='expense', amount, 0), 0)) as total_cash_expense"),
+//            DB::raw("SUM(IF(ct.pay_method='cash', IF(ct.transaction_type='expense', amount, 0), 0)) as total_cash_expense"),
             DB::raw("SUM(IF(ct.pay_method='cheque', IF(ct.transaction_type='sell', amount, 0), 0)) as total_cheque"),
             DB::raw("SUM(IF(ct.pay_method='cheque', IF(ct.transaction_type='expense', amount, 0), 0)) as total_cheque_expense"),
             DB::raw("SUM(IF(ct.pay_method='card', IF(ct.transaction_type='sell', amount, 0), 0)) as total_card"),
-            DB::raw("SUM(IF(ct.pay_method='card', IF(ct.transaction_type='expense', amount, 0), 0)) as total_card_expense"),
+//            DB::raw("SUM(IF(ct.pay_method='card', IF(ct.transaction_type='expense', amount, 0), 0)) as total_card_expense"),
             DB::raw("SUM(IF(ct.pay_method='bank_transfer', IF(ct.transaction_type='sell', amount, 0), 0)) as total_bank_transfer"),
             DB::raw("SUM(IF(ct.pay_method='bank_transfer', IF(ct.transaction_type='expense', amount, 0), 0)) as total_bank_transfer_expense"),
             DB::raw("SUM(IF(ct.pay_method='other', IF(ct.transaction_type='sell', amount, 0), 0)) as total_other"),
