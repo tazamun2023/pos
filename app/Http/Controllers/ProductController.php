@@ -779,12 +779,18 @@ class ProductController extends Controller
             if ($product->type == 'single') {
                 $single_data = $request->only(['single_variation_id', 'single_dpp', 'single_dpp_inc_tax', 'single_dsp_inc_tax', 'profit_percent', 'single_dsp']);
                 $variation = Variation::find($single_data['single_variation_id']);
-
+                if ($product->tax){
+                    $tax_rate = TaxRate::find($product->tax)->amount;
+                    $without_tax = $selling_price_inc_tax/(1+$tax_rate/100);
+//            dd($without_tax);
+                }
                 $variation->sub_sku = $product->sku;
-                $variation->default_purchase_price = $this->productUtil->num_uf($single_data['single_dpp']);
+//                $variation->default_purchase_price = $this->productUtil->num_uf($single_data['single_dpp']);
+                $variation->default_purchase_price = $without_tax?$this->productUtil->systemDoubleValue($without_tax):$this->productUtil->num_uf($single_data['single_dpp']);
                 $variation->dpp_inc_tax = $this->productUtil->num_uf($single_data['single_dpp_inc_tax']);
                 $variation->profit_percent = $this->productUtil->num_uf($single_data['profit_percent']);
-                $variation->default_sell_price = $this->productUtil->num_uf($single_data['single_dsp']);
+//                $variation->default_sell_price = $this->productUtil->num_uf($single_data['single_dsp']);
+                $variation->default_sell_price = $without_tax?$this->productUtil->systemDoubleValue($without_tax):$this->productUtil->num_uf($single_data['single_dsp']);
                 $variation->sell_price_inc_tax = $this->productUtil->num_uf($single_data['single_dsp_inc_tax']);
                 $variation->save();
 
