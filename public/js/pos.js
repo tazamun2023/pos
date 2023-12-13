@@ -1748,6 +1748,10 @@ function get_subtotal() {
 
 function calculate_billing_details(price_total) {
     var discount = pos_discount(price_total);
+
+    if (discount==0){
+
+    }
     // console.log('discount = '+discount);
     // console.log('price_total = '+price_total);
     if ($('#reward_point_enabled').length) {
@@ -1768,7 +1772,7 @@ function calculate_billing_details(price_total) {
     // price_total = price_total-discount;
     // console.log('here '+ price_total);
     var order_tax = pos_order_tax(price_total, discount);
-
+    console.log('order_tax - '+ order_tax);
     //Add shipping charges.
     var shipping_charges = __read_number($('input#shipping_charges'));
 
@@ -1849,29 +1853,47 @@ function pos_discount(total_amount) {
 }
 
 function pos_order_tax(price_total, discount) {
-    var tax_rate_id = $('#tax_rate_id').val();
-    var calculation_type = 'percentage';
-    var calculation_amount = __read_number($('#tax_calculation_amount'));
-    var total_amount = price_total - discount;
-    if (tax_rate_id) {
-        var order_tax = __calculate_amount(calculation_type, calculation_amount, total_amount);
-    } else {
-        var order_tax = 0;
+    if (discount==0){
+        var tax_rate_id = $('#tax_rate_id').val();
+        var calculation_type = 'percentage';
+        var calculation_amount = __read_number($('#tax_calculation_amount'));
+        var total_amount = price_total - discount;
+        if (tax_rate_id) {
+            var order_tax = __calculate_amount(calculation_type, calculation_amount, total_amount);
+        } else {
+            var order_tax = 0;
+        }
+
+
+        var tr = $(this).parents('tr');
+        var pos_line_dsp_1 = __read_number(tr.find('input.pos_line_dsp_1'));
+
+        $('table#pos_table tbody tr').each(function() {
+            pos_line_dsp_1 = pos_line_dsp_1 + __read_number($(this).find('input.pos_line_dsp_1'));
+        });
+        order_tax=pos_line_dsp_1;
+        $('span#order_tax').text(__currency_trans_from_en(order_tax, false));
+        $('input#order_tax_input').val(__currency_trans_from_en(order_tax, false));
+        // __write_number(tr.find('input.pos_line_dsp_1'), line_total_tax, false, 2);
+
+        return order_tax;
+    }else {
+        var tax_rate_id = $('#tax_rate_id').val();
+        var calculation_type = 'percentage';
+        var calculation_amount = __read_number($('#tax_calculation_amount'));
+        var total_amount = price_total - discount;
+
+        if (tax_rate_id) {
+            var order_tax = __calculate_amount(calculation_type, calculation_amount, total_amount);
+        } else {
+            var order_tax = 0;
+        }
+
+        $('span#order_tax').text(__currency_trans_from_en(order_tax, false));
+
+        return order_tax;
     }
 
-
-    var tr = $(this).parents('tr');
-    var pos_line_dsp_1 = __read_number(tr.find('input.pos_line_dsp_1'));
-
-    $('table#pos_table tbody tr').each(function() {
-        pos_line_dsp_1 = pos_line_dsp_1 + __read_number($(this).find('input.pos_line_dsp_1'));
-    });
-    order_tax=pos_line_dsp_1;
-    $('span#order_tax').text(__currency_trans_from_en(order_tax, false));
-    $('input#order_tax_input').val(__currency_trans_from_en(order_tax, false));
-    // __write_number(tr.find('input.pos_line_dsp_1'), line_total_tax, false, 2);
-
-    return order_tax;
 }
 
 function calculate_balance_due() {
