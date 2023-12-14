@@ -67,118 +67,174 @@ class TransactionPaymentController extends Controller
             $business_id = $request->session()->get('user.business_id');
             $transaction_id = $request->input('transaction_id');
             $transaction = Transaction::where('business_id', $business_id)->with(['contact'])->findOrFail($transaction_id);
-
             $transaction_before = $transaction->replicate();
 
             if (! (auth()->user()->can('purchase.payments') || auth()->user()->can('sell.payments') || auth()->user()->can('all_expense.access') || auth()->user()->can('view_own_expense'))) {
                 abort(403, 'Unauthorized action.');
             }
             $location_id = ! empty($transaction->location_id) ? $transaction->location_id : null;
+if ($transaction->type=='purchase'){
+    if ($transaction->payment_status != 'paid') {
+        $inputs = $request->only(['amount', 'method', 'note', 'card_number', 'card_holder_name',
+            'card_transaction_number', 'card_type', 'card_month', 'card_year', 'card_security',
+            'cheque_number', 'bank_account_number', ]);
+        $inputs['paid_on'] = $this->transactionUtil->uf_date($request->input('paid_on'), true);
+        $inputs['transaction_id'] = $transaction->id;
+        $inputs['amount'] = $this->transactionUtil->num_uf($inputs['amount']);
+        $inputs['created_by'] = auth()->user()->id;
+        $inputs['payment_for'] = $transaction->contact_id;
 
-            if ($transaction->payment_status != 'paid') {
-                $inputs = $request->only(['amount', 'method', 'note', 'card_number', 'card_holder_name',
-                    'card_transaction_number', 'card_type', 'card_month', 'card_year', 'card_security',
-                    'cheque_number', 'bank_account_number', ]);
-                $inputs['paid_on'] = $this->transactionUtil->uf_date($request->input('paid_on'), true);
-                $inputs['transaction_id'] = $transaction->id;
-                $checkCashRegisters = CashRegister::where('business_id', $business_id)->where('location_id', $location_id)->where('status', 'open')->first();
-                $checkCashRegisterBalnace = $this->transactionUtil->checkCashRegisterBalnace($checkCashRegisters->id);
-//                dd($checkCashRegisterBalnace);
-                $netCashInHand = $checkCashRegisterBalnace->cash_in_hand+$checkCashRegisterBalnace->net_cash_bal_in_hand;
-                $netCardBal = $checkCashRegisterBalnace->net_card_bal;
-//dd($transaction->type);
-//                dd(($inputs['method'] == 'cash' && $netCashInHand < $inputs['amount']) || ($inputs['method'] == 'card' && $netCardBal < $inputs['amount']));
-//                if ($transaction->type == 'sell_return'){
-                if ($transaction->type == 'sell_return' || $transaction->type == 'expense'){
-//                    if (($inputs['method'] == 'cash' && $netCashInHand < $inputs['amount']) || ($inputs['method'] == 'card' && $netCardBal < $inputs['amount'])) {
-//                        $output = ['success' => false, 'msg' => __('lang_v1.cash_register_out_of_balance'). $inputs['method']];
-//                        return redirect()->back()->with(['status' => $output]);
-//                    }
-                    if (
-                        ($inputs['method'] == 'cash' && $netCashInHand < $inputs['amount']) ||
-                        ($inputs['method'] == 'card' && $netCardBal < $inputs['amount'])
-                    ) {
-                        $output = ['success' => false, 'msg' => __('lang_v1.cash_register_out_of_balance') . $inputs['method']];
+        if ($inputs['method'] == 'custom_pay_1') {
+            $inputs['transaction_no'] = $request->input('transaction_no_1');
+        } elseif ($inputs['method'] == 'custom_pay_2') {
+            $inputs['transaction_no'] = $request->input('transaction_no_2');
+        } elseif ($inputs['method'] == 'custom_pay_3') {
+            $inputs['transaction_no'] = $request->input('transaction_no_3');
+        }
 
-                        // Add a check for card balance
-//                        if ($inputs['method'] == 'card' && $netCardBal < $inputs['amount']) {
-//                            $output['msg'] .= __('lang_v1.card_balance_out_of_balance');
-//                        }
+        if (! empty($request->input('account_id')) && $inputs['method'] != 'advance') {
+            $inputs['account_id'] = $request->input('account_id');
+        }
 
-                        return redirect()->back()->with(['status' => $output]);
-                    }
-                }
+        $prefix_type = 'purchase_payment';
+        if (in_array($transaction->type, ['sell', 'sell_return'])) {
+            $prefix_type = 'sell_payment';
+        } elseif (in_array($transaction->type, ['expense', 'expense_refund'])) {
+            $prefix_type = 'expense_payment';
+        }
 
-                $inputs['amount'] = $this->transactionUtil->num_uf($inputs['amount']);
+        DB::beginTransaction();
 
+        $ref_count = $this->transactionUtil->setAndGetReferenceCount($prefix_type);
+        //Generate reference number
+        $inputs['payment_ref_no'] = $this->transactionUtil->generateReferenceNumber($prefix_type, $ref_count);
 
-                $inputs['created_by'] = auth()->user()->id;
-                $inputs['payment_for'] = $transaction->contact_id;
+        $inputs['business_id'] = $request->session()->get('business.id');
+        $inputs['document'] = $this->transactionUtil->uploadFile($request, 'document', 'documents');
 
-                if ($inputs['method'] == 'custom_pay_1') {
-                    $inputs['transaction_no'] = $request->input('transaction_no_1');
-                } elseif ($inputs['method'] == 'custom_pay_2') {
-                    $inputs['transaction_no'] = $request->input('transaction_no_2');
-                } elseif ($inputs['method'] == 'custom_pay_3') {
-                    $inputs['transaction_no'] = $request->input('transaction_no_3');
-                }
+        //Pay from advance balance
+        $payment_amount = $inputs['amount'];
+        $contact_balance = ! empty($transaction->contact) ? $transaction->contact->balance : 0;
+        if ($inputs['method'] == 'advance' && $inputs['amount'] > $contact_balance) {
+            throw new AdvanceBalanceNotAvailable(__('lang_v1.required_advance_balance_not_available'));
+        }
 
-                if (! empty($request->input('account_id')) && $inputs['method'] != 'advance') {
-                    $inputs['account_id'] = $request->input('account_id');
-                }
+        if (! empty($inputs['amount'])) {
+            $tp = TransactionPayment::create($inputs);
 
-                $prefix_type = 'purchase_payment';
-                if (in_array($transaction->type, ['sell', 'sell_return'])) {
-                    $prefix_type = 'sell_payment';
-                } elseif (in_array($transaction->type, ['expense', 'expense_refund'])) {
-                    $prefix_type = 'expense_payment';
-                }
-
-                DB::beginTransaction();
-
-                $ref_count = $this->transactionUtil->setAndGetReferenceCount($prefix_type);
-                //Generate reference number
-                $inputs['payment_ref_no'] = $this->transactionUtil->generateReferenceNumber($prefix_type, $ref_count);
-
-                $inputs['business_id'] = $request->session()->get('business.id');
-                $inputs['document'] = $this->transactionUtil->uploadFile($request, 'document', 'documents');
-
-                //Pay from advance balance
-                $payment_amount = $inputs['amount'];
-                $contact_balance = ! empty($transaction->contact) ? $transaction->contact->balance : 0;
-                if ($inputs['method'] == 'advance' && $inputs['amount'] > $contact_balance) {
-                    throw new AdvanceBalanceNotAvailable(__('lang_v1.required_advance_balance_not_available'));
-                }
-                $paid_amount = $this->transactionUtil->getTotalPaid($transaction_id);
-                $amount = $transaction->final_total - $paid_amount;
-                if ($amount < 0) {
-                    $amount = 0;
-                }
-
-                if (! empty($inputs['amount'])) {
-                    $tp = TransactionPayment::create($inputs);
-                    $cash_register_transactions = CashRegisterTransaction::where('transaction_id', $transaction->id)->first();
-                    if ($amount - $inputs['amount'] > 0) {
-                        $this->handleCreditTransaction($transaction, $cash_register_transactions, $inputs['amount'], $inputs['method'], $transaction->type);
-                    } else {
-                        $this->handleDebitTransaction($transaction, $cash_register_transactions, $payment_amount, $inputs['method'], $transaction->type);
-                    }
-                    if (! empty($request->input('denominations'))) {
-                        $this->transactionUtil->addCashDenominations($tp, $request->input('denominations'));
-                    }
-
-                    $inputs['transaction_type'] = $transaction->type;
-                    event(new TransactionPaymentAdded($tp, $inputs));
-                }
-
-                //update payment status
-                $payment_status = $this->transactionUtil->updatePaymentStatus($transaction_id, $transaction->final_total);
-                $transaction->payment_status = $payment_status;
-
-                $this->transactionUtil->activityLog($transaction, 'payment_edited', $transaction_before);
-
-                DB::commit();
+            if (! empty($request->input('denominations'))) {
+                $this->transactionUtil->addCashDenominations($tp, $request->input('denominations'));
             }
+
+            $inputs['transaction_type'] = $transaction->type;
+            event(new TransactionPaymentAdded($tp, $inputs));
+        }
+
+        //update payment status
+        $payment_status = $this->transactionUtil->updatePaymentStatus($transaction_id, $transaction->final_total);
+        $transaction->payment_status = $payment_status;
+
+        $this->transactionUtil->activityLog($transaction, 'payment_edited', $transaction_before);
+
+        DB::commit();
+    }
+}else{
+    if ($transaction->payment_status != 'paid') {
+        $inputs = $request->only(['amount', 'method', 'note', 'card_number', 'card_holder_name',
+            'card_transaction_number', 'card_type', 'card_month', 'card_year', 'card_security',
+            'cheque_number', 'bank_account_number', ]);
+        $inputs['paid_on'] = $this->transactionUtil->uf_date($request->input('paid_on'), true);
+        $inputs['transaction_id'] = $transaction->id;
+        $checkCashRegisters = CashRegister::where('business_id', $business_id)->where('location_id', $location_id)->where('status', 'open')->first();
+        $checkCashRegisterBalnace = $this->transactionUtil->checkCashRegisterBalnace($checkCashRegisters->id);
+//                dd($checkCashRegisterBalnace);
+        $netCashInHand = $checkCashRegisterBalnace->cash_in_hand+$checkCashRegisterBalnace->net_cash_bal_in_hand;
+        $netCardBal = $checkCashRegisterBalnace->net_card_bal;
+
+        if ($transaction->type == 'sell_return' || $transaction->type == 'expense'){
+//
+            if (
+                ($inputs['method'] == 'cash' && $netCashInHand < $inputs['amount']) ||
+                ($inputs['method'] == 'card' && $netCardBal < $inputs['amount'])
+            ) {
+                $output = ['success' => false, 'msg' => __('lang_v1.cash_register_out_of_balance') . $inputs['method']];
+
+                return redirect()->back()->with(['status' => $output]);
+            }
+        }
+
+        $inputs['amount'] = $this->transactionUtil->num_uf($inputs['amount']);
+
+
+        $inputs['created_by'] = auth()->user()->id;
+        $inputs['payment_for'] = $transaction->contact_id;
+
+        if ($inputs['method'] == 'custom_pay_1') {
+            $inputs['transaction_no'] = $request->input('transaction_no_1');
+        } elseif ($inputs['method'] == 'custom_pay_2') {
+            $inputs['transaction_no'] = $request->input('transaction_no_2');
+        } elseif ($inputs['method'] == 'custom_pay_3') {
+            $inputs['transaction_no'] = $request->input('transaction_no_3');
+        }
+
+        if (! empty($request->input('account_id')) && $inputs['method'] != 'advance') {
+            $inputs['account_id'] = $request->input('account_id');
+        }
+
+        $prefix_type = 'purchase_payment';
+        if (in_array($transaction->type, ['sell', 'sell_return'])) {
+            $prefix_type = 'sell_payment';
+        } elseif (in_array($transaction->type, ['expense', 'expense_refund'])) {
+            $prefix_type = 'expense_payment';
+        }
+
+        DB::beginTransaction();
+
+        $ref_count = $this->transactionUtil->setAndGetReferenceCount($prefix_type);
+        //Generate reference number
+        $inputs['payment_ref_no'] = $this->transactionUtil->generateReferenceNumber($prefix_type, $ref_count);
+
+        $inputs['business_id'] = $request->session()->get('business.id');
+        $inputs['document'] = $this->transactionUtil->uploadFile($request, 'document', 'documents');
+
+        //Pay from advance balance
+        $payment_amount = $inputs['amount'];
+        $contact_balance = ! empty($transaction->contact) ? $transaction->contact->balance : 0;
+        if ($inputs['method'] == 'advance' && $inputs['amount'] > $contact_balance) {
+            throw new AdvanceBalanceNotAvailable(__('lang_v1.required_advance_balance_not_available'));
+        }
+        $paid_amount = $this->transactionUtil->getTotalPaid($transaction_id);
+        $amount = $transaction->final_total - $paid_amount;
+        if ($amount < 0) {
+            $amount = 0;
+        }
+
+        if (! empty($inputs['amount'])) {
+            $tp = TransactionPayment::create($inputs);
+            $cash_register_transactions = CashRegisterTransaction::where('transaction_id', $transaction->id)->first();
+            if ($amount - $inputs['amount'] > 0) {
+                $this->handleCreditTransaction($transaction, $cash_register_transactions, $inputs['amount'], $inputs['method'], $transaction->type);
+            } else {
+                $this->handleDebitTransaction($transaction, $cash_register_transactions, $payment_amount, $inputs['method'], $transaction->type);
+            }
+            if (! empty($request->input('denominations'))) {
+                $this->transactionUtil->addCashDenominations($tp, $request->input('denominations'));
+            }
+
+            $inputs['transaction_type'] = $transaction->type;
+            event(new TransactionPaymentAdded($tp, $inputs));
+        }
+
+        //update payment status
+        $payment_status = $this->transactionUtil->updatePaymentStatus($transaction_id, $transaction->final_total);
+        $transaction->payment_status = $payment_status;
+
+        $this->transactionUtil->activityLog($transaction, 'payment_edited', $transaction_before);
+
+        DB::commit();
+    }
+}
+
 
             $output = ['success' => true,
                 'msg' => __('purchase.payment_added_success'),
