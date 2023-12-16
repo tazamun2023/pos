@@ -62,10 +62,12 @@ class ProductUtil extends Util
             'sub_sku' => $sku,
 //            'default_purchase_price' => $this->num_uf($purchase_price),
             'default_purchase_price' => $without_tax?$this->systemDoubleValue($without_tax):$this->num_uf($purchase_price),
+            'default_purchase_price_double' => $without_tax??$this->num_uf($purchase_price),
             'dpp_inc_tax' => $this->num_uf($dpp_inc_tax),
             'profit_percent' => $this->num_uf($profit_percent),
 //            'default_sell_price' => $this->num_uf($selling_price),
             'default_sell_price' => $without_tax?$this->systemDoubleValue($without_tax):$this->num_uf($selling_price),
+            'default_sell_price_price_double' => $without_tax??$this->num_uf($selling_price),
             'sell_price_inc_tax' => $this->num_uf($selling_price_inc_tax),
             'combo_variations' => $combo_variations,
         ];
@@ -2268,4 +2270,9 @@ class ProductUtil extends Util
     function systemDoubleValue($value, $digits = 4){
         return sprintf('%.'.$digits.'f', floor($value*10000*($value>0?1:-1))/10000*($value>0?1:-1));
     }
+//    function systemDoubleValue($value, $digits = 4){
+//        // Use sprintf to format the value with exactly 8 digits after the decimal point
+//        return sprintf('%0.'.$digits.'f', $value);
+//    }
+
 }

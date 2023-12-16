@@ -788,10 +788,12 @@ class ProductController extends Controller
                 $variation->sub_sku = $product->sku;
 //                $variation->default_purchase_price = $this->productUtil->num_uf($single_data['single_dpp']);
                 $variation->default_purchase_price = $without_tax?$this->productUtil->systemDoubleValue($without_tax):$this->productUtil->num_uf($single_data['single_dpp']);
+                $variation->default_purchase_price_double = $without_tax??$this->productUtil->num_uf($single_data['single_dpp']);
                 $variation->dpp_inc_tax = $this->productUtil->num_uf($single_data['single_dpp_inc_tax']);
                 $variation->profit_percent = $this->productUtil->num_uf($single_data['profit_percent']);
 //                $variation->default_sell_price = $this->productUtil->num_uf($single_data['single_dsp']);
                 $variation->default_sell_price = $without_tax?$this->productUtil->systemDoubleValue($without_tax):$this->productUtil->num_uf($single_data['single_dsp']);
+                $variation->default_sell_price_price_double = $without_tax??$this->productUtil->num_uf($single_data['single_dsp']);
                 $variation->sell_price_inc_tax = $this->productUtil->num_uf($single_data['single_dsp_inc_tax']);
                 $variation->save();
 

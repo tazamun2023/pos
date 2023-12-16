@@ -285,7 +285,7 @@ class SellReturnController extends Controller
                 DB::beginTransaction();
 
                 $sell_return = $this->transactionUtil->addSellReturn($input, $business_id, $user_id);
-//dd($sell_return);
+
                 $receipt = $this->receiptContent($business_id, $sell_return->location_id, $sell_return->id);
                 //for register report
                 $this->transactionUtil->insertCashTransactionData($sell_return->final_total, null,'credit',$sell_return->id,'sell_return');

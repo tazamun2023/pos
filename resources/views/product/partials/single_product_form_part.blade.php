@@ -30,7 +30,7 @@
 
             <div class="col-sm-6 addProduct_form">
               {!! Form::label('single_dpp_inc_tax', trans('product.inc_of_tax') . ':*') !!}
-            
+
               {!! Form::text('single_dpp_inc_tax', $default, ['class' => 'form-control input-sm dpp_inc_tax input_number', 'placeholder' => __('product.inc_of_tax'), 'required']); !!}
             </div>
           </td>

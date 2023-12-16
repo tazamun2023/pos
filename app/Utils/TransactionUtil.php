@@ -5896,6 +5896,7 @@ class TransactionUtil extends Util
 
     public function addSellReturn($input, $business_id, $user_id, $uf_number = true)
     {
+
         $discount = [
             'discount_type' => $input['discount_type'] ?? 'fixed',
             'discount_amount' => $input['discount_amount'] ?? 0,

@@ -185,6 +185,16 @@
 {{--          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->total_credit_sell == $register_details->transaction_final_total ? $register_details->transaction_final_total: ($register_details->transaction_final_total-$register_details->total_credit_sell_partial) }}</span></b>--}}
         </td>
       </tr>
+      <tr class="success">
+        <th>
+          @lang('lang_v1.cash_sales'):
+        </th>
+        <td>
+          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->total_sale- ($register_details->total_credit_sell + $register_details->total_suspend) }}</span></b>
+{{--          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->transaction_final_total-$register_details->total_credit_sell==0? $register_details->total_credit_sell_partial + $register_details->total_credit_sell: $register_details->total_credit_sell_partial+$register_details->transaction_final_total }}</span></b>--}}
+{{--          <b><span class="display_currency" data-currency_symbol="true">{{ $register_details->total_credit_sell == $register_details->transaction_final_total ? $register_details->transaction_final_total: ($register_details->transaction_final_total-$register_details->total_credit_sell_partial) }}</span></b>--}}
+        </td>
+      </tr>
       <tr class='success'>
         <td>
           @lang('cash_register.total_sales'):

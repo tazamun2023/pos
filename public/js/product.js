@@ -78,7 +78,7 @@ $(document).ready(function() {
     $(document).on('change', 'input#single_dpp_inc_tax', function(e) {
         var purchase_inc_tax = __read_number($('input#single_dpp_inc_tax'));
         purchase_inc_tax = purchase_inc_tax == undefined ? 0 : purchase_inc_tax;
-
+        console.log('single_dpp_inc_tax = '+purchase_inc_tax);
         var tax_rate = $('select#tax')
             .find(':selected')
             .data('rate');
@@ -86,13 +86,13 @@ $(document).ready(function() {
 
         var purchase_exc_tax = __get_principle(purchase_inc_tax, tax_rate);
         __write_number($('input#single_dpp'), purchase_exc_tax);
-        $('input#single_dpp').change();
+        //this is for 10.01 issues
+        // $('input#single_dpp').change();
 
         var profit_percent = __read_number($('#profit_percent'));
         profit_percent = profit_percent == undefined ? 0 : profit_percent;
         var selling_price = __add_percent(purchase_exc_tax, profit_percent);
         __write_number($('input#single_dsp'), selling_price);
-
         var selling_price_inc_tax = __add_percent(selling_price, tax_rate);
         __write_number($('input#single_dsp_inc_tax'), selling_price_inc_tax);
     });

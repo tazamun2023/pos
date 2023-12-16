@@ -864,6 +864,7 @@ return [
     'duplicate_taxonomy_type_found' => 'Duplicate taxonomy type found',
     'taxonomy_type_not_found' => 'Taxonomy type not found',
     'credit_sales' => 'Credit Sales',
+    'cash_sales' => 'Cash Sales',
     'total_payment' => 'Total Payment',
     'deactivate_location' => 'Deactivate Location',
     'activate_location' => 'Activate Location',
