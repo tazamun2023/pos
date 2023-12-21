@@ -729,7 +729,7 @@ class ReportController extends Controller
                     'total_before_tax',
                     function ($row) {
                         return '<span class="total_before_tax" 
-                        data-orig-value="'.$row->total_before_tax.'">'.
+                        data-orig-value="'.$this->transactionUtil->num_f($row->total_before_tax).'">'.
                         $this->transactionUtil->num_f($row->total_before_tax, true).'</span>';
                     }
                 )->editColumn('discount_amount', function ($row) {
@@ -1701,7 +1701,7 @@ class ReportController extends Controller
                  })
                  ->editColumn('subtotal', function ($row) {
                      return '<span class="row_subtotal"  
-                     data-orig-value="'.$row->subtotal.'">'.
+                     data-orig-value="'.$this->transactionUtil->num_f($row->subtotal).'">'.
                      $this->transactionUtil->num_f($row->subtotal, true).'</span>';
                  })
                 ->editColumn('transaction_date', '{{@format_date($transaction_date)}}')
@@ -1733,8 +1733,6 @@ class ReportController extends Controller
         }
 
         $business_id = $request->session()->get('user.business_id');
-        $payment_types = $this->transactionUtil->payment_types(null, true, $business_id);
-
         if ($request->ajax()) {
             $variation_id = $request->get('variation_id', null);
             $query = TransactionSellLine::join(
@@ -1767,9 +1765,7 @@ class ReportController extends Controller
                     'c.supplier_business_name',
                     'c.contact_id',
                     't.id as transaction_id',
-                    'transaction_sell_lines.user_id',
                     't.invoice_no',
-                    't.payment_status as payment_status',
                     't.transaction_date as transaction_date',
                     'transaction_sell_lines.unit_price_before_discount as unit_price',
                     'transaction_sell_lines.unit_price_inc_tax as unit_sale_price',
@@ -1783,7 +1779,7 @@ class ReportController extends Controller
                     DB::raw('((transaction_sell_lines.quantity - transaction_sell_lines.quantity_returned) * transaction_sell_lines.unit_price_inc_tax) as subtotal')
                 )
                 ->groupBy('transaction_sell_lines.id');
-//dd($query->get());
+
             if (! empty($variation_id)) {
                 $query->where('transaction_sell_lines.variation_id', $variation_id);
             }
@@ -1812,26 +1808,17 @@ class ReportController extends Controller
             $customer_group_id = $request->get('customer_group_id', null);
             if (! empty($customer_group_id)) {
                 $query->leftjoin('customer_groups AS CG', 'c.customer_group_id', '=', 'CG.id')
-                ->where('CG.id', $customer_group_id);
+                    ->where('CG.id', $customer_group_id);
             }
 
             $category_id = $request->get('category_id', null);
             if (! empty($category_id)) {
                 $query->where('p.category_id', $category_id);
             }
-            $filter_user_id = $request->get('filter_user_id', null);
-            if (! empty($filter_user_id)) {
-                $query->where('user_id', $filter_user_id);
-            }
 
             $brand_id = $request->get('brand_id', null);
             if (! empty($brand_id)) {
                 $query->where('p.brand_id', $brand_id);
-            }
-
-            $payment_method = $request->get('payment_method', null);
-            if (! empty($payment_method)) {
-                $query->where('t.payment_status', $payment_method);
             }
 
             return Datatables::of($query)
@@ -1843,21 +1830,14 @@ class ReportController extends Controller
 
                     return $product_name;
                 })
-                 ->editColumn('invoice_no', function ($row) {
-                     return '<a data-href="'.action([\App\Http\Controllers\SellController::class, 'show'], [$row->transaction_id])
-                            .'" href="#" data-container=".view_modal" class="btn-modal">'.$row->invoice_no.'</a>';
-                 })
-                 ->editColumn('user_name', function ($row) {
-                    $surename = $row->user->surename ?? '';
-                    $firstName = $row->user->first_name ?? '';
-                    $lastName = $row->user->last_name ?? '';
-                
-                    return $surename . ' ' . $firstName . ' ' . $lastName;
+                ->editColumn('invoice_no', function ($row) {
+                    return '<a data-href="'.action([\App\Http\Controllers\SellController::class, 'show'], [$row->transaction_id])
+                        .'" href="#" data-container=".view_modal" class="btn-modal">'.$row->invoice_no.'</a>';
                 })
                 ->editColumn('transaction_date', '{{@format_datetime($transaction_date)}}')
                 ->editColumn('unit_sale_price', function ($row) {
                     return '<span class="unit_sale_price" data-orig-value="'.$row->unit_sale_price.'">'.
-                    $this->transactionUtil->num_f($row->unit_sale_price, true).'</span>';
+                        $this->transactionUtil->num_f($row->unit_sale_price, true).'</span>';
                 })
                 ->editColumn('sell_qty', function ($row) {
                     //ignore child sell line of combo product
@@ -1865,20 +1845,19 @@ class ReportController extends Controller
 
                     return '<span class="'.$class.'"  data-orig-value="'.$row->sell_qty.'" 
                     data-unit="'.$row->unit.'" >'.
-                    $this->transactionUtil->num_f($row->sell_qty, false, null, true).'</span> '.$row->unit;
+                        $this->transactionUtil->num_f($row->sell_qty, false, null, true).'</span> '.$row->unit;
                 })
-                 ->editColumn('subtotal', function ($row) {
-                     //ignore child sell line of combo product
-                     $class = is_null($row->parent_sell_line_id) ? 'row_subtotal' : '';
+                ->editColumn('subtotal', function ($row) {
+                    //ignore child sell line of combo product
+                    $class = is_null($row->parent_sell_line_id) ? 'row_subtotal' : '';
 
-                     return '<span class="'.$class.'"  data-orig-value="'.$row->subtotal.'">'.
-                    $this->transactionUtil->num_f($row->subtotal, true).'</span>';
-                 })
+                    return '<span class="'.$class.'"  data-orig-value="'.$row->subtotal.'">'.
+                        $this->transactionUtil->num_f($row->subtotal, true).'</span>';
+                })
                 ->editColumn('unit_price', function ($row) {
                     return '<span class="unit_price" data-orig-value="'.$row->unit_price.'">'.
-                    $this->transactionUtil->num_f($row->unit_price, true).'</span>';
+                        $this->transactionUtil->num_f($row->unit_price, true).'</span>';
                 })
-                
                 ->editColumn('discount_amount', '
                     @if($discount_type == "percentage")
                         {{@num_format($discount_amount)}} %
@@ -1886,33 +1865,13 @@ class ReportController extends Controller
                         {{@num_format($discount_amount)}}
                     @endif
                     ')
-                // ->editColumn('tax', function ($row) {
-                //     return $this->transactionUtil->num_f($row->item_tax, true)
-                //      .'<br>'.'<span data-orig-value="'.$row->item_tax.'" 
-                //      class="tax" data-unit="'.$row->tax.'"><small>('.$row->tax.')</small></span>';
-                // })
                 ->editColumn('tax', function ($row) {
-                    $percentage = 0.15;
-                    $value = $row->subtotal;
-
-                    // $result = ($percentage / 100) * $value;              
-                    $result = $percentage * $value;              
-                    return $this->transactionUtil->num_f($result,true);
-                })
-                ->editColumn('total', function ($row) {
-                    $percentage = 0.15;
-                    $value = $row->subtotal;
-
-                    // $result = ($percentage / 100) * $value;   
-                    $result = $percentage * $value;   
-                    $total = $result + $value;   
-                    $class = is_null($row->parent_sell_line_id) ? 'row_total' : '';        
-                    // return $this->transactionUtil->num_f($total, true);
-                    return '<span class="'.$class.'"  data-orig-value="'.$total.'">'.
-                    $this->transactionUtil->num_f($total, true).'</span>';
+                    return $this->transactionUtil->num_f($row->item_tax, true)
+                        .'<br>'.'<span data-orig-value="'.$row->item_tax.'" 
+                     class="tax" data-unit="'.$row->tax.'"><small>('.$row->tax.')</small></span>';
                 })
                 ->editColumn('customer', '@if(!empty($supplier_business_name)) {{$supplier_business_name}},<br>@endif {{$customer}}')
-                ->rawColumns(['invoice_no', 'unit_sale_price', 'subtotal','total', 'sell_qty', 'discount_amount', 'unit_price', 'tax', 'customer'])
+                ->rawColumns(['invoice_no', 'unit_sale_price', 'subtotal', 'sell_qty', 'discount_amount', 'unit_price', 'tax', 'customer'])
                 ->make(true);
         }
 
@@ -1921,10 +1880,10 @@ class ReportController extends Controller
         $categories = Category::forDropdown($business_id, 'product');
         $brands = Brands::forDropdown($business_id);
         $customer_group = CustomerGroup::forDropdown($business_id, false, true);
-        $users = User::forDropdown($business_id, false);
+
         return view('report.product_sell_report')
             ->with(compact('business_locations', 'customers', 'categories', 'brands',
-                'customer_group', 'payment_types', 'users'));
+                'customer_group'));
     }
 
     /**

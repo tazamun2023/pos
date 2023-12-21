@@ -784,7 +784,10 @@ class ProductController extends Controller
                     $tax_rate = TaxRate::find($product->tax)->amount;
                     $without_tax = $single_data['single_dsp_inc_tax']/(1+$tax_rate/100);
 //            dd($without_tax);
+                }else{
+                    $without_tax = null;
                 }
+
                 $variation->sub_sku = $product->sku;
 //                $variation->default_purchase_price = $this->productUtil->num_uf($single_data['single_dpp']);
                 $variation->default_purchase_price = $without_tax?$this->productUtil->systemDoubleValue($without_tax):$this->productUtil->num_uf($single_data['single_dpp']);

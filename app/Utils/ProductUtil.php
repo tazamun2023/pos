@@ -42,12 +42,10 @@ class ProductUtil extends Util
             $product = Product::find($product);
         }
 
-//        dd($product->tax);
         if ($product->tax){
             $tax_rate = TaxRate::find($product->tax)->amount;
             $without_tax = $selling_price_inc_tax/(1+$tax_rate/100);
-//            dd($without_tax);
-        }
+
         //create product variations
         $product_variation_data = [
             'name' => 'DUMMY',
@@ -76,6 +74,33 @@ class ProductUtil extends Util
         Media::uploadMedia($product->business_id, $variation, request(), 'variation_images');
 
         return true;
+        }else{
+
+            //create product variations
+            $product_variation_data = [
+                'name' => 'DUMMY',
+                'is_dummy' => 1,
+            ];
+            $product_variation = $product->product_variations()->create($product_variation_data);
+
+            //create variations
+            $variation_data = [
+                'name' => 'DUMMY',
+                'product_id' => $product->id,
+                'sub_sku' => $sku,
+                'default_purchase_price' => $this->num_uf($purchase_price),
+                'dpp_inc_tax' => $this->num_uf($dpp_inc_tax),
+                'profit_percent' => $this->num_uf($profit_percent),
+                'default_sell_price' => $this->num_uf($selling_price),
+                'sell_price_inc_tax' => $this->num_uf($selling_price_inc_tax),
+                'combo_variations' => $combo_variations,
+            ];
+            $variation = $product_variation->variations()->create($variation_data);
+
+            Media::uploadMedia($product->business_id, $variation, request(), 'variation_images');
+
+            return true;
+        }
     }
 
     /**

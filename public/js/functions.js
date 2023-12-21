@@ -254,6 +254,7 @@ function update_font_size() {
 }
 
 function sum_table_col(table, class_name) {
+    console.log(table, class_name);
     var sum = 0;
     table
         .find('tbody')
@@ -266,11 +267,13 @@ function sum_table_col(table, class_name) {
                         .data('orig-value')
                 )
             ) {
+
                 sum += parseFloat(
                     $(this)
                         .find('.' + class_name)
                         .data('orig-value')
                 );
+
             }
         });
 
