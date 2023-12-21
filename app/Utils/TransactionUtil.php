@@ -4937,7 +4937,7 @@ class TransactionUtil extends Util
     public function getListSells($business_id, $sale_type = 'sell')
     {
         $sells = Transaction::leftJoin('contacts', 'transactions.contact_id', '=', 'contacts.id')
-            // ->leftJoin('transaction_payments as tp', 'transactions.id', '=', 'tp.transaction_id')
+            ->leftJoin('transaction_payments as tp', 'transactions.id', '=', 'tp.transaction_id')
             ->leftJoin('transaction_sell_lines as tsl', function ($join) {
                 $join->on('transactions.id', '=', 'tsl.transaction_id')
                     ->whereNull('tsl.parent_sell_line_id');
@@ -5003,6 +5003,7 @@ class TransactionUtil extends Util
                 'transactions.custom_field_2',
                 'transactions.custom_field_3',
                 'transactions.custom_field_4',
+                'tp.method',
                 DB::raw('DATE_FORMAT(transactions.transaction_date, "%Y/%m/%d") as sale_date'),
                 DB::raw("CONCAT(COALESCE(u.surname, ''),' ',COALESCE(u.first_name, ''),' ',COALESCE(u.last_name,'')) as added_by"),
                 DB::raw('(SELECT SUM(IF(TP.is_return = 1,-1*TP.amount,TP.amount)) FROM transaction_payments AS TP WHERE

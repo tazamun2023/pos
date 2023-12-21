@@ -1873,6 +1873,7 @@ function pos_order_tax(price_total, discount) {
         });
         order_tax=pos_line_dsp_1;
         $('span#order_tax').text(__currency_trans_from_en(order_tax, false));
+        console.log('order_tax '+ order_tax);
         $('input#order_tax_input').val(__currency_trans_from_en(order_tax, false));
         // __write_number(tr.find('input.pos_line_dsp_1'), line_total_tax, false, 2);
 
